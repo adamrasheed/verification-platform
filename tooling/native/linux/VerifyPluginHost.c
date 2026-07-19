@@ -352,8 +352,6 @@ int main(int argument_count, char **argument_values) {
   add_argument(sandbox_arguments, &sandbox_argument_count, "0");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--gid");
   add_argument(sandbox_arguments, &sandbox_argument_count, "0");
-  add_argument(sandbox_arguments, &sandbox_argument_count, "--cap-drop");
-  add_argument(sandbox_arguments, &sandbox_argument_count, "ALL");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--tmpfs");
   add_argument(sandbox_arguments, &sandbox_argument_count, "/");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--ro-bind");
