@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { readFile, rm } from "node:fs/promises";
+import {
+  chmod,
+  copyFile,
+  readFile,
+  rm,
+} from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
@@ -39,15 +44,19 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
   ]);
   const host = path.join(nativeDirectory, "VerifyPluginHost");
   const seccomp = path.join(nativeDirectory, "VerifyPluginSeccomp.so");
+  const nodePath = path.join(nativeDirectory, "node");
+  await copyFile(process.execPath, nodePath);
+  await chmod(nodePath, 0o555);
   const bubblewrapPath = "/usr/bin/bwrap";
   const identity = {
     expectedHostDigest: await digest(host),
-    expectedNodeDigest: await digest(process.execPath),
+    expectedNodeDigest: await digest(nodePath),
     expectedBubblewrapDigest: await digest(bubblewrapPath),
     expectedSeccompLibraryDigest: await digest(seccomp),
   };
   const sandbox = createLinuxNamespaceSandboxLauncher({
     nativeDirectory,
+    nodePath,
     bubblewrapPath,
     ...identity,
   });
@@ -56,6 +65,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
   assert.equal(
     await createLinuxNamespaceSandboxLauncher({
       nativeDirectory,
+      nodePath,
       bubblewrapPath,
       ...identity,
       expectedHostDigest: `sha256:${"0".repeat(64)}`,
@@ -120,6 +130,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
 
   const cpuSandbox = createLinuxNamespaceSandboxLauncher({
     nativeDirectory,
+    nodePath,
     bubblewrapPath,
     maximumCpuNanoseconds: 1_000_000_000,
     ...identity,
