@@ -13,9 +13,14 @@ changes use ADRs. Business decisions remain founder-owned.
 
 | ID | Decision | Why it remains open | Needed by | Default if unanswered |
 |---|---|---|---|---|
-| F-001 | Public product name and npm scope | Brand and package ownership are business decisions | First npm release | Use internal names and an unpublished workspace |
-| F-002 | Open-source license and commercial packaging | Changes ecosystem adoption and defensibility; legal review is required | Public repository or npm release | Keep all code private and license-unpublished |
 | F-003 | Pricing model and included hosted allowance | Multiple credible models affect go-to-market and margins | Hosted beta | Meter usage without charging |
+
+## Resolved founder decisions
+
+| ID | Resolution | Resolved |
+|---|---|---|
+| F-001 | Publish the local CLI as `@adamrasheed/verify`; retain `verify` as the executable command | 2026-07-18 |
+| F-002 | License the repository and public CLI under Apache-2.0; commercial hosted packaging remains independently founder-owned | 2026-07-18 |
 
 ## Deferred architecture selections
 

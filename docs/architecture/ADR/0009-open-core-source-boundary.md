@@ -23,7 +23,8 @@ dispatch service, product-operated worker implementation, and proprietary
 provider plugins. Closed services consume the same public contracts and receive
 no semantic exception.
 
-No source is published until founder/legal selects the license under F-002.
+The founder selected Apache-2.0 for the repository and public local CLI under
+F-002 on 2026-07-18.
 
 ## Alternatives considered
 
@@ -72,4 +73,6 @@ requires a different boundary.
 
 ## Approval
 
-Accepted as the technical boundary; public licensing remains pending F-002.
+Accepted as the technical boundary. Public repository and local CLI source are
+licensed under Apache-2.0; hosted commercial packaging remains separately
+founder-owned.

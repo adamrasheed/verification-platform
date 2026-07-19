@@ -32,7 +32,7 @@
     "test:m2": "npm run test:m1 && npm run test --workspace @verify-internal/discovery && npm run test --workspace @verify-internal/proofs",
     "test:m3": "npm run test:m2 && npm run test --workspace @verify-internal/evidence && npm run test --workspace @verify-internal/engine",
     "test:m4": "npm run test:m3 && npm run test --workspace @verify-internal/auth && npm run test --workspace @verify-internal/execution && npm run test --workspace @verify-internal/repair",
-    "test:m5": "npm run test:m4 && npm run test --workspace verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
+    "test:m5": "npm run test:m4 && npm run test --workspace @adamrasheed/verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
     "test": "npm run test:m5"
   },
   "devDependencies": {

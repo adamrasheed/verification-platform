@@ -24,7 +24,7 @@ Requires Node.js 22.5 or newer.
 ```sh
 npm install
 npm test
-npm run build --workspace verify
+npm run build --workspace @adamrasheed/verify
 node apps/cli/dist/verify.js verify . --json
 ```
 
@@ -61,3 +61,7 @@ If documents conflict, the precedence rules in the Architecture Freeze apply.
 Research informs decisions but does not make them. Roadmaps sequence work but do
 not change contracts. ADRs change frozen decisions only after acceptance by the
 Lead Architect and incorporation into the freeze.
+
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).

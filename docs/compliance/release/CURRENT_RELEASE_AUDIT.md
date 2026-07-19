@@ -1,7 +1,7 @@
 # Current Release Audit
 
 **Date:** 2026-07-18
-**Status:** release-candidate gates passed; publication authority remains external
+**Status:** release-candidate gates passed; authenticated publication authorized
 
 ## Passing gates
 
@@ -11,17 +11,17 @@
 - Generated adversarial corpus passed bounded/deep trees, Unicode/case
   collisions, symlinks and special files, dirty mutation, corrupted cache,
   miss/hit/bypass behavior, and hostile secret/script canaries.
-- Generated 100,000-file / 589,078-byte warm discovery p95 was 344.164 ms
+- Generated 100,000-file / 589,078-byte warm discovery p95 was 340.379 ms
   against 5 s.
-- Engine overhead p95 was 5.940 ms against 1 s; healthy cache lookup p95 was
-  0.150 ms against 50 ms.
-- Deadline cancellation completed in 46.311 ms, first progress appeared in
-  42.716 ms, maximum machine output was 104,100 bytes, and maximum measured RSS
-  was 129,417,216 bytes.
+- Engine overhead p95 was 7.008 ms against 1 s; healthy cache lookup p95 was
+  0.157 ms against 50 ms.
+- Deadline cancellation completed in 51.397 ms, first progress appeared in
+  44.205 ms, maximum machine output was 104,100 bytes, and maximum measured RSS
+  was 127,827,968 bytes.
 - Synthetic exact npm pack audit: passed.
 - MVP repository corpus: 8/8 passed, including npm, pnpm, Yarn, unknown,
   malformed, duplicate, empty, and hostile fixtures.
-- Public package audit: `verify@0.1.0` passed as a three-file, self-contained
+- Public package audit: `@adamrasheed/verify@0.1.0` passed as a four-file, self-contained
   executable package with no lifecycle scripts or production dependencies.
 - Engine suite: 20/20 passed, including progressive lifecycle transactions,
   crash-prefix recovery, projection reconciliation, exact cache provenance,
@@ -30,12 +30,13 @@
   discipline, durable inspection/cache behavior, and cancellation under one
   second.
 
-## Publication prerequisites
+## Publication authority
 
 Candidate preparation binds the exact repository HEAD, performance report,
 security report, pack manifest, SBOM, provenance, and tested tarball bytes.
-Production publication was intentionally not attempted because no production
-signing identity/key or npm publication authority was provided. Package-name
-ownership and the open-source license choice also remain explicit founder and
-legal decisions (F-001 and F-002). The tooling does not invent or bypass those
-authorities; publication is a separate, explicitly authorized action.
+Founder decisions F-001 and F-002 resolve the package as
+`@adamrasheed/verify` and the license as Apache-2.0. npm publication authority
+was authenticated as `adamrasheed` on 2026-07-18. Registry publication remains
+a separately recorded external action. The public npm registry applies its
+verifiable ECDSA signature to published package bytes; post-publication
+verification must confirm the registry integrity and signature records.

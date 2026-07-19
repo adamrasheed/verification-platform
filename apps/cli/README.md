@@ -20,10 +20,10 @@ Stable commands:
 Typical use:
 
 ```sh
-npx verify
-npx verify --json
-npx verify --jsonl
-npx verify inspect run <invocation-id> --json
+npx @adamrasheed/verify
+npx @adamrasheed/verify --json
+npx @adamrasheed/verify --jsonl
+npx @adamrasheed/verify inspect run <invocation-id> --json
 ```
 
 Machine modes never prompt. JSON emits one final document. JSONL emits

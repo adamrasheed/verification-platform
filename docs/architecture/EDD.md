@@ -998,7 +998,8 @@ max, and failures. Performance never weakens Evidence, redaction, or isolation.
 
 ## 35. Open-Source and Closed-Source Boundaries
 
-ADR-0009 selects an open-core technical boundary, conditional on F-002.
+ADR-0009 selects an open-core technical boundary. Founder decision F-002
+resolved the repository and public CLI license as Apache-2.0.
 
 Intended public: contracts/schemas, events, discovery, Proof/Evidence/Repair,
 local execution/cache, auth ports, Engine, protocol, plugin SDK/runtime, CLI,

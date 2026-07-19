@@ -1,7 +1,8 @@
 {
-  "name": "verify",
+  "name": "@adamrasheed/verify",
   "version": "0.1.0",
   "description": "Offline, evidence-backed JavaScript workspace integrity verification",
+  "license": "Apache-2.0",
   "type": "module",
   "bin": {
     "verify": "./dist/verify.js"
