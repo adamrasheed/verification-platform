@@ -193,6 +193,12 @@ export function createLinuxNamespaceSandboxLauncher(
       child.stdin.on("error", () => {
         // Live writes receive their callback error; termination may reset the pipe.
       });
+      child.stdout.on("error", () => {
+        // Active iteration receives read errors; termination may reset the pipe.
+      });
+      child.stderr.on("error", () => {
+        // Active collection receives read errors; termination may reset the pipe.
+      });
       return {
         enforcementTier: "linux-namespace-seccomp-v1",
         stdoutLines: boundedUtf8Lines(child.stdout),
