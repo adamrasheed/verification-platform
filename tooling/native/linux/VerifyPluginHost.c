@@ -347,6 +347,7 @@ int main(int argument_count, char **argument_values) {
   add_argument(sandbox_arguments, &sandbox_argument_count, argument_values[8]);
   add_argument(sandbox_arguments, &sandbox_argument_count, "--unshare-all");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--die-with-parent");
+  add_argument(sandbox_arguments, &sandbox_argument_count, "--as-pid-1");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--new-session");
   add_argument(sandbox_arguments, &sandbox_argument_count, "--uid");
   add_argument(sandbox_arguments, &sandbox_argument_count, "0");
