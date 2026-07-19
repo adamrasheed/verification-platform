@@ -427,9 +427,9 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
     const occurredAt = this.#now().toISOString() as Rfc3339Utc;
     const producer = {
       id: "@verify-internal/engine" as OpaqueId,
-      version: "0.1.0",
+      version: "0.2.0",
       artifactDigest: `sha256:${createHash("sha256")
-        .update("@verify-internal/engine@0.1.0")
+        .update("@verify-internal/engine@0.2.0")
         .digest("hex")}` as Sha256Digest,
     };
     await this.#unitOfWork.commit({
@@ -511,9 +511,9 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
         sequence: 3,
         producer: {
           id: "@verify-internal/engine" as OpaqueId,
-          version: "0.1.0",
+          version: "0.2.0",
           artifactDigest: `sha256:${createHash("sha256")
-            .update("@verify-internal/engine@0.1.0")
+            .update("@verify-internal/engine@0.2.0")
             .digest("hex")}`,
         },
         dataClassification: "MINIMAL_METADATA",
@@ -605,9 +605,9 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
         sequence: 1,
         producer: {
           id: "@verify-internal/engine" as OpaqueId,
-          version: "0.1.0",
+          version: "0.2.0",
           artifactDigest: `sha256:${createHash("sha256")
-            .update("@verify-internal/engine@0.1.0")
+            .update("@verify-internal/engine@0.2.0")
             .digest("hex")}`,
         },
         dataClassification: "LOCAL_SOURCE",
@@ -694,9 +694,9 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
       sequence: firstSequence + index,
       producer: {
         id: "@verify-internal/engine" as OpaqueId,
-        version: "0.1.0",
+        version: "0.2.0",
         artifactDigest: `sha256:${createHash("sha256")
-          .update("@verify-internal/engine@0.1.0")
+          .update("@verify-internal/engine@0.2.0")
           .digest("hex")}` as Sha256Digest,
       },
       dataClassification: event.dataClassification,
@@ -780,9 +780,9 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
           sequence,
           producer: {
             id: "@verify-internal/engine" as OpaqueId,
-            version: "0.1.0",
+            version: "0.2.0",
             artifactDigest: `sha256:${createHash("sha256")
-              .update("@verify-internal/engine@0.1.0")
+              .update("@verify-internal/engine@0.2.0")
               .digest("hex")}`,
           },
           dataClassification: "MINIMAL_METADATA",

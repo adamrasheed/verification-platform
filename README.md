@@ -28,7 +28,7 @@ Requires Node.js 22.5 or newer.
 Run the published CLI:
 
 ```sh
-npx @adamrasheed/verify@0.1.0 verify .
+npx @adamrasheed/verify@0.2.0 verify .
 ```
 
 Or work from source:

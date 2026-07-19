@@ -10,7 +10,7 @@
   "artifacts": [
     {
       "path": "apps/cli/src/public/run.ts",
-      "digest": "sha256:b92d26ae2cb33f6536b6e9863a4cb02c944b803e9dc84d069b44ba201e9bbac6"
+      "digest": "sha256:dcff0c5f78ce192564638b6a3aa09d38367731586cbe8a88ada9abba3de6c0d3"
     },
     {
       "path": "tooling/release/prepare-candidate.mjs",
