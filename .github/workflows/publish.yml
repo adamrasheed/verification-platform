@@ -1,0 +1,75 @@
+name: Publish npm release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and publish tested bytes
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    environment: npm
+    timeout-minutes: 25
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Set up Node.js and npm registry
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Require the release tag to match the package version
+        run: |
+          VERSION="$(node -p "require('./apps/cli/package.json').version")"
+          test "${GITHUB_REF_NAME}" = "v${VERSION}"
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run conformance suite
+        run: npm test
+
+      - name: Generate release evidence
+        run: |
+          mkdir -p .release/reports
+          node tooling/conformance/run-security-gates.mjs \
+            --out .release/reports/security.json
+          node tooling/conformance/benchmark.mjs \
+            --out .release/reports/performance.json
+
+      - name: Build and attest the release candidate
+        run: |
+          node tooling/release/prepare-candidate.mjs \
+            --package apps/cli \
+            --out .release/candidate \
+            --performance .release/reports/performance.json \
+            --security .release/reports/security.json \
+            --source-revision "${GITHUB_SHA}"
+          node tooling/release/attest-tested-bytes.mjs \
+            .release/candidate/release-candidate.json \
+            .release/candidate/test-attestation.json \
+            -- node tooling/release/verify-packed-artifact.mjs
+          node tooling/release/check-candidate.mjs \
+            .release/candidate/release-candidate.json
+
+      - name: Publish the exact tested artifact
+        run: |
+          VERSION="$(node -p "require('./apps/cli/package.json').version")"
+          npm publish \
+            ".release/candidate/artifact/adamrasheed-verify-${VERSION}.tgz" \
+            --access public
