@@ -21,3 +21,11 @@ limits. It enforces physical-memory and CPU budgets, propagates cancellation to
 the sandbox tree, and maps exhaustion to a typed runtime error. A production
 launcher becomes available only when Developer ID authority, Team ID, hardened
 runtime, and exact supervisor/host/helper code-directory hashes all match.
+
+On supported Linux kernels, the production launcher requires exact SHA-256
+identities for the native host, bundled Node helper, system bubblewrap, and
+post-exec seccomp library. The resulting tier combines an empty mount root,
+user/PID/network/IPC/UTS/cgroup namespaces, a deny profile for process,
+network, mutation, tracing, namespace, and kernel-attack syscalls, and native
+RSS/CPU supervision. Kernels or host policies that deny required namespaces
+remain explicitly unavailable.

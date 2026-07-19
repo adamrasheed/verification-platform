@@ -4,8 +4,8 @@ import {
   type ChildProcess,
 } from "node:child_process";
 import {
+  lstat,
   readFile,
-  stat,
 } from "node:fs/promises";
 import path from "node:path";
 import {
@@ -39,7 +39,7 @@ async function exactExecutable(
 ): Promise<boolean> {
   if (!/^sha256:[a-f0-9]{64}$/.test(expectedDigest)) return false;
   try {
-    const information = await stat(file);
+    const information = await lstat(file);
     const effectiveUser = process.geteuid?.();
     if (
       !information.isFile()
@@ -97,17 +97,6 @@ function signalProcessGroup(
     else child.kill(signal);
   } catch {
     child.kill(signal);
-  }
-}
-
-async function* diagnosticStderr(
-  source: AsyncIterable<Uint8Array>,
-): AsyncIterable<Uint8Array> {
-  for await (const chunk of source) {
-    if (process.env.VERIFY_DEBUG_LINUX_NATIVE === "1") {
-      process.stderr.write(chunk);
-    }
-    yield chunk;
   }
 }
 
@@ -202,7 +191,7 @@ export function createLinuxNamespaceSandboxLauncher(
       return {
         enforcementTier: "linux-namespace-seccomp-v1",
         stdoutLines: boundedUtf8Lines(child.stdout),
-        stderr: diagnosticStderr(child.stderr),
+        stderr: child.stderr,
         exit: childExit(child),
         async write(line: string): Promise<void> {
           await new Promise<void>((resolve, reject) => {

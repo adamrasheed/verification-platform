@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-linux-sandbox",
+  "taskId": "M6-T06-linux-production,M6-T07-linux",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§10.5,11.5,18", "EDD §§13,25,27"],
+  "testIds": ["plugin-runtime:12", "native-linux:1"],
+  "command": "VERIFY_RUN_LINUX_NATIVE=1 npm run test --workspace @verify-internal/plugin-runtime",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/native/linux/VerifyPluginHost.c",
+      "digest": "sha256:3a692739da7a46f6efdb3f697868f8253a5f0b4be9cbcd2c08848e863e8c02e8"
+    },
+    {
+      "path": "tooling/native/linux/VerifyPluginSeccomp.c",
+      "digest": "sha256:2b4d1c05daa70cefb8c37eadeab9cf537a95746e451185dcf72ae8d15292d61e"
+    },
+    {
+      "path": "tooling/native/linux/build-host.mjs",
+      "digest": "sha256:01918bd1250fee946df086916b6788664dddbc1b67b7286082ea0949a40c1a13"
+    },
+    {
+      "path": "packages/plugin-runtime/src/public/linux-sandbox.ts",
+      "digest": "sha256:822dc970d5c0e190c950da107f41e10e7b41ddb25e028e8a478290692f20e827"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "digest": "sha256:03b3c605fe710a4e637e6a377d40190307941c34d107bf289f3561eeac80b061"
+    }
+  ]
+}

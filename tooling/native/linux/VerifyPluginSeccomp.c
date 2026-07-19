@@ -33,6 +33,7 @@ static void install_verify_plugin_filter(void) {
   size_t length = 0;
 
   unsetenv("LD_PRELOAD");
+  unsetenv("PWD");
   if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) != 0) _exit(126);
 
   APPEND(BPF_STMT(

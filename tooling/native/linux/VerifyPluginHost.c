@@ -21,6 +21,7 @@ extern char **environ;
 static const size_t maximum_artifact_bytes = 16U * 1024U * 1024U;
 static pid_t sandbox_process = 0;
 static pid_t plugin_process = 0;
+static volatile sig_atomic_t requested_termination = 0;
 static char invocation_root[128] = "";
 static char artifact_path[160] = "";
 
@@ -35,10 +36,8 @@ static void fail(const char *message, int status) {
   exit(status);
 }
 
-static void relay_termination(int signal_number) {
-  if (plugin_process > 0) kill(plugin_process, SIGKILL);
-  if (sandbox_process > 0) kill(sandbox_process, SIGKILL);
-  _exit(128 + signal_number);
+static void request_termination(int signal_number) {
+  requested_termination = signal_number;
 }
 
 static bool parse_unsigned(const char *value, uint64_t *result) {
@@ -426,13 +425,18 @@ int main(int argument_count, char **argument_values) {
     fail("sandbox did not identify the plugin process", 126);
   }
 
-  signal(SIGTERM, relay_termination);
-  signal(SIGINT, relay_termination);
-  signal(SIGHUP, relay_termination);
+  signal(SIGTERM, request_termination);
+  signal(SIGINT, request_termination);
+  signal(SIGHUP, request_termination);
   int sandbox_status = 0;
-  bool reported_initial_usage = false;
-  bool reported_high_usage = false;
   for (;;) {
+    if (requested_termination != 0) {
+      kill(plugin_process, SIGKILL);
+      kill(sandbox_process, SIGKILL);
+      while (waitpid(sandbox_process, NULL, 0) < 0 && errno == EINTR) {}
+      cleanup();
+      return 128 + requested_termination;
+    }
     pid_t wait_result = waitpid(sandbox_process, &sandbox_status, WNOHANG);
     if (wait_result == sandbox_process) break;
     if (wait_result < 0) {
@@ -451,33 +455,6 @@ int main(int argument_count, char **argument_values) {
       kill(sandbox_process, SIGKILL);
       waitpid(sandbox_process, NULL, 0);
       fail("resource inspection failed closed", 126);
-    }
-    if (!reported_initial_usage) {
-      fprintf(
-        stderr,
-        "verify-plugin-linux-host: supervised pid=%ld rss=%" PRIu64
-        " cpu-ns=%" PRIu64 "\n",
-        (long)plugin_process,
-        resident_bytes,
-        cpu_nanoseconds
-      );
-      reported_initial_usage = true;
-    }
-    if (
-      !reported_high_usage
-      && (
-        resident_bytes > 128U * 1024U * 1024U
-        || cpu_nanoseconds > 500000000U
-      )
-    ) {
-      fprintf(
-        stderr,
-        "verify-plugin-linux-host: high usage rss=%" PRIu64
-        " cpu-ns=%" PRIu64 "\n",
-        resident_bytes,
-        cpu_nanoseconds
-      );
-      reported_high_usage = true;
     }
     if (
       resident_bytes > maximum_memory_bytes

@@ -54,4 +54,7 @@ execution remains `unavailable` until a signed native sandbox host passes the
 platform canaries. The macOS implementation now passes filesystem, subprocess,
 raw-network, memory, CPU, cancellation, and signature-rejection canaries; it
 becomes production-available only for a release-pinned Developer ID bundle.
+The Linux implementation passes the equivalent namespace, seccomp, identity,
+resource, and protocol canaries with release-pinned native dependencies; hosts
+that restrict the required namespaces remain unavailable.
 The ordinary plugin-free CLI continues to operate normally.

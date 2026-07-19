@@ -79,3 +79,10 @@ satisfy production authorization. A separate native supervisor enforces CPU
 and physical-memory budgets without receiving plugin or provider data.
 Production authorization additionally requires Developer ID signatures plus
 pinned Team ID and supervisor/host/helper code-directory hashes.
+
+The Linux production tier runs only when the native host, bundled Node helper,
+system bubblewrap, and seccomp preload match release-pinned SHA-256 identities
+and are not group- or world-writable. It exposes no workspace mount or external
+network interface and enforces one process plus physical-memory and CPU budgets.
+Restricted kernels that cannot construct every required namespace report the
+plugin platform as unavailable.
