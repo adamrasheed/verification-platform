@@ -44,6 +44,7 @@ import {
 import type {
   SandboxLauncher,
   SandboxProcess,
+  SandboxResourceLimits,
 } from "./sandbox.js";
 
 export interface PluginInvocation {
@@ -64,6 +65,7 @@ export interface PluginInvocationResult {
   readonly trustTier: PluginTrustDecision["tier"];
   readonly contributions: readonly CanonicalValue[];
   readonly diagnostics: readonly string[];
+  readonly resourceLimits: SandboxLauncher["resourceLimits"];
 }
 
 export interface PluginRuntimeOptions {
@@ -130,6 +132,7 @@ function enforceGrant(
   invocation: PluginInvocation,
   trust: PluginTrustDecision,
   expectedEnforcementTier: string,
+  expectedResourceLimits: SandboxResourceLimits,
   now: Date,
 ): void {
   if (!invocation.authorization.allowed) {
@@ -140,6 +143,10 @@ function enforceGrant(
     authorized.pluginId !== manifest.pluginId
     || authorized.operationId !== invocation.operation.operationId
     || authorized.enforcementTier !== expectedEnforcementTier
+    || authorized.maximumMemoryBytes !== expectedResourceLimits.maximumMemoryBytes
+    || authorized.maximumCpuNanoseconds !== expectedResourceLimits.maximumCpuNanoseconds
+    || authorized.maximumPluginProcesses
+      !== expectedResourceLimits.maximumPluginProcesses
     || !Number.isFinite(Date.parse(authorized.expiresAt))
     || Date.parse(authorized.expiresAt) <= now.getTime()
     || authorized.destinationIds.length !== invocation.egressGrant.destinationIds.length
@@ -193,6 +200,22 @@ function abortError(signal: AbortSignal): PluginRuntimeError {
   return new PluginRuntimeError(
     signal.aborted ? "VFY_PLUGIN_CANCELLED" : "VFY_PLUGIN_DEADLINE",
     signal.aborted ? "plugin invocation was cancelled" : "plugin deadline elapsed",
+  );
+}
+
+function processExitError(
+  exit: { readonly code: number | null; readonly signal: NodeJS.Signals | null },
+  phase: string,
+): PluginRuntimeError {
+  if (exit.code === 125) {
+    return new PluginRuntimeError(
+      "VFY_PLUGIN_RESOURCE_EXHAUSTED",
+      "plugin exceeded its native resource limit",
+    );
+  }
+  return new PluginRuntimeError(
+    "VFY_PLUGIN_CRASH",
+    `plugin exited ${phase} (${exit.code ?? exit.signal ?? "unknown"})`,
   );
 }
 
@@ -315,6 +338,7 @@ export class ProviderPluginRuntime {
       invocation,
       trust,
       this.#options.sandbox.enforcementTier,
+      this.#options.sandbox.resourceLimits,
       this.#options.now(),
     );
     if (
@@ -366,10 +390,7 @@ export class ProviderPluginRuntime {
       const handshakeLine = await nextWithDeadline(iterator, deadline, invocation.signal);
       if (handshakeLine.done) {
         const exit = await processHandle.exit;
-        throw new PluginRuntimeError(
-          "VFY_PLUGIN_CRASH",
-          `plugin exited before handshake (${exit.code ?? exit.signal ?? "unknown"})`,
-        );
+        throw processExitError(exit, "before handshake");
       }
       const handshake = decodePluginMessage(handshakeLine.value);
       if (
@@ -407,7 +428,15 @@ export class ProviderPluginRuntime {
           enforcementTier: processHandle.enforcementTier,
           grantedDestinationIds: invocation.egressGrant.destinationIds,
           secretReferenceIds: invocation.egressGrant.secretReferenceIds,
-        } as unknown as CanonicalValue,
+          resourceLimits: {
+            maximumMemoryBytes:
+              this.#options.sandbox.resourceLimits.maximumMemoryBytes,
+            maximumCpuNanoseconds:
+              this.#options.sandbox.resourceLimits.maximumCpuNanoseconds,
+            maximumPluginProcesses:
+              this.#options.sandbox.resourceLimits.maximumPluginProcesses,
+          },
+        } as CanonicalValue,
       }));
       const contributions: CanonicalValue[] = [];
       const providerRequestIds = new Set<string>();
@@ -416,10 +445,7 @@ export class ProviderPluginRuntime {
         const next = await nextWithDeadline(iterator, deadline, invocation.signal);
         if (next.done) {
           const exit = await processHandle.exit;
-          throw new PluginRuntimeError(
-            "VFY_PLUGIN_CRASH",
-            `plugin exited without completion (${exit.code ?? exit.signal ?? "unknown"})`,
-          );
+          throw processExitError(exit, "without completion");
         }
         let message: PluginMessage;
         try {
@@ -476,6 +502,7 @@ export class ProviderPluginRuntime {
         trustTier: trust.tier,
         contributions,
         diagnostics,
+        resourceLimits: this.#options.sandbox.resourceLimits,
       };
       await rm(stageDirectory, { recursive: true, force: true });
       stageDirectory = undefined;

@@ -41,6 +41,12 @@ export interface PluginHandshakeResponse {
   readonly pluginId: string;
 }
 
+export interface PluginResourceLimits {
+  readonly maximumMemoryBytes: number;
+  readonly maximumCpuNanoseconds: number;
+  readonly maximumPluginProcesses: number;
+}
+
 export interface PluginOperationRequest {
   readonly operation: PluginOperation;
   readonly operationId: string;
@@ -50,6 +56,7 @@ export interface PluginOperationRequest {
   readonly deadline: string;
   readonly cancellationRequestId: string;
   readonly enforcementTier: string;
+  readonly resourceLimits: PluginResourceLimits;
   readonly grantedDestinationIds: readonly string[];
   readonly secretReferenceIds: readonly string[];
   readonly input: CanonicalValue;

@@ -75,5 +75,7 @@ override this gate.
 
 The macOS development tier uses an App Sandbox application with an inherited
 Node helper. It is continuously exercised with ad hoc signatures, but cannot
-satisfy production authorization. Developer ID signatures, pinned host/helper
-code-directory hashes, and the hard memory canary remain release gates.
+satisfy production authorization. A separate native supervisor enforces CPU
+and physical-memory budgets without receiving plugin or provider data.
+Production authorization additionally requires Developer ID signatures plus
+pinned Team ID and supervisor/host/helper code-directory hashes.

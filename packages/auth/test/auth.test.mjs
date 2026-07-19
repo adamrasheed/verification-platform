@@ -77,6 +77,9 @@ test("plugin authority binds exact identity, destinations, secrets, effects, tie
     subprocess: false,
     sideEffects: [],
     enforcementTier: "native-sandbox-v1",
+    maximumMemoryBytes: 256 * 1024 * 1024,
+    maximumCpuNanoseconds: 30_000_000_000,
+    maximumPluginProcesses: 1,
     expiresAt: "2026-07-19T01:00:00Z",
   };
   const policy = {
@@ -89,6 +92,9 @@ test("plugin authority binds exact identity, destinations, secrets, effects, tie
     allowSubprocess: false,
     allowedSideEffects: [],
     enforcementTiers: ["native-sandbox-v1"],
+    maximumMemoryBytes: 256 * 1024 * 1024,
+    maximumCpuNanoseconds: 30_000_000_000,
+    maximumPluginProcesses: 1,
     maximumExpiresAt: "2026-07-19T02:00:00Z",
   };
   const decision = authorizePluginOperation(
@@ -119,5 +125,15 @@ test("plugin authority binds exact identity, destinations, secrets, effects, tie
       new Date("2026-07-19T00:00:00Z"),
     ).reasonCode,
     "ENFORCEMENT_TIER_DENIED",
+  );
+  assert.equal(
+    authorizePluginOperation(
+      principal,
+      { ...request, maximumMemoryBytes: 512 * 1024 * 1024 },
+      policy,
+      "authorization:4",
+      new Date("2026-07-19T00:00:00Z"),
+    ).reasonCode,
+    "RESOURCE_LIMIT_DENIED",
   );
 });

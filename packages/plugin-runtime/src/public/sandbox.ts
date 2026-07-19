@@ -1,5 +1,6 @@
 import {
   PLUGIN_MESSAGE_MAX_BYTES,
+  type PluginResourceLimits,
 } from "@verify-internal/plugin-sdk";
 
 export interface SandboxLaunchRequest {
@@ -25,9 +26,12 @@ export interface SandboxProcess {
   kill(): void;
 }
 
+export type SandboxResourceLimits = PluginResourceLimits;
+
 export interface SandboxLauncher {
   readonly production: boolean;
   readonly enforcementTier: string;
+  readonly resourceLimits: SandboxResourceLimits;
   available(): Promise<boolean>;
   launch(request: SandboxLaunchRequest): Promise<SandboxProcess>;
 }
@@ -64,6 +68,11 @@ export function createProductionSandboxLauncher(): SandboxLauncher {
   return {
     production: true,
     enforcementTier: `unavailable-${process.platform}`,
+    resourceLimits: {
+      maximumMemoryBytes: 0,
+      maximumCpuNanoseconds: 0,
+      maximumPluginProcesses: 0,
+    },
     async available(): Promise<boolean> {
       return false;
     },

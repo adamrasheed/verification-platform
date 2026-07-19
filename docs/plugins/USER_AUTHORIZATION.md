@@ -32,6 +32,7 @@ Authorization shows the exact effective operation:
 
 - plugin and operation IDs;
 - sandbox enforcement tier;
+- maximum physical-memory and CPU budgets, plus the plugin-process count;
 - filesystem read and write roots;
 - destination IDs, methods, path classes, and byte bounds;
 - Secret Reference IDs, audiences, and scopes;
@@ -50,4 +51,7 @@ cancellation, expiry, or process exit.
 The SDK, signed manifest, protocol runtime, authorization boundary, egress
 broker, and synthetic conformance suite are implemented. Production dynamic
 execution remains `unavailable` until a signed native sandbox host passes the
-platform canaries. The ordinary plugin-free CLI continues to operate normally.
+platform canaries. The macOS implementation now passes filesystem, subprocess,
+raw-network, memory, CPU, cancellation, and signature-rejection canaries; it
+becomes production-available only for a release-pinned Developer ID bundle.
+The ordinary plugin-free CLI continues to operate normally.

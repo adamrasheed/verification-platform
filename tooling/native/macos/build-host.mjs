@@ -32,6 +32,7 @@ const output = path.resolve(option(
 const contents = path.join(output, "Contents");
 const host = path.join(contents, "MacOS/VerifyPluginHost");
 const helper = path.join(contents, "Helpers/node");
+const supervisor = path.join(contents, "Helpers/VerifyPluginSupervisor");
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(path.dirname(host), { recursive: true, mode: 0o755 });
@@ -44,6 +45,23 @@ execFileSync("swiftc", [
   "-o",
   host,
   path.join(scriptRoot, "VerifyPluginHost.swift"),
+], { stdio: "inherit" });
+execFileSync("swiftc", [
+  "-O",
+  "-o",
+  supervisor,
+  path.join(scriptRoot, "VerifyPluginSupervisor.swift"),
+], { stdio: "inherit" });
+execFileSync("codesign", [
+  "--force",
+  "--timestamp=none",
+  "--options",
+  "runtime",
+  "--sign",
+  identity,
+  "--identifier",
+  "dev.verify.plugin-supervisor",
+  supervisor,
 ], { stdio: "inherit" });
 execFileSync("codesign", [
   "--force",

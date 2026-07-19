@@ -13,6 +13,11 @@ export function createConformanceProcessLauncher(
   return {
     production: false,
     enforcementTier: "conformance-process-v1",
+    resourceLimits: {
+      maximumMemoryBytes: 0,
+      maximumCpuNanoseconds: 0,
+      maximumPluginProcesses: 0,
+    },
     async available(): Promise<boolean> {
       return true;
     },

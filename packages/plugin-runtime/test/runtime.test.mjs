@@ -69,6 +69,11 @@ test("three synthetic provider behaviors run without provider-specific core chan
     behavior: "fast",
     enforcementTier: "conformance-process-v1",
     kind: "synthetic",
+    resourceLimits: {
+      maximumCpuNanoseconds: 0,
+      maximumMemoryBytes: 0,
+      maximumPluginProcesses: 0,
+    },
   }]);
   assert.equal(fast.trustTier, "verified-publisher");
   assert.equal(fast.diagnostics.join("\n").includes("CANARY_PLUGIN_SECRET"), false);

@@ -37,9 +37,16 @@ The first macOS implementation packages a sandboxed background application and
 an inherited Node helper. Exact artifact bytes enter through a dedicated pipe,
 are rehashed and staged inside the application container, and execute with an
 empty environment and Node capability restrictions. Ad hoc signing is accepted
-only by the non-production development tier. Production remains unavailable
-until Developer ID identities and code-directory hashes are pinned and a hard
-memory supervisor passes its canary.
+only by the non-production development tier.
+
+A separately signed, non-sandboxed native supervisor launches that application
+without reading artifact bytes, protocol messages, provider data, or secrets.
+It receives only the signed helper PID and enforces configurable physical
+memory and CPU budgets with `proc_pid_rusage`, relays termination to the host
+and helper, and fails closed if resource inspection becomes unavailable.
+Production availability additionally requires Developer ID authority, one
+expected Team ID, hardened runtime on all three executables, and exact
+code-directory hashes for the supervisor, host, and helper.
 
 Distributable plugins require:
 

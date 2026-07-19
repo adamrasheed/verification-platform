@@ -10,7 +10,15 @@
   "artifacts": [
     {
       "path": "tooling/native/macos/VerifyPluginHost.swift",
-      "digest": "sha256:35945d9d1bce53ca2ca8452520a6dc26df1c6bc0678f64558b02bf45aa9dbaa5"
+      "digest": "sha256:25cda8f8a85fea4ced843b33a5b26a16b03637bb0ea5f3df21464a301e920812"
+    },
+    {
+      "path": "tooling/native/macos/VerifyPluginSupervisor.swift",
+      "digest": "sha256:dd5e1b53512dafac04cc8165d5b5f1dd25bc975885a9f9401f4b80b08a4fbd8a"
+    },
+    {
+      "path": "tooling/native/macos/build-host.mjs",
+      "digest": "sha256:9c23d2879adc8b7cc39359b0053c60808ef38422d55bdbb391cf6ae1df0d3ae3"
     },
     {
       "path": "tooling/native/macos/verify-plugin-host.entitlements",
@@ -22,7 +30,7 @@
     },
     {
       "path": "packages/plugin-runtime/src/public/macos-sandbox.ts",
-      "digest": "sha256:c4b3537208ca5384eafd7d11fee1122644029d3163abdc7adb3781daeb88194f"
+      "digest": "sha256:cf6c44d1eca9ad1226b3dcc27bedf83e7bea300b6078bdeb3525fc5a0befe0c1"
     },
     {
       "path": ".github/workflows/ci.yml",
