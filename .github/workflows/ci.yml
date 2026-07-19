@@ -91,4 +91,5 @@ jobs:
       - name: Run native sandbox conformance
         env:
           VERIFY_RUN_LINUX_NATIVE: "1"
+          VERIFY_DEBUG_LINUX_NATIVE: "1"
         run: npm run test --workspace @verify-internal/plugin-runtime

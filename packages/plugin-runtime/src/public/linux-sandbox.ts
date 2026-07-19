@@ -100,6 +100,17 @@ function signalProcessGroup(
   }
 }
 
+async function* diagnosticStderr(
+  source: AsyncIterable<Uint8Array>,
+): AsyncIterable<Uint8Array> {
+  for await (const chunk of source) {
+    if (process.env.VERIFY_DEBUG_LINUX_NATIVE === "1") {
+      process.stderr.write(chunk);
+    }
+    yield chunk;
+  }
+}
+
 export function createLinuxNamespaceSandboxLauncher(
   options: LinuxNamespaceSandboxLauncherOptions,
 ): SandboxLauncher {
@@ -182,7 +193,7 @@ export function createLinuxNamespaceSandboxLauncher(
       return {
         enforcementTier: "linux-namespace-seccomp-v1",
         stdoutLines: boundedUtf8Lines(child.stdout),
-        stderr: child.stderr,
+        stderr: diagnosticStderr(child.stderr),
         exit: childExit(child),
         async write(line: string): Promise<void> {
           await new Promise<void>((resolve, reject) => {
