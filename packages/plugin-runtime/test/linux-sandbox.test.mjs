@@ -25,6 +25,12 @@ import {
 const executeFile = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../../..");
 
+function phase(value) {
+  if (process.env.VERIFY_DEBUG_LINUX_NATIVE === "1") {
+    process.stderr.write(`linux-native-phase: ${value}\n`);
+  }
+}
+
 async function digest(file) {
   return `sha256:${createHash("sha256").update(await readFile(file)).digest("hex")}`;
 }
@@ -86,6 +92,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
     deadlineMs: 10_000,
   }));
   assert.equal(fastResult.contributions[0].behavior, "fast");
+  phase("fast complete");
 
   const brokered = await signedManifest("brokered.mjs", "synthetic-brokered", {
     destinations: [destination({ secret: true })],
@@ -100,12 +107,14 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
     }),
   );
   assert.equal(brokeredResult.contributions[0].behavior, "brokered");
+  phase("brokered complete");
 
   const slow = await signedManifest("slow.mjs", "synthetic-slow");
   await assert.rejects(
     runtime.invoke(authorizedInvocation(slow, { deadlineMs: 250 })),
     (error) => error.code === "VFY_PLUGIN_DEADLINE",
   );
+  phase("deadline complete");
 
   const canary = await signedManifest(
     "sandbox-canary.mjs",
@@ -118,6 +127,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
   assert.notEqual(canaryResult.contributions[0].subprocess, "ALLOWED");
   assert.notEqual(canaryResult.contributions[0].network, "ALLOWED");
   assert.notEqual(canaryResult.contributions[0].network, "TIMEOUT");
+  phase("capability canary complete");
 
   const memoryFlood = await signedManifest(
     "memory-flood.mjs",
@@ -127,6 +137,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
     runtime.invoke(authorizedInvocation(memoryFlood, { deadlineMs: 10_000 })),
     (error) => error.code === "VFY_PLUGIN_RESOURCE_EXHAUSTED",
   );
+  phase("memory canary complete");
 
   const cpuSandbox = createLinuxNamespaceSandboxLauncher({
     nativeDirectory,
@@ -142,6 +153,7 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
     ),
     (error) => error.code === "VFY_PLUGIN_RESOURCE_EXHAUSTED",
   );
+  phase("CPU canary complete");
 
   const stderrFlood = await signedManifest(
     "stderr-flood.mjs",
@@ -151,4 +163,5 @@ test("Linux native host runs synthetic providers and denies ambient capabilities
     runtime.invoke(authorizedInvocation(stderrFlood, { deadlineMs: 10_000 })),
     (error) => error.code === "VFY_PLUGIN_STDERR_OVERSIZED",
   );
+  phase("stderr canary complete");
 });

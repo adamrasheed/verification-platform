@@ -430,6 +430,8 @@ int main(int argument_count, char **argument_values) {
   signal(SIGINT, relay_termination);
   signal(SIGHUP, relay_termination);
   int sandbox_status = 0;
+  bool reported_initial_usage = false;
+  bool reported_high_usage = false;
   for (;;) {
     pid_t wait_result = waitpid(sandbox_process, &sandbox_status, WNOHANG);
     if (wait_result == sandbox_process) break;
@@ -449,6 +451,33 @@ int main(int argument_count, char **argument_values) {
       kill(sandbox_process, SIGKILL);
       waitpid(sandbox_process, NULL, 0);
       fail("resource inspection failed closed", 126);
+    }
+    if (!reported_initial_usage) {
+      fprintf(
+        stderr,
+        "verify-plugin-linux-host: supervised pid=%ld rss=%" PRIu64
+        " cpu-ns=%" PRIu64 "\n",
+        (long)plugin_process,
+        resident_bytes,
+        cpu_nanoseconds
+      );
+      reported_initial_usage = true;
+    }
+    if (
+      !reported_high_usage
+      && (
+        resident_bytes > 128U * 1024U * 1024U
+        || cpu_nanoseconds > 500000000U
+      )
+    ) {
+      fprintf(
+        stderr,
+        "verify-plugin-linux-host: high usage rss=%" PRIu64
+        " cpu-ns=%" PRIu64 "\n",
+        resident_bytes,
+        cpu_nanoseconds
+      );
+      reported_high_usage = true;
     }
     if (
       resident_bytes > maximum_memory_bytes
