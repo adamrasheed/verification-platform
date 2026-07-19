@@ -83,6 +83,26 @@
       "governingClauses": ["Freeze §10", "EDD §§24–25"]
     },
     {
+      "id": "plugin-sdk",
+      "path": "packages/plugin-sdk",
+      "kind": "package",
+      "owner": "plugin-platform",
+      "milestone": "M6",
+      "state": "active",
+      "allowedDependencies": ["contracts"],
+      "governingClauses": ["Freeze §9", "EDD §13"]
+    },
+    {
+      "id": "plugin-runtime",
+      "path": "packages/plugin-runtime",
+      "kind": "package",
+      "owner": "plugin-platform",
+      "milestone": "M6",
+      "state": "active",
+      "allowedDependencies": ["contracts", "auth", "plugin-sdk"],
+      "governingClauses": ["Freeze §§9–11", "EDD §§13,25,27"]
+    },
+    {
       "id": "engine",
       "path": "packages/engine",
       "kind": "package",
@@ -97,7 +117,8 @@
         "evidence",
         "repair",
         "execution",
-        "auth"
+        "auth",
+        "plugin-runtime"
       ],
       "governingClauses": ["Freeze §6", "EDD §5"]
     },

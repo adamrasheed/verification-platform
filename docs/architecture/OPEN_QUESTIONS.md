@@ -26,10 +26,15 @@ changes use ADRs. Business decisions remain founder-owned.
 
 | ID | Decision | Frozen constraint | Reconsideration trigger |
 |---|---|---|---|
-| D-001 | Exact OS sandbox backend per supported platform | Enforcement tier is recorded; unavailable controls fail closed or require explicit override | Before dynamic repository commands ship |
 | D-002 | Cloud vendor, primary region, and managed service products | Logical cloud contracts, tenant isolation, encryption, and deletion semantics do not change | Before hosted implementation |
 | D-003 | Evidence attestation wire format | Evidence remains immutable and provenance-bearing; a digest is not independent truth | Before third-party attestation exchange |
 | D-004 | Per-record local encryption | Local permissions and platform storage encryption are the Phase 1 baseline | Enterprise local threat model requires stronger protection |
+
+## Resolved architecture selections
+
+| ID | Resolution | Mechanism | Resolved |
+|---|---|---|---|
+| D-001 | Dynamic plugins require a signed native sandbox host: Linux namespaces+seccomp, macOS App Sandbox, or Windows AppContainer. A missing host is `unavailable`; deprecated Seatbelt and Node permissions are not treated as malicious-code isolation. Publisher trust uses digest-pinned Ed25519 manifests and revocation. Provider secrets are attached only inside the Engine egress broker. | [ADR-0011](ADR/0011-plugin-security-enforcement.md) | 2026-07-19 |
 
 ## Resolution rules
 

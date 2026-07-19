@@ -123,11 +123,17 @@ when its expected artifact and acceptance Evidence are committed.
 
 **Milestone:** first provider plugin after security gates.
 
-Tasks: accept sandbox/signing/secret-delivery selections; implement manifest and
-NDJSON runtime; implement Engine egress broker; pass three synthetic providers;
-ship separate developer/user onboarding; then pilot read-only GitHub
-repository-policy observations. Each task requires crash, cancellation, DNS,
-redirect, telemetry, secret, revocation, and permission fixtures.
+| Task | Status | Work | Acceptance/test requirement |
+|---|---|---|---|
+| M6-T01 | **Complete** | Resolve sandbox, signing/revocation, secret-delivery, and egress selections in ADR-0011 | Missing production controls are explicitly `unavailable`; no degraded claim |
+| M6-T02 | **Complete** | Implement signed manifest and Plugin Contract v1 SDK | Strict schema, canonical signature payload, compatibility negotiation |
+| M6-T03 | **Complete** | Implement bounded NDJSON runtime coordinator | Handshake, crash, malformed output, flood, deadline, and cancellation fixtures |
+| M6-T04 | **Complete** | Implement publisher trust, artifact integrity, and revocation | Tampering and revoked key/artifact fail before launch |
+| M6-T05 | **Complete** | Implement Engine-owned typed provider egress broker | DNS, redirect, telemetry, size, schema, secret, response, and audit gates |
+| M6-T06 | **In progress** | Implement signed native sandbox hosts | Linux namespaces+seccomp, macOS App Sandbox, Windows AppContainer canaries |
+| M6-T07 | **Contract complete; OS gate pending** | Pass three synthetic providers with different auth, latency, and error behavior | Same plugins must pass again through each production native host |
+| M6-T08 | **Complete** | Separate plugin developer and user-authorization onboarding | Installation, trust, authorization, and unavailable state are distinct |
+| M6-T09 | **Pending** | Pilot read-only repository-policy provider | No provider release before M6-T06 and T07 pass |
 
 ## Epic M7 — First Integrations
 

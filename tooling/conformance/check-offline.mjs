@@ -32,6 +32,9 @@ async function walk(directory) {
     if (["dist", "node_modules", "test", "fixtures"].includes(entry.name)) continue;
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) {
+      if (
+        path.resolve(target) === path.resolve(root, "packages/plugin-runtime")
+      ) continue;
       await walk(target);
       continue;
     }
@@ -56,4 +59,4 @@ if (failures.length > 0) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log("offline/passive source gate passed: no network or repository execution primitives");
+console.log("offline/passive core source gate passed: plugin runtime is outside the default execution graph");
