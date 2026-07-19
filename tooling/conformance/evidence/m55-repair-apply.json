@@ -14,7 +14,7 @@
     },
     {
       "path": "packages/engine/src/public/local-runtime.ts",
-      "digest": "sha256:58218ae05d3a66357726f3b05d8c2adfcad260bb0cbca1636fd5aa188da50d01"
+      "digest": "sha256:7e2f45053cbb92fbd50b4d82c7deb3aceebc716478816aaa55413fa05bfc2ab3"
     },
     {
       "path": "packages/protocol/schemas/repair-command.schema.json",
