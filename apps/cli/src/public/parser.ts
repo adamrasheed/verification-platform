@@ -21,6 +21,14 @@ export interface CacheCliCommand extends CommonOptions {
   readonly kind: "cacheInspect" | "cacheClear";
 }
 
+export interface RepairCliCommand extends CommonOptions {
+  readonly kind: "repairPreview" | "repairApply";
+  readonly sourceInvocationId: string;
+  readonly repairId: string;
+  readonly workspace: string;
+  readonly writeGranted: boolean;
+}
+
 export interface StaticCliCommand extends CommonOptions {
   readonly kind: "version" | "schema";
 }
@@ -29,6 +37,7 @@ export type CliCommand =
   | VerifyCliCommand
   | InspectCliCommand
   | CacheCliCommand
+  | RepairCliCommand
   | StaticCliCommand;
 
 export interface CliParseError {
@@ -159,6 +168,52 @@ export function parseCli(
       ok: true,
       command: {
         kind: action === "inspect" ? "cacheInspect" : "cacheClear",
+        outputMode: selected.mode,
+      },
+    };
+  }
+  if (first === "repair") {
+    const action = args[1];
+    const sourceInvocationId = args[2];
+    const repairId = args[3];
+    if (
+      (action !== "preview" && action !== "apply") ||
+      sourceInvocationId === undefined ||
+      repairId === undefined
+    ) {
+      return failure(
+        "usage: verify repair preview|apply <run-id> <repair-id> [--workspace <path>] [--grant-workspace-write]",
+      );
+    }
+    let workspace = cwd;
+    let writeGranted = false;
+    for (let index = 4; index < args.length; index += 1) {
+      const arg = args[index];
+      if (arg === "--workspace") {
+        const value = args[index + 1];
+        if (value === undefined) return failure("--workspace requires a path");
+        workspace = value;
+        index += 1;
+      } else if (arg === "--grant-workspace-write") {
+        writeGranted = true;
+      } else {
+        return failure(`unknown repair option: ${arg}`);
+      }
+    }
+    if (action === "preview" && writeGranted) {
+      return failure("preview is read-only and does not accept a write grant");
+    }
+    if (action === "apply" && !writeGranted) {
+      return failure("apply requires --grant-workspace-write");
+    }
+    return {
+      ok: true,
+      command: {
+        kind: action === "preview" ? "repairPreview" : "repairApply",
+        sourceInvocationId,
+        repairId,
+        workspace,
+        writeGranted,
         outputMode: selected.mode,
       },
     };

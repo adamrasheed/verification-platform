@@ -2,6 +2,16 @@ import { createHash } from "node:crypto";
 import { canonicalize } from "@verify-internal/contracts";
 import type { CanonicalValue } from "@verify-internal/contracts";
 
+export {
+  RepairApplyConflict,
+  applyRepairPatch,
+  previewRepairPatch,
+} from "./apply.js";
+export type {
+  RepairApplyConflictCode,
+  RepairPatchPreview,
+} from "./apply.js";
+
 export interface FailedProof {
   readonly proofId: string;
   readonly promiseId: string;

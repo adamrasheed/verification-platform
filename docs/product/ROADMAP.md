@@ -115,9 +115,9 @@ when its expected artifact and acceptance Evidence are committed.
 
 | Task | Work | Dependencies | Expected artifact | Acceptance/test requirement |
 |---|---|---|---|---|
-| M55-T01 | Define preview/apply canonical command | M5 | Command schemas | Write authority separate from suggestion |
-| M55-T02 | Implement atomic patch/conflict handling | T01 | Local apply service | No partial write; stale input rejected |
-| M55-T03 | Link apply event to later verification | T02 | Lifecycle/result integration | Only later pass marks verified |
+| M55-T01 | **Complete** — define preview/apply canonical command | M5 | Command schemas | Write authority separate from suggestion |
+| M55-T02 | **Complete** — implement atomic patch/conflict handling | T01 | Local apply service | No partial write; stale input rejected |
+| M55-T03 | **Complete** — link apply event to later verification | T02 | Lifecycle/result integration | Only later pass marks verified |
 
 ## Epic M6 — Plugin Platform and First Provider
 

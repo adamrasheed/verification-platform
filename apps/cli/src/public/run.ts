@@ -157,6 +157,8 @@ function outputPersistence(
 async function runPersistence(
   command: Exclude<CliCommand, { readonly kind: "verify" | "version" | "schema" }>,
   adapter: CliPersistenceAdapter,
+  invocationId: string,
+  signal: AbortSignal,
 ): Promise<PersistenceProjection> {
   switch (command.kind) {
     case "inspectRun":
@@ -167,6 +169,21 @@ async function runPersistence(
       return adapter.inspectCache();
     case "cacheClear":
       return adapter.clearCache();
+    case "repairPreview":
+      return adapter.previewRepair(
+        command.sourceInvocationId,
+        command.repairId,
+        command.workspace,
+      );
+    case "repairApply":
+      return adapter.applyRepair(
+        invocationId,
+        command.sourceInvocationId,
+        command.repairId,
+        command.workspace,
+        command.writeGranted,
+        signal,
+      );
   }
 }
 
@@ -198,6 +215,8 @@ export async function runCli(
     return 0;
   }
   if (command.kind !== "verify") {
+    const invocationId =
+      dependencies.createInvocationId?.() ?? `invocation:${randomUUID()}`;
     try {
       const projection = await runPersistence(
         command as Exclude<
@@ -205,6 +224,8 @@ export async function runCli(
           { readonly kind: "verify" | "version" | "schema" }
         >,
         dependencies.persistence ?? new UnavailablePersistenceAdapter(),
+        invocationId,
+        dependencies.signal ?? new AbortController().signal,
       );
       outputPersistence(projection, command.outputMode, io);
       return projection.exitCode;
@@ -214,6 +235,8 @@ export async function runCli(
           ? "blocked"
           : error instanceof PersistenceNotFoundError
             ? "invalid"
+            : error instanceof Error && error.name === "RepairApplyConflict"
+              ? "invalid"
           : "internal_error";
       const message =
         error instanceof Error ? error.message : "unexpected persistence error";

@@ -72,6 +72,19 @@ export interface CliPersistenceAdapter {
   inspectEvidence(id: string): Promise<PersistenceProjection>;
   inspectCache(): Promise<PersistenceProjection>;
   clearCache(): Promise<PersistenceProjection>;
+  previewRepair(
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+  ): Promise<PersistenceProjection>;
+  applyRepair(
+    applicationInvocationId: string,
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+    writeGranted: boolean,
+    signal: AbortSignal,
+  ): Promise<PersistenceProjection>;
 }
 
 export class PersistenceUnavailableError extends Error {
@@ -102,6 +115,25 @@ export class UnavailablePersistenceAdapter implements CliPersistenceAdapter {
   }
 
   async clearCache(): Promise<PersistenceProjection> {
+    throw new PersistenceUnavailableError();
+  }
+
+  async previewRepair(
+    _sourceInvocationId: string,
+    _repairId: string,
+    _workspace: string,
+  ): Promise<PersistenceProjection> {
+    throw new PersistenceUnavailableError();
+  }
+
+  async applyRepair(
+    _applicationInvocationId: string,
+    _sourceInvocationId: string,
+    _repairId: string,
+    _workspace: string,
+    _writeGranted: boolean,
+    _signal: AbortSignal,
+  ): Promise<PersistenceProjection> {
     throw new PersistenceUnavailableError();
   }
 }
@@ -195,6 +227,46 @@ export class LocalRuntimeAdapter
 
   async clearCache(): Promise<PersistenceProjection> {
     const document = await this.#runtime.clearCache();
+    return {
+      document,
+      humanLines: JSON.stringify(document, null, 2).split("\n"),
+      exitCode: 0,
+    };
+  }
+
+  async previewRepair(
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+  ): Promise<PersistenceProjection> {
+    const { document } = this.#runtime.previewRepair(
+      sourceInvocationId,
+      repairId,
+      workspace,
+    );
+    return {
+      document,
+      humanLines: JSON.stringify(document, null, 2).split("\n"),
+      exitCode: 0,
+    };
+  }
+
+  async applyRepair(
+    applicationInvocationId: string,
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+    writeGranted: boolean,
+    signal: AbortSignal,
+  ): Promise<PersistenceProjection> {
+    const { document } = await this.#runtime.applyRepair(
+      applicationInvocationId,
+      sourceInvocationId,
+      repairId,
+      workspace,
+      writeGranted,
+      signal,
+    );
     return {
       document,
       humanLines: JSON.stringify(document, null, 2).split("\n"),

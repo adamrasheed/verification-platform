@@ -414,12 +414,20 @@ function proofResult(
 function repairAction(
   repair: LegacyRepairSuggestion,
   evidence: Evidence,
+  manifestContentDigest?: Sha256Digest,
 ): ContractRepairSuggestion["action"] {
   if (repair.action.kind === "json_patch") {
+    if (manifestContentDigest === undefined) {
+      return {
+        kind: "advisoryInstruction",
+        instructionCode: "VERIFY_REPAIR_TARGET_NOT_SEALED",
+        parameters: { target: repair.action.target },
+      };
+    }
     return {
       kind: "jsonPatch",
       target: repair.action.target,
-      expectedContentDigest: evidence.contentDigest,
+      expectedContentDigest: manifestContentDigest,
       operations: repair.action.operations.map((operation) => ({
         operation: operation.op,
         pointer: operation.path,
@@ -783,7 +791,13 @@ export function buildCanonicalRuntimeRecords(
       motivatingExecution: execution.attemptRef,
       evidence: [motivatingEvidenceRef],
       generator: input.engine,
-      action: repairAction(legacyRepair, motivatingEvidence),
+      action: repairAction(
+        legacyRepair,
+        motivatingEvidence,
+        input.discovery.manifests.find(
+          (manifest) => manifest.path === legacyRepair.action.target,
+        )?.contentDigest,
+      ),
       assumptions: legacyRepair.assumptions,
       requiredPermissions: permissions,
       expectedEffect: legacyRepair.expectedEffect,
