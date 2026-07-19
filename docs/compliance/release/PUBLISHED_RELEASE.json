@@ -2,34 +2,44 @@
   "schemaVersion": 1,
   "kind": "publishedNpmRelease",
   "status": "verified",
-  "observedAt": "2026-07-19T04:02:59Z",
+  "observedAt": "2026-07-19T05:20:41Z",
   "package": {
     "name": "@adamrasheed/verify",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license": "Apache-2.0",
     "distTag": "latest",
-    "registryUrl": "https://www.npmjs.com/package/@adamrasheed/verify/v/0.1.0",
-    "tarballUrl": "https://registry.npmjs.org/@adamrasheed/verify/-/verify-0.1.0.tgz"
+    "registryUrl": "https://www.npmjs.com/package/@adamrasheed/verify/v/0.2.0",
+    "tarballUrl": "https://registry.npmjs.org/@adamrasheed/verify/-/verify-0.2.0.tgz"
   },
-  "sourceRevision": "23ebdb36673f3339dbd4eedf04af37f48c040fad",
+  "sourceRevision": "ea6e7759f6812ccbb213e582d2ed03a758b324a9",
   "testedArtifact": {
-    "sha256": "sha256:497d2f883dc961926115bf074981731844966a9ada47b9c1ca2c3ff63d05f9d3",
-    "size": 47012,
+    "sha256": "sha256:eda8641b1e90257e649487245eaec9dbc586a0a7e814dd70ba88497c2c3c07ca",
+    "size": 51195,
     "registryBytesMatched": true
   },
   "registryIntegrity": {
-    "sha512": "sha512-Wt2cfFjqrwN9Saz3vQYcPbpURMvoe2UQa0QIQ9EQZhqnTBovzdU8gBziOtUV60W4eaitViyDOi3BsNXlGZoXow==",
-    "sha1": "a00b5596642b044ca2ed244f4154cd26f7b10d07"
+    "sha512": "sha512-YH0rsXaLQolX2F0gSH7ua3LdVZrXsdmQmC//Iwb/Q35orRJJqmNfXeOa+I2JEIscui+e8O8ZVgToJxEOzhk58g==",
+    "sha1": "0708539023de468513f3f3d4fbd757179cf896af"
   },
   "registrySignature": {
     "status": "verified",
     "keyId": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
   },
+  "provenance": {
+    "status": "verified",
+    "predicateType": "https://slsa.dev/provenance/v1",
+    "attestationsUrl": "https://registry.npmjs.org/-/npm/v1/attestations/@adamrasheed%2fverify@0.2.0"
+  },
+  "publication": {
+    "method": "npm-trusted-publishing",
+    "workflowRun": "https://github.com/adamrasheed/verification-platform/actions/runs/29674635913",
+    "release": "https://github.com/adamrasheed/verification-platform/releases/tag/v0.2.0"
+  },
   "runtimeSmokeTest": {
     "status": "passed",
-    "command": "npx --yes @adamrasheed/verify@0.1.0 version",
-    "reportedCliVersion": "0.1.0",
-    "reportedEngineVersion": "0.1.0",
+    "command": "npx --yes @adamrasheed/verify@0.2.0 version --json",
+    "reportedCliVersion": "0.2.0",
+    "reportedEngineVersion": "0.2.0",
     "reportedProtocolSchema": 1
   }
 }
