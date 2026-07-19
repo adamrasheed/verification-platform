@@ -1,0 +1,22 @@
+{
+  "$comment": "GENERATED from tooling/schema/sources/canary.schema.json; do not edit",
+  "$id": "urn:verify:schema:canary:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "type": "integer"
+    },
+    "value": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "value"
+  ],
+  "title": "Schema Generation Canary",
+  "type": "object"
+}

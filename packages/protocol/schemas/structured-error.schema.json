@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/structured-error/v1",
+  "title": "StructuredErrorV1",
+  "type": "object",
+  "required": [
+    "code",
+    "category",
+    "retryability",
+    "message",
+    "component",
+    "operation",
+    "blocksRequiredProof",
+    "causes",
+    "diagnosticRefs"
+  ],
+  "properties": {
+    "code": { "type": "string", "pattern": "^VFY_[A-Z0-9]+(?:_[A-Z0-9]+)+$" },
+    "category": {
+      "enum": [
+        "invalid",
+        "permission",
+        "authentication",
+        "environment",
+        "plugin",
+        "network",
+        "integrity",
+        "compatibility",
+        "resource",
+        "internal"
+      ]
+    },
+    "retryability": { "enum": ["never", "safe", "policy_required"] },
+    "message": { "type": "string" },
+    "remediation": { "type": "string" },
+    "component": { "type": "string" },
+    "operation": { "type": "string" },
+    "blocksRequiredProof": { "type": "boolean" },
+    "causes": { "type": "array" },
+    "diagnosticRefs": { "type": "array" },
+    "details": {}
+  },
+  "additionalProperties": false
+}

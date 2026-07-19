@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/command-request/v1",
+  "title": "CommandRequestV1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "command",
+    "invocationId",
+    "arguments",
+    "configurationReferences",
+    "policyReferences",
+    "consentGrantReferences",
+    "offline",
+    "outputMode",
+    "environment"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "command": {
+      "enum": [
+        "verify",
+        "dispatchVerification",
+        "publishedVerification",
+        "getRun",
+        "getPublishedRun"
+      ]
+    },
+    "invocationId": { "type": "string", "minLength": 1 },
+    "workspace": {
+      "type": "object",
+      "required": ["rootBinding"],
+      "properties": {
+        "rootBinding": { "type": "string", "minLength": 1 },
+        "expectedRevision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "arguments": {},
+    "configurationReferences": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policyReferences": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "consentGrantReferences": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "offline": { "type": "boolean" },
+    "deadlineMs": { "type": "integer", "minimum": 1 },
+    "outputMode": { "enum": ["human", "json", "jsonl"] },
+    "environment": {
+      "type": "object",
+      "required": ["platform", "allowlistedBindings"],
+      "properties": {
+        "platform": { "type": "string" },
+        "allowlistedBindings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

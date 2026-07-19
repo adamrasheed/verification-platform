@@ -1,0 +1,18 @@
+{
+  "request": {
+    "kind": "application",
+    "id": "sid:application:test",
+    "schemaVersion": 1,
+    "payload": {
+      "workspaceId": "workspace:repo",
+      "root": "packages/api",
+      "packageIdentity": "@acme/api",
+      "provenance": []
+    }
+  },
+  "expectedRevision": "sha256:6d69dc36572ccae8a6598dec06ac95c6d1bd5fbf64ef4b2f52ac01477ad0e8d4",
+  "envelopes": [
+    {"createdAt": "2026-07-18T20:00:00Z"},
+    {"createdAt": "2026-07-19T01:00:00Z"}
+  ]
+}

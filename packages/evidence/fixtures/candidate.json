@@ -1,0 +1,19 @@
+{
+  "workspaceBinding": "workspace:test",
+  "evidenceType": "workspace.manifest-observations",
+  "mediaType": "application/vnd.verify.workspace-observations+json",
+  "observations": [
+    {
+      "path": "packages/a/package.json",
+      "name": "@fixture/a",
+      "version": "1.0.0",
+      "dependencies": {},
+      "workspaceMember": true,
+      "contentDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "lockfiles": ["package-lock.json"],
+  "packageManagers": ["npm"],
+  "completion": "complete",
+  "diagnostics": []
+}

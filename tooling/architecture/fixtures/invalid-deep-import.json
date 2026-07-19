@@ -1,0 +1,20 @@
+{
+  "expectValid": false,
+  "graph": {
+    "nodes": [
+      {
+        "id": "engine",
+        "kind": "package",
+        "allowedDependencies": ["contracts"],
+        "dependencies": ["contracts"],
+        "sourceImports": ["@verify-internal/contracts/internal/hash"]
+      },
+      {
+        "id": "contracts",
+        "kind": "package",
+        "allowedDependencies": [],
+        "dependencies": []
+      }
+    ]
+  }
+}

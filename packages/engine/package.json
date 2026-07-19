@@ -1,0 +1,28 @@
+{
+  "name": "@verify-internal/engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist", "README.md"],
+  "exports": {
+    ".": {
+      "types": "./dist/public/index.d.ts",
+      "default": "./dist/public/index.js"
+    }
+  },
+  "dependencies": {
+    "@verify-internal/auth": "0.0.0",
+    "@verify-internal/contracts": "0.0.0",
+    "@verify-internal/discovery": "0.0.0",
+    "@verify-internal/evidence": "0.0.0",
+    "@verify-internal/events": "0.0.0",
+    "@verify-internal/execution": "0.0.0",
+    "@verify-internal/proofs": "0.0.0",
+    "@verify-internal/repair": "0.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  }
+}

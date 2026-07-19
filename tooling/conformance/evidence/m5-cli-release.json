@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m5-cli-release",
+  "taskId": "M5-T01..M5-T09",
+  "owner": "developer-experience",
+  "governingClauses": ["Freeze §§2,12,14,18,19", "EDD §§15,34,36"],
+  "testIds": ["cli:19", "corpus:8", "release:3", "pack:3-files"],
+  "command": "npm run test:m5",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "apps/cli/src/public/run.ts",
+      "digest": "sha256:0772ff0add5b689e61cac02f84d2fba0ade9bc2a936c56cbca724bca37d241bf"
+    },
+    {
+      "path": "tooling/release/prepare-candidate.mjs",
+      "digest": "sha256:9569662e92bbfdc35d9d3c25bcf695f560f1b5add5a0af5647f03d585c26ce7e"
+    }
+  ]
+}

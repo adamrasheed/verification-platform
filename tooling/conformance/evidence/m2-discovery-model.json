@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m2-discovery-model",
+  "taskId": "M2-T01..M2-T11",
+  "owner": "core-engine",
+  "governingClauses": ["Freeze §7", "EDD §§7,36"],
+  "testIds": ["discovery:12", "proofs:registry"],
+  "command": "npm run test:m2",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/discovery/src/public/model-sealing.ts",
+      "digest": "sha256:a0ea5fefda2bd167bd9e1137df544a1b5c4f94aecea7c189ceb5e67d16ed15f4"
+    }
+  ]
+}

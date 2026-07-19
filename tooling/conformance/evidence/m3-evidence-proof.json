@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m3-evidence-proof",
+  "taskId": "M3-T01..M3-T10",
+  "owner": "core-engine",
+  "governingClauses": ["Freeze §§5.5,5.7", "EDD §§10,11"],
+  "testIds": ["evidence:8", "proofs:11", "engine:20"],
+  "command": "npm run test:m3",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/evidence/src/public/index.ts",
+      "digest": "sha256:20171d0ae942f16b4d515824fb90748ac01811d48bd509d3f25424aec28c39bc"
+    }
+  ]
+}

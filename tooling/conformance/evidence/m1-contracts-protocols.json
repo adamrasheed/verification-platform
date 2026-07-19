@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m1-contracts-protocols",
+  "taskId": "M1-T03..M1-T11",
+  "owner": "domain-contracts",
+  "governingClauses": ["Freeze §5", "Freeze §12", "EDD §§6,16,22"],
+  "testIds": ["contracts:19", "events:8", "protocol:13"],
+  "command": "npm run test:m1",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/contracts/src/public/model.ts",
+      "digest": "sha256:96fd59cfc2c55e41bba588e9d0b8c3b7d1a17ce878fb5e03e02301ba0eedd5e0"
+    }
+  ]
+}

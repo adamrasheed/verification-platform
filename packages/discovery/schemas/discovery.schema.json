@@ -1,0 +1,74 @@
+{
+  "$id": "urn:verify:schema:discovery:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Passive Workspace Discovery",
+  "$defs": {
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxFiles", "maxInspectedBytes", "maxFileBytes", "maxManifests", "maxDepth", "timeoutMs"],
+      "properties": {
+        "maxFiles": {"type": "integer", "minimum": 1},
+        "maxInspectedBytes": {"type": "integer", "minimum": 1},
+        "maxFileBytes": {"type": "integer", "minimum": 1},
+        "maxManifests": {"type": "integer", "minimum": 1},
+        "maxDepth": {"type": "integer", "minimum": 1},
+        "timeoutMs": {"type": "integer", "minimum": 1}
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "workspaceRoot", "limits", "permissions"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "workspaceRoot": {"type": "string", "minLength": 1},
+        "limits": {"$ref": "#/$defs/limits"},
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["network", "write", "process"],
+          "properties": {
+            "network": {"const": false},
+            "write": {"const": false},
+            "process": {"const": false}
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion", "workspaceRoot", "workspaceBinding", "completion",
+        "packageManagers", "workspacePatterns", "manifests", "lockfiles",
+        "inspectedFiles", "inspectedBytes", "skipped", "conflicts",
+        "diagnostics", "signals", "facts", "candidates", "modelRevision"
+      ],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "workspaceRoot": {"type": "string", "minLength": 1},
+        "workspaceBinding": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "completion": {"enum": ["complete", "bounded", "cancelled", "error"]},
+        "packageManagers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["npm", "pnpm", "yarn"]}
+        },
+        "selectedPackageManager": {"enum": ["npm", "pnpm", "yarn"]},
+        "workspacePatterns": {"type": "array", "items": {"type": "string"}},
+        "manifests": {"type": "array"},
+        "lockfiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "inspectedFiles": {"type": "integer", "minimum": 0},
+        "inspectedBytes": {"type": "integer", "minimum": 0},
+        "skipped": {"type": "array"},
+        "conflicts": {"type": "array"},
+        "diagnostics": {"type": "array"},
+        "signals": {"type": "array"},
+        "facts": {"type": "array"},
+        "candidates": {"type": "array"},
+        "modelRevision": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      }
+    }
+  }
+}

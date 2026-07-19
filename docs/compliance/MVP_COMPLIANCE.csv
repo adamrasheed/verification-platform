@@ -1,0 +1,21 @@
+requirement_id,source_clause,owner,planned_control,status
+MVP-ARCH-001,Freeze §3.2,core-engine,Canonical dispatcher parity tests,implemented
+MVP-ARCH-002,Freeze §3.9,repository-architecture,Provider dependency boundary rule,implemented
+MVP-MODEL-001,Freeze §5.2,domain-contracts,Revision digest golden vectors,implemented
+MVP-MODEL-002,Freeze §5.4.1,domain-contracts,PromiseProofBinding graph fixtures,implemented
+MVP-DISC-001,Freeze §7,discovery,Passive walker hostile repository corpus,implemented
+MVP-DISC-002,Freeze §7,security,Offline zero-network test,implemented
+MVP-PROOF-001,Freeze §5.5,proofs,Proof lifecycle property tests,implemented
+MVP-EVID-001,Freeze §5.7,evidence,Evidence validation and provenance tests,implemented
+MVP-REPAIR-001,Freeze §5.8,repair,Advisory repair citation fixtures,implemented
+MVP-EXEC-001,Freeze §8,execution,Sealed plan and resource bound tests,implemented
+MVP-AUTH-001,Freeze §10.2,auth,Local principal no-login tests,implemented
+MVP-JSON-001,Freeze §12,protocol,JSON stdout purity and schema tests,implemented
+MVP-EXIT-001,Freeze §12.4,protocol,Exit code decision table,implemented
+MVP-CACHE-001,Freeze §13.3,execution,Cache mutation and corruption matrix,implemented
+MVP-SEC-001,Freeze §14.1,security,Secret and path canary suite,implemented
+MVP-OFF-001,Freeze §15,security,Offline DNS and socket denial test,implemented
+MVP-COMPAT-001,Freeze §17,domain-contracts,Current and previous reader fixtures,implemented
+MVP-REL-001,Freeze §18,release,Release conformance matrix,implemented
+MVP-PERF-001,Freeze §19,performance,Reference repository benchmark,implemented
+MVP-SUPPLY-001,Freeze §14.4,release,Package content SBOM and provenance checks,implemented

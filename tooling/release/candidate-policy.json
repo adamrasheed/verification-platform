@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "allowedTarPrefixes": [
+    "package/dist/",
+    "package/schemas/"
+  ],
+  "allowedTarFiles": [
+    "package/package.json",
+    "package/README.md",
+    "package/LICENSE",
+    "package/NOTICE"
+  ],
+  "forbiddenLifecycleScripts": [
+    "preinstall",
+    "install",
+    "postinstall",
+    "prepack",
+    "postpack",
+    "prepare",
+    "prepublish",
+    "prepublishOnly",
+    "publish",
+    "postpublish"
+  ],
+  "forbiddenDependencyPrefixes": [
+    "@verify-internal/"
+  ],
+  "forbiddenPathFragments": [
+    "/src/",
+    "/test/",
+    "/fixtures/",
+    "/node_modules/",
+    ".env",
+    ".npmrc",
+    ".tsbuildinfo"
+  ],
+  "requiredTarFiles": [
+    "package/package.json",
+    "package/README.md"
+  ],
+  "requiredTestCommand": [
+    "node",
+    "tooling/release/verify-packed-artifact.mjs"
+  ],
+  "requiredPerformanceClaims": [
+    "warmDiscoveryP95Passed",
+    "coldVerifyP95Passed",
+    "cacheLookupP95Passed",
+    "cancellationWithinOneSecondPassed",
+    "firstProgressWithin250MsPassed",
+    "machineOutputBoundPassed",
+    "memoryBoundPassed"
+  ],
+  "requiredSecurityGates": [
+    "M5-T06-MVP-CORPUS",
+    "M5-T07-OFFLINE-PASSIVE",
+    "M5-T07-RUNTIME-NETWORK-DENY",
+    "M5-T07-SECRET-CANARIES"
+  ],
+  "requiredSecurityClaims": [
+    "zeroEngineNetwork",
+    "zeroRepositoryExecution",
+    "zeroCanaryLeakage",
+    "hostileCorpusPassed"
+  ]
+}

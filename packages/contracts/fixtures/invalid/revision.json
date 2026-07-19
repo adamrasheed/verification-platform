@@ -1,0 +1,24 @@
+[
+  {
+    "name": "mutable-alias-reference",
+    "reference": {
+      "kind": "proof",
+      "id": "proof:workspace-integrity",
+      "revision": "latest",
+      "schemaVersion": 1
+    }
+  },
+  {
+    "name": "envelope-metadata-in-payload",
+    "request": {
+      "kind": "application",
+      "id": "sid:application:test",
+      "schemaVersion": 1,
+      "payload": {
+        "workspaceId": "workspace:repo",
+        "root": "packages/api",
+        "createdAt": "2026-07-18T20:00:00Z"
+      }
+    }
+  }
+]

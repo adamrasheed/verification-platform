@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "npmReleaseCandidate",
+  "status": "pending_test_attestation",
+  "source": {
+    "packageDirectory": "apps/cli",
+    "packageName": "REPLACE_AFTER_FOUNDER_NAMING_DECISION",
+    "packageVersion": "REPLACE",
+    "sourceRevision": "REPLACE_WITH_EXACT_GIT_COMMIT",
+    "nodeVersion": "REPLACE",
+    "npmVersion": "REPLACE"
+  },
+  "artifact": {
+    "path": "artifact/REPLACE.tgz",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "packManifest": {
+    "path": "pack-manifest.json",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "sbom": {
+    "path": "sbom.cdx.json",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "provenance": {
+    "path": "provenance.intoto.json",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "performanceReport": {
+    "path": "reports/performance.json",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "securityReport": {
+    "path": "reports/security.json",
+    "sha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS",
+    "size": 0
+  },
+  "testAttestation": null
+}

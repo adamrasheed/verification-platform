@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "dist/protocol.tsbuildinfo",
+    "paths": {
+      "@verify-internal/contracts": ["../contracts/src/public/index.ts"],
+      "@verify-internal/events": ["../events/src/public/index.ts"]
+    }
+  },
+  "references": [
+    { "path": "../contracts" },
+    { "path": "../events" }
+  ],
+  "include": ["src/**/*.ts"]
+}

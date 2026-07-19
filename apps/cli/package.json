@@ -1,0 +1,28 @@
+{
+  "name": "verify",
+  "version": "0.1.0",
+  "description": "Offline, evidence-backed JavaScript workspace integrity verification",
+  "type": "module",
+  "bin": {
+    "verify": "./dist/verify.js"
+  },
+  "files": [
+    "dist/verify.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@verify-internal/engine": "0.0.0",
+    "@verify-internal/protocol": "0.0.0"
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.json && esbuild dist/bin/verify.js --bundle --platform=node --format=esm --target=node22 --legal-comments=none --outfile=dist/verify.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  }
+}

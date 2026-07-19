@@ -1,0 +1,13 @@
+{
+  "name": "verify-release-fixture",
+  "version": "1.2.3",
+  "type": "module",
+  "bin": {
+    "verify-release-fixture": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}

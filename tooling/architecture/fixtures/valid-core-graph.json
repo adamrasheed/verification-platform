@@ -1,0 +1,31 @@
+{
+  "expectValid": true,
+  "graph": {
+    "nodes": [
+      {
+        "id": "contracts",
+        "kind": "package",
+        "allowedDependencies": [],
+        "dependencies": [],
+        "externalDependencies": [],
+        "sourceImports": []
+      },
+      {
+        "id": "events",
+        "kind": "package",
+        "allowedDependencies": ["contracts"],
+        "dependencies": ["contracts"],
+        "externalDependencies": [],
+        "sourceImports": ["@verify-internal/contracts"]
+      },
+      {
+        "id": "cli",
+        "kind": "application",
+        "allowedDependencies": ["events"],
+        "dependencies": ["events"],
+        "externalDependencies": [],
+        "sourceImports": ["@verify-internal/events"]
+      }
+    ]
+  }
+}

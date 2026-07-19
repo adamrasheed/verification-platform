@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "fixture": true,
+  "evidenceId": "fixture:m0:repository-guardrails",
+  "taskId": "M0-T04",
+  "owner": "repository-architecture",
+  "governingClauses": ["EDD §33", "Roadmap M0-T04"],
+  "testIds": ["M0-EVIDENCE-001"],
+  "command": "npm run check:conformance",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/conformance/evidence.schema.json",
+      "digest": "sha256:f10d765ffdcef19fb95b430973c0031dbb3d03655c1e90ae67e647d1893f9746"
+    }
+  ]
+}

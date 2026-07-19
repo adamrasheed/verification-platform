@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "dist/cli.tsbuildinfo",
+    "types": ["node"],
+    "paths": {
+      "@verify-internal/engine": ["../../packages/engine/src/public/index.ts"],
+      "@verify-internal/protocol": ["../../packages/protocol/src/public/index.ts"]
+    }
+  },
+  "references": [
+    { "path": "../../packages/engine" },
+    { "path": "../../packages/protocol" }
+  ],
+  "include": ["src/**/*.ts"]
+}

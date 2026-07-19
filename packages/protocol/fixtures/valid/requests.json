@@ -1,0 +1,28 @@
+[
+  {
+    "schemaVersion": 1,
+    "command": "verify",
+    "invocationId": "request-verify",
+    "workspace": { "rootBinding": "workspace-1" },
+    "arguments": {},
+    "configurationReferences": [],
+    "policyReferences": [],
+    "consentGrantReferences": [],
+    "offline": true,
+    "deadlineMs": 600000,
+    "outputMode": "json",
+    "environment": { "platform": "test", "allowlistedBindings": [] }
+  },
+  {
+    "schemaVersion": 1,
+    "command": "getRun",
+    "invocationId": "request-get",
+    "arguments": { "runId": "run-1" },
+    "configurationReferences": [],
+    "policyReferences": [],
+    "consentGrantReferences": [],
+    "offline": true,
+    "outputMode": "json",
+    "environment": { "platform": "test", "allowlistedBindings": [] }
+  }
+]

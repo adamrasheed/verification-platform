@@ -1,0 +1,6 @@
+{
+  "name": "yarn-valid",
+  "private": true,
+  "packageManager": "yarn@4.9.2",
+  "workspaces": ["packages/*"]
+}

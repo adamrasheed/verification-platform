@@ -1,0 +1,41 @@
+[
+  {
+    "name": "explicit-repository-workspace",
+    "request": {
+      "kind": "workspace",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "source": "repository",
+        "repositoryId": "https://example.invalid/acme/repo"
+      }
+    },
+    "expected": "sid:workspace:9c7e3b27129316fcb523e41b18b81a86eb7322ba5a69de75f0339aadfff2e827"
+  },
+  {
+    "name": "application-relative-to-workspace",
+    "request": {
+      "kind": "application",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "workspaceId": "workspace:repo",
+        "root": "packages/api",
+        "packageIdentity": "@acme/api"
+      }
+    },
+    "expected": "sid:application:f4fb7f45f4b34500c74b242ee678f581785012deb94c8182cc7bda4ecefd30a4"
+  },
+  {
+    "name": "proof-evaluator-and-requirement",
+    "request": {
+      "kind": "proof",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "evaluatorId": "workspace.integrity",
+        "evaluatorVersion": "1.0.0",
+        "predicateLanguageRevision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "evidenceRequirementIdentity": "manifest-json:v1"
+      }
+    },
+    "expected": "sid:proof:7d9cf1224a3ce8f5185b1a8846e77e3550f66fe92efcd5b03107344c94f2cc7f"
+  }
+]

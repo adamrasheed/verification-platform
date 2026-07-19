@@ -1,0 +1,22 @@
+[
+  {
+    "name": "unknown operational status",
+    "expected": "incompatible_result",
+    "patch": { "operationalStatus": "successful" }
+  },
+  {
+    "name": "unknown verify outcome",
+    "expected": "incompatible_result",
+    "resultPatch": { "outcome": "probably_satisfied" }
+  },
+  {
+    "name": "completed without result",
+    "expected": "invalid",
+    "patch": { "result": null }
+  },
+  {
+    "name": "command/result mismatch",
+    "expected": "invalid",
+    "patch": { "command": "getPublishedRun" }
+  }
+]

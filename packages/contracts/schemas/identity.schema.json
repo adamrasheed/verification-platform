@@ -1,0 +1,90 @@
+{
+  "$id": "urn:verify:schema:contracts:identity:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Semantic and Ephemeral Identity Contracts",
+  "$defs": {
+    "semanticIdentityKind": {
+      "enum": [
+        "workspace",
+        "application",
+        "capability",
+        "promise",
+        "proof",
+        "discoverySignal",
+        "discoveryFact"
+      ]
+    },
+    "semanticIdRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "schemaVersion", "naturalKey"],
+          "properties": {
+            "kind": {"const": "workspace"},
+            "schemaVersion": {"type": "integer", "minimum": 1},
+            "naturalKey": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["source", "repositoryId"],
+                  "properties": {
+                    "source": {"const": "repository"},
+                    "repositoryId": {"type": "string", "minLength": 1}
+                  }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["source", "rootIdentityDigest", "vcsIdentityDigest"],
+                  "properties": {
+                    "source": {"const": "localVcs"},
+                    "rootIdentityDigest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+                    "vcsIdentityDigest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "schemaVersion", "naturalKey"],
+          "properties": {
+            "kind": {"const": "application"},
+            "schemaVersion": {"type": "integer", "minimum": 1},
+            "naturalKey": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["workspaceId", "root", "packageIdentity"],
+              "properties": {
+                "workspaceId": {"type": "string", "minLength": 1},
+                "root": {"type": "string", "pattern": "^(?:\\.|(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)\\.(?:/|$))(?!.*//).+)$"},
+                "packageIdentity": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "schemaVersion", "naturalKey"],
+          "properties": {
+            "kind": {"enum": ["capability", "promise", "proof", "discoverySignal", "discoveryFact"]},
+            "schemaVersion": {"type": "integer", "minimum": 1},
+            "naturalKey": {"type": "object"}
+          }
+        }
+      ]
+    },
+    "semanticId": {
+      "type": "string",
+      "pattern": "^sid:[A-Za-z]+:[a-f0-9]{64}$"
+    },
+    "ephemeralIdKind": {
+      "enum": ["invocation", "attempt", "event", "transport", "storage"]
+    }
+  }
+}

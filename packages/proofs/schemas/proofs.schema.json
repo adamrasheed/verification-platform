@@ -1,0 +1,56 @@
+{
+  "$id": "urn:verify:schema:proofs:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workspace Proof Registry and Aggregation",
+  "$defs": {
+    "predicateOperator": {
+      "enum": [
+        "manifest.structuralValidity",
+        "workspace.uniqueMembership",
+        "workspace.localDependencyReference",
+        "workspace.singleLockfileOwnership"
+      ]
+    },
+    "proofStatus": {
+      "enum": ["passed", "failed", "indeterminate", "error", "cancelled"]
+    },
+    "promiseStatus": {
+      "enum": ["satisfied", "violated", "indeterminate"]
+    },
+    "proofRegistration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proofId", "promiseId", "predicate", "predicateAst", "order", "required", "revision", "definition"],
+      "properties": {
+        "proofId": {"type": "string", "minLength": 1},
+        "promiseId": {"type": "string", "minLength": 1},
+        "predicate": {"$ref": "#/$defs/predicateOperator"},
+        "predicateAst": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schemaVersion", "operator", "arguments"],
+          "properties": {
+            "schemaVersion": {"const": 1},
+            "operator": {"$ref": "#/$defs/predicateOperator"},
+            "arguments": {"type": "array"}
+          }
+        },
+        "order": {"type": "integer", "minimum": 0},
+        "required": {"const": true},
+        "revision": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "definition": {"type": "object"}
+      }
+    },
+    "invocationAggregation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "promises", "reasonCodes", "resultDigest"],
+      "properties": {
+        "outcome": {"enum": ["satisfied", "violated", "indeterminate", "not_evaluated"]},
+        "promises": {"type": "array"},
+        "reasonCodes": {"type": "array", "items": {"type": "string"}},
+        "resultDigest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "npm-duplicate",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

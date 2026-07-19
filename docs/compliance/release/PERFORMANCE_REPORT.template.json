@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "performance",
+  "status": "pending",
+  "artifact": {
+    "command": "node tooling/conformance/benchmark.mjs",
+    "measurementSha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS"
+  },
+  "environment": {
+    "nodeVersion": "REPLACE",
+    "operatingSystem": "REPLACE",
+    "architecture": "REPLACE"
+  },
+  "measurements": {
+    "warmDiscovery100k": {
+      "samples": 0,
+      "medianMs": 0,
+      "p95Ms": 0,
+      "maximumMs": 0,
+      "budgetMs": 5000
+    }
+  },
+  "requirements": {
+    "warmDiscoveryP95Passed": false,
+    "coldVerifyP95Passed": false,
+    "cacheLookupP95Passed": false,
+    "cancellationWithinOneSecondPassed": false,
+    "firstProgressWithin250MsPassed": false,
+    "machineOutputBoundPassed": false,
+    "memoryBoundPassed": false
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "null",
+    "input": null,
+    "canonical": "null",
+    "sha256": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  {
+    "name": "object-order",
+    "input": {"b": 2, "a": 1},
+    "canonical": "{\"a\":1,\"b\":2}",
+    "sha256": "sha256:43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+  },
+  {
+    "name": "nested-and-negative-zero",
+    "input": {"z": [3, -0, true, null], "a": {"é": "😀", "control": "\b\n"}},
+    "canonical": "{\"a\":{\"control\":\"\\b\\n\",\"é\":\"😀\"},\"z\":[3,0,true,null]}",
+    "sha256": "sha256:c43d421f78e9939b90186420ea5251f9974d66a18bf0d83c1338fcce453493a2"
+  },
+  {
+    "name": "utf16-property-order",
+    "input": {"€": "euro", "\r": "control", "1": "ascii", "😀": "astral", "ö": "latin"},
+    "canonical": "{\"\\r\":\"control\",\"1\":\"ascii\",\"ö\":\"latin\",\"€\":\"euro\",\"😀\":\"astral\"}",
+    "sha256": "sha256:b93b58b931be916276d47187aa07df9fe6a93aff897616290abf05b025d0357d"
+  },
+  {
+    "name": "ecmascript-number-format",
+    "input": [1e+30, 0.002, 1e-7, 333333333.3333333],
+    "canonical": "[1e+30,0.002,1e-7,333333333.3333333]",
+    "sha256": "sha256:f276878873c8551efa7a0cccdde5de171116b52672d550e3e3cacdda5090860d"
+  }
+]

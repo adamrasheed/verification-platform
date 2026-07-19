@@ -1,0 +1,19 @@
+{
+  "expectValid": false,
+  "graph": {
+    "nodes": [
+      {
+        "id": "engine",
+        "kind": "package",
+        "allowedDependencies": ["cli"],
+        "dependencies": ["cli"]
+      },
+      {
+        "id": "cli",
+        "kind": "application",
+        "allowedDependencies": [],
+        "dependencies": []
+      }
+    ]
+  }
+}

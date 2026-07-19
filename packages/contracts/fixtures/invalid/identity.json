@@ -1,0 +1,38 @@
+[
+  {
+    "name": "absolute-checkout-path-is-not-a-natural-key",
+    "request": {
+      "kind": "application",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "workspaceId": "workspace:repo",
+        "root": "/Users/alice/repo/packages/api",
+        "packageIdentity": "@acme/api"
+      }
+    }
+  },
+  {
+    "name": "random-fallback-is-not-a-workspace-identity",
+    "request": {
+      "kind": "workspace",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "source": "repository",
+        "repositoryId": ""
+      }
+    }
+  },
+  {
+    "name": "proof-requires-an-exact-language-revision",
+    "request": {
+      "kind": "proof",
+      "schemaVersion": 1,
+      "naturalKey": {
+        "evaluatorId": "workspace.integrity",
+        "evaluatorVersion": "1.0.0",
+        "predicateLanguageRevision": "latest",
+        "evidenceRequirementIdentity": "manifest-json:v1"
+      }
+    }
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "operationalStatus": "completed",
+  "outcome": "violated",
+  "reasonCodes": ["DUPLICATE_WORKSPACE_NAME"]
+}

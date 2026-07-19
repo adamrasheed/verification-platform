@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification-platform.invalid/schemas/events/engine-unit-of-work.schema.json",
+  "title": "EngineUnitOfWorkCommit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "idempotencyKey",
+    "invocationId",
+    "expectedNextSequence",
+    "revisions",
+    "events",
+    "referenceEdges",
+    "currentRevisionMutations"
+  ],
+  "properties": {
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "invocationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "expectedNextSequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "revisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "id",
+          "revision",
+          "schemaVersion",
+          "payload"
+        ]
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "event-envelope.schema.json"
+      }
+    },
+    "referenceEdges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "relation",
+          "target"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "event-envelope.schema.json#/$defs/revisionRef"
+          },
+          "relation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "$ref": "event-envelope.schema.json#/$defs/revisionRef"
+          }
+        }
+      }
+    },
+    "currentRevisionMutations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slot",
+          "expectedCurrent",
+          "nextCurrent"
+        ],
+        "properties": {
+          "slot": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expectedCurrent": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "event-envelope.schema.json#/$defs/revisionRef"
+              }
+            ]
+          },
+          "nextCurrent": {
+            "$ref": "event-envelope.schema.json#/$defs/revisionRef"
+          }
+        }
+      }
+    }
+  }
+}

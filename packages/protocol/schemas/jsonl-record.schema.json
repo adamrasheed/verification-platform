@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/jsonl-record/v1",
+  "title": "JsonlRecordV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["schemaVersion", "recordType", "event"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": { "const": "event" },
+        "event": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["schemaVersion", "recordType", "envelope"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "recordType": { "const": "result" },
+        "envelope": { "$ref": "./command-envelope.schema.json" }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[
+  {"name": "wrong-binding-endpoint-kind", "mutation": "wrongKind", "code": "WRONG_REFERENCE_KIND"},
+  {"name": "dangling-binding-endpoint", "mutation": "dangling", "code": "DANGLING_BINDING"},
+  {"name": "cross-scope-binding", "mutation": "crossScope", "code": "CROSS_SCOPE_BINDING"},
+  {"name": "duplicate-association", "mutation": "duplicate", "code": "DUPLICATE_BINDING"},
+  {"name": "cyclic-proof-dependency", "mutation": "cycle", "code": "CYCLIC_PROOF_DEPENDENCY"},
+  {"name": "missing-promise-binding", "mutation": "missingBinding", "code": "MISSING_PROMISE_BINDING"},
+  {"name": "mutable-proof-alias", "mutation": "mutableAlias", "code": "INVALID_EXACT_REFERENCE"},
+  {"name": "inline-secret-in-manifest", "mutation": "inlineSecret", "code": "SECRET_FIELD_PROHIBITED"}
+]

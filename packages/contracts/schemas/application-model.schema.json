@@ -1,0 +1,254 @@
+{
+  "$id": "urn:verify:schema:contracts:application-model:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Application Model Graph Contracts",
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "opaqueId": {"type": "string", "minLength": 1, "maxLength": 512},
+    "revisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "revision", "schemaVersion"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "applicationModel", "application", "capability", "promise", "proof",
+            "promiseProofBinding", "providerBinding", "repairKnowledge", "policy",
+            "configuration", "executionContext", "executionPlan",
+            "executionManifest", "evidence", "repair", "discoverySignal",
+            "discoveryFact"
+          ]
+        },
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1}
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspaceId", "relativeRoot"],
+      "properties": {
+        "workspaceId": {"$ref": "#/$defs/opaqueId"},
+        "applicationId": {"$ref": "#/$defs/opaqueId"},
+        "relativeRoot": {
+          "type": "string",
+          "pattern": "^(?:\\.|(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)\\.(?:/|$))(?!.*//).+)$"
+        }
+      }
+    },
+    "schemaRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "schemaVersion", "revision"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "revision": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "artifactDigest"],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "version": {"type": "string", "minLength": 1},
+        "artifactDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer", "method", "inputs", "details"],
+      "properties": {
+        "producer": {"$ref": "#/$defs/producer"},
+        "method": {"type": "string", "minLength": 1},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "details": {"type": "array"}
+      }
+    },
+    "applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["language", "expression"],
+      "properties": {
+        "language": {"$ref": "#/$defs/schemaRef"},
+        "expression": {"type": ["array", "boolean", "null", "number", "object", "string"]}
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "workspaceId", "root",
+        "provenance", "extensions"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "workspaceId": {"$ref": "#/$defs/opaqueId"},
+        "root": {"type": "string", "pattern": "^(?:\\.|(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)\\.(?:/|$))(?!.*//).+)$"},
+        "packageIdentity": {"type": "string", "minLength": 1},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}},
+        "extensions": {"type": "array"}
+      }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "basis", "ruleId", "signalRefs"],
+      "properties": {
+        "value": {"type": "number", "minimum": 0, "maximum": 1},
+        "basis": {"enum": ["declared", "policy", "deterministic_rule", "heuristic"]},
+        "ruleId": {"type": "string", "minLength": 1},
+        "signalRefs": {"type": "array", "items": {"$ref": "#/$defs/opaqueId"}}
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "application", "type", "scope",
+        "activation", "confidence", "provenance", "extensions"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "application": {"$ref": "#/$defs/revisionRef"},
+        "type": {"type": "string", "minLength": 1},
+        "scope": {"$ref": "#/$defs/scope"},
+        "activation": {"enum": ["candidate", "active", "retired"]},
+        "confidence": {"$ref": "#/$defs/confidence"},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}},
+        "extensions": {"type": "array"}
+      }
+    },
+    "promise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "subject", "capability",
+        "predicate", "expected", "criticality", "provenanceKind",
+        "applicability", "provenance"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "subject": {"$ref": "#/$defs/revisionRef"},
+        "capability": {"$ref": "#/$defs/revisionRef"},
+        "predicate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["language", "operator", "arguments"],
+          "properties": {
+            "language": {"$ref": "#/$defs/schemaRef"},
+            "operator": {"type": "string", "minLength": 1},
+            "arguments": {"type": "array"}
+          }
+        },
+        "expected": {"type": ["array", "boolean", "null", "number", "object", "string"]},
+        "criticality": {"enum": ["required", "advisory"]},
+        "provenanceKind": {"enum": ["declared", "policy", "discovered"]},
+        "applicability": {"$ref": "#/$defs/applicability"},
+        "owner": {"type": "string", "minLength": 1},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "evaluator",
+        "predicateLanguage", "inputs", "evidenceRequirements", "dependencies",
+        "permissions", "reproducibility", "cachePolicy", "timeoutMs",
+        "retryPolicy", "applicability", "provenance"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "evaluator": {"$ref": "#/$defs/producer"},
+        "predicateLanguage": {"$ref": "#/$defs/schemaRef"},
+        "inputs": {"type": "array"},
+        "evidenceRequirements": {"type": "array"},
+        "dependencies": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "permissions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filesystem", "network", "subprocess", "secrets"],
+          "properties": {
+            "filesystem": {"type": "array"},
+            "network": {"type": "array"},
+            "subprocess": {"type": "boolean"},
+            "secrets": {"type": "array"}
+          }
+        },
+        "reproducibility": {"enum": ["hermetic", "replayable", "observational"]},
+        "cachePolicy": {"type": "object"},
+        "timeoutMs": {"type": "integer", "minimum": 0},
+        "retryPolicy": {"type": "object"},
+        "applicability": {"$ref": "#/$defs/applicability"},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+      }
+    },
+    "promiseProofBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "modelScope", "promise", "proof",
+        "requirement", "order", "applicability", "provenance"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "modelScope": {"$ref": "#/$defs/scope"},
+        "promise": {
+          "allOf": [
+            {"$ref": "#/$defs/revisionRef"},
+            {"properties": {"kind": {"const": "promise"}}}
+          ]
+        },
+        "proof": {
+          "allOf": [
+            {"$ref": "#/$defs/revisionRef"},
+            {"properties": {"kind": {"const": "proof"}}}
+          ]
+        },
+        "requirement": {"enum": ["required", "advisory"]},
+        "order": {"type": "integer", "minimum": 0},
+        "applicability": {"$ref": "#/$defs/applicability"},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+      }
+    },
+    "applicationModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "revision", "schemaVersion", "scope", "applications",
+        "capabilities", "promises", "proofs", "promiseProofBindings",
+        "providerBindings", "repairKnowledge", "provenance"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/opaqueId"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "scope": {"$ref": "#/$defs/scope"},
+        "applications": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "capabilities": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "promises": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "proofs": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "promiseProofBindings": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "providerBindings": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "repairKnowledge": {"type": "array", "items": {"$ref": "#/$defs/revisionRef"}},
+        "policyRevision": {"$ref": "#/$defs/revisionRef"},
+        "configurationRevision": {"$ref": "#/$defs/revisionRef"},
+        "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+      }
+    }
+  }
+}

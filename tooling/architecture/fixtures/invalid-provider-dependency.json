@@ -1,0 +1,14 @@
+{
+  "expectValid": false,
+  "graph": {
+    "nodes": [
+      {
+        "id": "engine",
+        "kind": "package",
+        "allowedDependencies": [],
+        "dependencies": [],
+        "externalDependencies": ["@octokit/rest"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "promise": {
+    "kind": "promise",
+    "id": "promise:test",
+    "revision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "schemaVersion": 1
+  },
+  "proof": {
+    "kind": "proof",
+    "id": "proof:test",
+    "revision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "schemaVersion": 1
+  },
+  "model": {
+    "kind": "applicationModel",
+    "id": "model:test",
+    "revision": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "schemaVersion": 1
+  },
+  "executionContext": {
+    "kind": "executionContext",
+    "id": "context:test",
+    "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "schemaVersion": 1
+  },
+  "evidence": {
+    "kind": "evidence",
+    "id": "evidence:test",
+    "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "schemaVersion": 1
+  }
+}

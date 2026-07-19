@@ -1,0 +1,17 @@
+{
+  "reason": "events in one invocation stream must use consecutive sequence values",
+  "mutations": [
+    {
+      "eventIndex": 1,
+      "sequence": 1
+    },
+    {
+      "eventIndex": 1,
+      "sequence": 3
+    },
+    {
+      "eventIndex": 0,
+      "sequence": 0
+    }
+  ]
+}

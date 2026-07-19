@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m4-persistence-repair",
+  "taskId": "M4-T01..M4-T11",
+  "owner": "execution-platform",
+  "governingClauses": ["Freeze §§8,10,13", "EDD §§12,20,21"],
+  "testIds": ["execution:14", "auth:3", "repair:3", "engine:20"],
+  "command": "npm run test:m4",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/execution/src/public/sqlite-unit-of-work.ts",
+      "digest": "sha256:bbb8303369cf721cf1f06b96a0e4a9223d80a598b8a0440b5ec26ea24a0e50d5"
+    }
+  ]
+}

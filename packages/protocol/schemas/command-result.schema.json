@@ -1,0 +1,481 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/command-result/v1",
+  "title": "CommandResultV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "kind",
+        "outcome",
+        "applicationModel",
+        "summary",
+        "promises",
+        "proofExecutions",
+        "evidence",
+        "repairs",
+        "executionManifests",
+        "cacheDecisions"
+      ],
+      "properties": {
+        "kind": { "const": "verify" },
+        "outcome": {
+          "enum": ["satisfied", "violated", "indeterminate", "not_evaluated"]
+        },
+        "partial": { "const": true },
+        "workspace": {
+          "type": "object",
+          "required": ["rootBinding", "modelRevision"],
+          "properties": {
+            "rootBinding": { "type": "string", "minLength": 1 },
+            "packageManager": { "enum": ["npm", "pnpm", "yarn"] },
+            "modelRevision": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "applicationModel": { "$ref": "#/$defs/revisionRef" },
+        "summary": { "type": "object" },
+        "promises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/localPromiseResult" }
+        },
+        "proofExecutions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/localProofExecution" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "evidenceRecords": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceRecord" }
+        },
+        "repairs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "repairRecords": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/repairRecord" }
+        },
+        "executionManifests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/executionManifest" }
+        },
+        "cacheDecisions": { "type": "array" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": [
+        "kind",
+        "dispatchId",
+        "state",
+        "workloadBinding",
+        "reasonCodes"
+      ],
+      "properties": {
+        "kind": { "const": "dispatchVerification" },
+        "dispatchId": { "type": "string", "minLength": 1 },
+        "state": {
+          "enum": [
+            "accepted",
+            "unavailable",
+            "unauthorized",
+            "expired",
+            "cancelled",
+            "transport_error"
+          ]
+        },
+        "workloadBinding": { "type": "string", "minLength": 1 },
+        "verifyInvocationId": { "type": "string", "minLength": 1 },
+        "publishedRunId": { "type": "string", "minLength": 1 },
+        "reasonCodes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    {
+      "$ref": "./published-verification.schema.json"
+    },
+    {
+      "type": "object",
+      "required": ["kind", "run"],
+      "properties": {
+        "kind": { "const": "getRun" },
+        "run": { "$ref": "./command-envelope.schema.json" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["kind", "run"],
+      "properties": {
+        "kind": { "const": "getPublishedRun" },
+        "run": { "$ref": "./published-verification.schema.json" }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "$defs": {
+    "revisionRef": {
+      "type": "object",
+      "required": ["kind", "id", "revision", "schemaVersion"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "id": { "type": "string", "minLength": 1 },
+        "revision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "schemaVersion": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "proofAttemptRef": {
+      "type": "object",
+      "required": ["attemptId", "proof", "invocationId"],
+      "properties": {
+        "attemptId": { "type": "string", "minLength": 1 },
+        "proof": { "$ref": "#/$defs/revisionRef" },
+        "invocationId": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "localPromiseResult": {
+      "type": "object",
+      "required": ["promise", "status", "proofAttempts", "evidence", "reasonCodes"],
+      "properties": {
+        "promise": { "$ref": "#/$defs/revisionRef" },
+        "status": { "enum": ["satisfied", "violated", "indeterminate"] },
+        "proofAttempts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/proofAttemptRef" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "localProofResult": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status", "evidence"],
+          "properties": {
+            "status": { "const": "passed" },
+            "evidence": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/revisionRef" }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status", "evidence", "reasonCodes"],
+          "properties": {
+            "status": { "enum": ["failed", "indeterminate"] },
+            "evidence": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/revisionRef" }
+            },
+            "reasonCodes": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status", "error"],
+          "properties": {
+            "status": { "const": "error" },
+            "error": {
+              "type": "object",
+              "required": ["code", "message"],
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status", "reason"],
+          "properties": {
+            "status": { "const": "cancelled" },
+            "reason": { "enum": ["caller", "deadline", "shutdown"] }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "localProofExecution": {
+      "type": "object",
+      "required": [
+        "attemptId",
+        "attemptRef",
+        "proof",
+        "promise",
+        "model",
+        "executionContext",
+        "planKey",
+        "executionManifest",
+        "state",
+        "effective",
+        "evidence"
+      ],
+      "properties": {
+        "attemptId": { "type": "string", "minLength": 1 },
+        "attemptRef": { "$ref": "#/$defs/proofAttemptRef" },
+        "proof": { "$ref": "#/$defs/revisionRef" },
+        "promise": { "$ref": "#/$defs/revisionRef" },
+        "model": { "$ref": "#/$defs/revisionRef" },
+        "executionContext": { "$ref": "#/$defs/revisionRef" },
+        "planKey": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "executionManifest": { "$ref": "#/$defs/revisionRef" },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "passed",
+            "failed",
+            "indeterminate",
+            "error",
+            "cancelled"
+          ]
+        },
+        "effective": { "type": "boolean" },
+        "startedAt": { "type": "string" },
+        "completedAt": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "result": { "$ref": "#/$defs/localProofResult" },
+        "resultDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "attemptRecordDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "producerRef": {
+      "type": "object",
+      "required": ["id", "version", "artifactDigest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string" },
+        "artifactDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "executionManifest": {
+      "type": "object",
+      "required": [
+        "id",
+        "revision",
+        "schemaVersion",
+        "engine",
+        "applicationModel",
+        "promises",
+        "proof",
+        "pluginsAndTools",
+        "source",
+        "configurationDigest",
+        "policyDigest",
+        "platform",
+        "authenticationBindingIds",
+        "isolation",
+        "discoveryOutputDigest",
+        "executionPlan",
+        "executionPlanDigest"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "revision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "schemaVersion": { "type": "integer", "minimum": 1 },
+        "engine": { "$ref": "#/$defs/producerRef" },
+        "applicationModel": { "$ref": "#/$defs/revisionRef" },
+        "promises": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "proof": { "$ref": "#/$defs/revisionRef" },
+        "pluginsAndTools": { "type": "array", "items": { "type": "object" } },
+        "source": {
+          "type": "object",
+          "required": ["inputDigest", "repositoryState"],
+          "properties": {
+            "inputDigest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            "repositoryState": { "enum": ["clean", "dirty", "unknown"] }
+          },
+          "additionalProperties": false
+        },
+        "configurationDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "policyDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "platform": { "type": "object" },
+        "authenticationBindingIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "isolation": { "type": "object" },
+        "discoveryOutputDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "executionPlan": { "$ref": "#/$defs/revisionRef" },
+        "executionPlanDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidenceRecord": {
+      "type": "object",
+      "required": [
+        "id",
+        "revision",
+        "schemaVersion",
+        "evidenceType",
+        "mediaType",
+        "producer",
+        "captureMethod",
+        "capturedAt",
+        "attempt",
+        "subjects",
+        "inputRefs",
+        "contentDigest",
+        "byteSize",
+        "classification",
+        "chainOfCustody",
+        "supersedes"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "revision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "schemaVersion": { "type": "integer", "minimum": 1 },
+        "evidenceType": { "type": "string" },
+        "mediaType": { "type": "string" },
+        "producer": { "$ref": "#/$defs/producerRef" },
+        "captureMethod": { "type": "string" },
+        "capturedAt": { "type": "string" },
+        "attempt": { "$ref": "#/$defs/proofAttemptRef" },
+        "subjects": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "inputRefs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "contentDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "byteSize": { "type": "integer", "minimum": 0 },
+        "classification": {
+          "enum": [
+            "SECRET",
+            "LOCAL_SOURCE",
+            "SENSITIVE_EVIDENCE",
+            "MINIMAL_METADATA",
+            "EXPLICIT_SHARE"
+          ]
+        },
+        "chainOfCustody": { "type": "array", "items": { "type": "object" } },
+        "supersedes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "repairRecord": {
+      "type": "object",
+      "required": [
+        "id",
+        "revision",
+        "schemaVersion",
+        "motivatingPromise",
+        "motivatingExecution",
+        "evidence",
+        "generator",
+        "action",
+        "assumptions",
+        "requiredPermissions",
+        "expectedEffect",
+        "confidence",
+        "verificationPlan"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "revision": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "schemaVersion": { "type": "integer", "minimum": 1 },
+        "motivatingPromise": { "$ref": "#/$defs/revisionRef" },
+        "motivatingExecution": { "$ref": "#/$defs/proofAttemptRef" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/revisionRef" }
+        },
+        "generator": { "$ref": "#/$defs/producerRef" },
+        "action": { "type": "object" },
+        "assumptions": { "type": "array", "items": { "type": "string" } },
+        "requiredPermissions": { "type": "object" },
+        "expectedEffect": { "type": "string" },
+        "confidence": { "type": "object" },
+        "verificationPlan": { "$ref": "#/$defs/revisionRef" },
+        "llmGeneration": { "type": "object" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

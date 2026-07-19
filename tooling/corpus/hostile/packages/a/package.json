@@ -1,0 +1,5 @@
+{
+  "name": "@fixture/hostile-a",
+  "version": "1.0.0",
+  "token": "SECRET_CANARY_DO_NOT_LEAK"
+}

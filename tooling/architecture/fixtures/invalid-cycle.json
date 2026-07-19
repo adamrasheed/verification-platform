@@ -1,0 +1,19 @@
+{
+  "expectValid": false,
+  "graph": {
+    "nodes": [
+      {
+        "id": "a",
+        "kind": "package",
+        "allowedDependencies": ["b"],
+        "dependencies": ["b"]
+      },
+      {
+        "id": "b",
+        "kind": "package",
+        "allowedDependencies": ["a"],
+        "dependencies": ["a"]
+      }
+    ]
+  }
+}

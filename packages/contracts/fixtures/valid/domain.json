@@ -1,0 +1,186 @@
+{
+  "model": {
+    "id": "model:workspace",
+    "revision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "schemaVersion": 1,
+    "scope": {"workspaceId": "workspace:repo", "applicationId": "app:api", "relativeRoot": "packages/api"},
+    "applications": [
+      {"kind": "application", "id": "app:api", "revision": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "schemaVersion": 1}
+    ],
+    "capabilities": [
+      {"kind": "capability", "id": "cap:integrity", "revision": "sha256:3333333333333333333333333333333333333333333333333333333333333333", "schemaVersion": 1}
+    ],
+    "promises": [
+      {"kind": "promise", "id": "promise:valid-manifest", "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "schemaVersion": 1}
+    ],
+    "proofs": [
+      {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1}
+    ],
+    "promiseProofBindings": [
+      {"kind": "promiseProofBinding", "id": "binding:manifest", "revision": "sha256:6666666666666666666666666666666666666666666666666666666666666666", "schemaVersion": 1}
+    ],
+    "providerBindings": [],
+    "repairKnowledge": [],
+    "provenance": []
+  },
+  "promise": {
+    "id": "promise:valid-manifest",
+    "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "schemaVersion": 1,
+    "subject": {"kind": "application", "id": "app:api", "revision": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "schemaVersion": 1},
+    "capability": {"kind": "capability", "id": "cap:integrity", "revision": "sha256:3333333333333333333333333333333333333333333333333333333333333333", "schemaVersion": 1},
+    "predicate": {
+      "language": {"id": "predicate.workspace", "schemaVersion": 1, "revision": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+      "operator": "manifest.structurallyValid",
+      "arguments": []
+    },
+    "expected": true,
+    "criticality": "required",
+    "provenanceKind": "declared",
+    "applicability": {
+      "language": {"id": "applicability.core", "schemaVersion": 1, "revision": "sha256:8888888888888888888888888888888888888888888888888888888888888888"},
+      "expression": true
+    },
+    "provenance": []
+  },
+  "proof": {
+    "id": "proof:valid-manifest",
+    "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "schemaVersion": 1,
+    "evaluator": {"id": "engine:manifest-evaluator", "version": "1.0.0", "artifactDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"},
+    "predicateLanguage": {"id": "predicate.workspace", "schemaVersion": 1, "revision": "sha256:7777777777777777777777777777777777777777777777777777777777777777"},
+    "inputs": [],
+    "evidenceRequirements": [
+      {
+        "identity": "manifest-json:v1",
+        "evidenceType": "workspace.manifest",
+        "mediaTypes": ["application/json"],
+        "minimumCount": 1,
+        "validationSchema": {"id": "manifest-observation", "schemaVersion": 1, "revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+      }
+    ],
+    "dependencies": [],
+    "permissions": {"filesystem": [], "network": [], "subprocess": false, "secrets": []},
+    "reproducibility": "hermetic",
+    "cachePolicy": {"mode": "content_addressed"},
+    "timeoutMs": 1000,
+    "retryPolicy": {"maximumAttempts": 1, "retryableOperations": []},
+    "applicability": {
+      "language": {"id": "applicability.core", "schemaVersion": 1, "revision": "sha256:8888888888888888888888888888888888888888888888888888888888888888"},
+      "expression": true
+    },
+    "provenance": []
+  },
+  "binding": {
+    "id": "binding:manifest",
+    "revision": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "schemaVersion": 1,
+    "modelScope": {"workspaceId": "workspace:repo", "applicationId": "app:api", "relativeRoot": "packages/api"},
+    "promise": {"kind": "promise", "id": "promise:valid-manifest", "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "schemaVersion": 1},
+    "proof": {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1},
+    "requirement": "required",
+    "order": 0,
+    "applicability": {
+      "language": {"id": "applicability.core", "schemaVersion": 1, "revision": "sha256:8888888888888888888888888888888888888888888888888888888888888888"},
+      "expression": true
+    },
+    "provenance": []
+  },
+  "evidence": {
+    "id": "evidence:manifest",
+    "revision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "schemaVersion": 1,
+    "evidenceType": "workspace.manifest",
+    "mediaType": "application/json",
+    "producer": {"id": "engine:manifest-reader", "version": "1.0.0", "artifactDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+    "captureMethod": "passive-json-read",
+    "capturedAt": "2026-07-18T20:00:00Z",
+    "attempt": {
+      "attemptId": "attempt:1",
+      "proof": {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1},
+      "invocationId": "invocation:1"
+    },
+    "subjects": [
+      {"kind": "application", "id": "app:api", "revision": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "schemaVersion": 1}
+    ],
+    "inputRefs": [],
+    "contentDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "byteSize": 42,
+    "classification": "LOCAL_SOURCE",
+    "chainOfCustody": [
+      {
+        "sequence": 0,
+        "action": "captured",
+        "actor": {"id": "engine:manifest-reader", "version": "1.0.0", "artifactDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+        "outputDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "occurredAt": "2026-07-18T20:00:00Z"
+      }
+    ],
+    "supersedes": []
+  },
+  "repair": {
+    "id": "repair:manifest",
+    "revision": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "schemaVersion": 1,
+    "motivatingPromise": {"kind": "promise", "id": "promise:valid-manifest", "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "schemaVersion": 1},
+    "motivatingExecution": {
+      "attemptId": "attempt:1",
+      "proof": {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1},
+      "invocationId": "invocation:1"
+    },
+    "evidence": [
+      {"kind": "evidence", "id": "evidence:manifest", "revision": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "schemaVersion": 1}
+    ],
+    "generator": {"id": "engine:repair-rule", "version": "1.0.0", "artifactDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+    "action": {
+      "kind": "jsonPatch",
+      "target": "packages/api/package.json",
+      "expectedContentDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "operations": [{"operation": "replace", "pointer": "/name", "value": "@acme/api"}]
+    },
+    "assumptions": ["package identity is intended"],
+    "requiredPermissions": {"filesystem": [], "network": [], "subprocess": false, "secrets": []},
+    "expectedEffect": "manifest structural proof can be re-evaluated",
+    "confidence": {"value": 1, "basis": "deterministic_rule", "ruleId": "repair.manifest.name", "signalRefs": []},
+    "verificationPlan": {"kind": "executionPlan", "id": "plan:verify-repair", "revision": "sha256:1212121212121212121212121212121212121212121212121212121212121212", "schemaVersion": 1}
+  },
+  "plan": {
+    "id": "plan:verify",
+    "revision": "sha256:1313131313131313131313131313131313131313131313131313131313131313",
+    "schemaVersion": 1,
+    "applicationModel": {"kind": "applicationModel", "id": "model:workspace", "revision": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "schemaVersion": 1},
+    "executionContext": {"kind": "executionContext", "id": "context:local", "revision": "sha256:1414141414141414141414141414141414141414141414141414141414141414", "schemaVersion": 1},
+    "proofs": [
+      {
+        "binding": {"kind": "promiseProofBinding", "id": "binding:manifest", "revision": "sha256:6666666666666666666666666666666666666666666666666666666666666666", "schemaVersion": 1},
+        "promise": {"kind": "promise", "id": "promise:valid-manifest", "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "schemaVersion": 1},
+        "proof": {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1},
+        "requirement": "required",
+        "order": 0,
+        "dependencyProofs": []
+      }
+    ],
+    "discoveryOutputDigest": "sha256:1515151515151515151515151515151515151515151515151515151515151515"
+  },
+  "manifest": {
+    "id": "manifest:attempt-1",
+    "revision": "sha256:1616161616161616161616161616161616161616161616161616161616161616",
+    "schemaVersion": 1,
+    "engine": {"id": "engine:core", "version": "1.0.0", "artifactDigest": "sha256:1717171717171717171717171717171717171717171717171717171717171717"},
+    "applicationModel": {"kind": "applicationModel", "id": "model:workspace", "revision": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "schemaVersion": 1},
+    "promises": [
+      {"kind": "promise", "id": "promise:valid-manifest", "revision": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "schemaVersion": 1}
+    ],
+    "proof": {"kind": "proof", "id": "proof:valid-manifest", "revision": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "schemaVersion": 1},
+    "pluginsAndTools": [],
+    "source": {"inputDigest": "sha256:1818181818181818181818181818181818181818181818181818181818181818", "repositoryState": "clean"},
+    "configurationDigest": "sha256:1919191919191919191919191919191919191919191919191919191919191919",
+    "policyDigest": "sha256:2020202020202020202020202020202020202020202020202020202020202020",
+    "platform": {"operatingSystem": "test-os", "architecture": "test-arch", "runtimeVersions": [], "toolchainVersions": []},
+    "authenticationBindingIds": [],
+    "isolation": {"filesystem": {"mode": "read-only"}, "network": {"mode": "none"}, "clock": {"mode": "fixed"}, "randomness": {"mode": "none"}, "enforcementTier": "passive-engine"},
+    "discoveryOutputDigest": "sha256:1515151515151515151515151515151515151515151515151515151515151515",
+    "executionPlan": {"kind": "executionPlan", "id": "plan:verify", "revision": "sha256:1313131313131313131313131313131313131313131313131313131313131313", "schemaVersion": 1},
+    "executionPlanDigest": "sha256:1313131313131313131313131313131313131313131313131313131313131313"
+  }
+}

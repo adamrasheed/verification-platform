@@ -1,0 +1,5 @@
+{
+  "operationalStatus": "completed",
+  "outcome": "violated",
+  "reasonCodes": ["INVALID_PACKAGE_JSON"]
+}

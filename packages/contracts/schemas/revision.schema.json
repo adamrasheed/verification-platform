@@ -1,0 +1,70 @@
+{
+  "$id": "urn:verify:schema:contracts:revision:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Immutable Revision Documents and Exact References",
+  "$defs": {
+    "domainObjectKind": {
+      "enum": [
+        "applicationModel",
+        "application",
+        "capability",
+        "promise",
+        "proof",
+        "promiseProofBinding",
+        "providerBinding",
+        "repairKnowledge",
+        "policy",
+        "configuration",
+        "executionContext",
+        "executionPlan",
+        "executionManifest",
+        "evidence",
+        "repair",
+        "discoverySignal",
+        "discoveryFact"
+      ]
+    },
+    "revisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "revision", "schemaVersion"],
+      "properties": {
+        "kind": {"$ref": "#/$defs/domainObjectKind"},
+        "id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "revision": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "schemaVersion": {"type": "integer", "minimum": 1}
+      }
+    },
+    "revisionDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "revision", "schemaVersion", "payload"],
+      "properties": {
+        "kind": {"$ref": "#/$defs/domainObjectKind"},
+        "id": {"type": "string", "minLength": 1, "maxLength": 512},
+        "revision": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+        "schemaVersion": {"type": "integer", "minimum": 1},
+        "payload": {"type": ["array", "boolean", "null", "number", "object", "string"]}
+      }
+    },
+    "revisionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document", "createdAt"],
+      "properties": {
+        "document": {"$ref": "#/$defs/revisionDocument"},
+        "createdAt": {"type": "string", "format": "date-time", "pattern": "Z$"}
+      }
+    },
+    "publishedObjectRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objectType", "publicationId", "tenantBinding"],
+      "properties": {
+        "objectType": {"type": "string", "minLength": 1},
+        "publicationId": {"type": "string", "minLength": 1, "maxLength": 512},
+        "tenantBinding": {"type": "string", "minLength": 1, "maxLength": 512}
+      }
+    }
+  }
+}

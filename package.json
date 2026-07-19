@@ -1,0 +1,43 @@
+{
+  "name": "verification-platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.9.3",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "check:inventory": "node tooling/architecture/check-inventory.mjs",
+    "check:architecture": "node tooling/architecture/check-boundaries.mjs",
+    "check:schemas": "node tooling/schema/generate.mjs --check && node tooling/schema/check-package-schemas.mjs",
+    "check:conformance": "node tooling/conformance/check-evidence.mjs",
+    "check:package-content": "node tooling/release/check-package-content.mjs",
+    "check:compliance": "node tooling/conformance/check-compliance.mjs",
+    "check:offline": "node tooling/conformance/check-offline.mjs",
+    "check:performance": "node tooling/conformance/benchmark.mjs",
+    "check:corpus": "node tooling/conformance/run-mvp-corpus.mjs",
+    "check:release-tools": "node tooling/release/test-release-tools.mjs",
+    "check:release-pack": "node tooling/release/audit-pack.mjs apps/cli",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:packages": "npm run test --workspaces --if-present",
+    "test:contracts": "npm run test --workspace @verify-internal/contracts",
+    "test:m0": "npm run check:inventory && npm run check:architecture && npm run check:schemas && npm run check:conformance && npm run check:package-content && npm run check:compliance",
+    "test:m1": "npm run test:m0 && npm run typecheck && npm run test --workspace @verify-internal/contracts && npm run test --workspace @verify-internal/events && npm run test --workspace @verify-internal/protocol",
+    "test:m2": "npm run test:m1 && npm run test --workspace @verify-internal/discovery && npm run test --workspace @verify-internal/proofs",
+    "test:m3": "npm run test:m2 && npm run test --workspace @verify-internal/evidence && npm run test --workspace @verify-internal/engine",
+    "test:m4": "npm run test:m3 && npm run test --workspace @verify-internal/auth && npm run test --workspace @verify-internal/execution && npm run test --workspace @verify-internal/repair",
+    "test:m5": "npm run test:m4 && npm run test --workspace verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
+    "test": "npm run test:m5"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.6",
+    "esbuild": "0.25.6",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "allowedPackedPathPrefixes": ["dist/", "schemas/", "README.md", "package.json"],
+  "forbiddenLifecycleScripts": ["preinstall", "install", "postinstall"],
+  "forbiddenProductionDependencyPrefixes": [
+    "@octokit/",
+    "@aws-sdk/",
+    "@google-cloud/",
+    "stripe",
+    "axios",
+    "got",
+    "node-fetch",
+    "undici"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "$id": "urn:verify:conformance:evidence-record:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conformance Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "taskId",
+    "owner",
+    "governingClauses",
+    "testIds",
+    "command",
+    "outcome",
+    "artifacts"
+  ]
+}

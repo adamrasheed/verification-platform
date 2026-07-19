@@ -1,0 +1,11 @@
+operational status: completed
+verification outcome: satisfied
+application model: model:test@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+required promises:
+  - promise:test — proof:test: passed
+evidence references:
+  - evidence:test@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+next actions:
+  (none)
+cache: miss
+invocation: invocation:test

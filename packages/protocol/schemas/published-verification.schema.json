@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/published-verification/v1",
+  "title": "PublishedVerificationV1",
+  "description": "Closed Freeze 11.3 allowlist projection",
+  "type": "object",
+  "required": [
+    "kind",
+    "purpose",
+    "tenantId",
+    "projectId",
+    "runId",
+    "idempotencyKey",
+    "applicationModel",
+    "operationalStatus",
+    "outcome",
+    "engine",
+    "protocolVersion",
+    "plugins",
+    "promises",
+    "proofs",
+    "evidence",
+    "summary",
+    "auditCorrelationId",
+    "retentionClass"
+  ],
+  "properties": {
+    "kind": { "const": "publishedVerification" },
+    "purpose": { "type": "string" },
+    "tenantId": { "type": "string" },
+    "projectId": { "type": "string" },
+    "runId": { "type": "string" },
+    "idempotencyKey": { "type": "string" },
+    "applicationModel": { "$ref": "#/$defs/publishedObjectRef" },
+    "operationalStatus": {
+      "enum": ["completed", "invalid", "blocked", "cancelled", "internal_error"]
+    },
+    "outcome": {
+      "enum": ["satisfied", "violated", "indeterminate", "not_evaluated"]
+    },
+    "engine": { "$ref": "#/$defs/artifact" },
+    "protocolVersion": { "type": "integer", "minimum": 1 },
+    "plugins": { "type": "array", "items": { "$ref": "#/$defs/artifact" } },
+    "promises": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["promise", "status", "reasonCodes"],
+        "properties": {
+          "promise": { "$ref": "#/$defs/publishedObjectRef" },
+          "status": { "enum": ["satisfied", "violated", "indeterminate"] },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["proof", "status", "reasonCodes"],
+        "properties": {
+          "proof": { "$ref": "#/$defs/publishedObjectRef" },
+          "status": {
+            "enum": ["passed", "failed", "indeterminate", "error", "cancelled"]
+          },
+          "reasonCodes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "durationMs": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "evidence",
+          "evidenceType",
+          "byteSize",
+          "sensitivityClass"
+        ],
+        "properties": {
+          "evidence": { "$ref": "#/$defs/publishedObjectRef" },
+          "evidenceType": { "type": "string" },
+          "byteSize": { "type": "integer", "minimum": 0 },
+          "sensitivityClass": {
+            "enum": [
+              "LOCAL_SOURCE",
+              "SENSITIVE_EVIDENCE",
+              "MINIMAL_METADATA",
+              "EXPLICIT_SHARE"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["promiseCount", "proofCount", "evidenceCount", "durationMs"],
+      "properties": {
+        "promiseCount": { "type": "integer", "minimum": 0 },
+        "proofCount": { "type": "integer", "minimum": 0 },
+        "evidenceCount": { "type": "integer", "minimum": 0 },
+        "durationMs": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "applicationAlias": { "type": "string" },
+    "auditCorrelationId": { "type": "string" },
+    "retentionClass": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "publishedObjectRef": {
+      "type": "object",
+      "required": ["objectType", "publicationId", "tenantBinding"],
+      "properties": {
+        "objectType": { "type": "string" },
+        "publicationId": { "type": "string" },
+        "tenantBinding": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["id", "version", "artifactDigest"],
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "string" },
+        "artifactDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

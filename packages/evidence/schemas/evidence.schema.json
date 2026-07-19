@@ -1,0 +1,62 @@
+{
+  "$id": "urn:verify:schema:evidence:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Normalized Workspace Evidence and Validation Decision",
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspaceBinding", "evidenceType", "mediaType", "observations",
+        "lockfiles", "packageManagers", "completion", "diagnostics"
+      ],
+      "properties": {
+        "workspaceBinding": {"type": "string", "minLength": 1},
+        "evidenceType": {"const": "workspace.manifest-observations"},
+        "mediaType": {"const": "application/vnd.verify.workspace-observations+json"},
+        "observations": {"type": "array"},
+        "lockfiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "packageManagers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["npm", "pnpm", "yarn"]}
+        },
+        "completion": {"enum": ["complete", "bounded", "cancelled", "error"]},
+        "diagnostics": {"type": "array"}
+      }
+    },
+    "normalizedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion", "id", "revision", "evidenceType", "mediaType",
+        "contentDigest", "byteSize", "classification", "body", "redactions"
+      ],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "id": {"type": "string", "pattern": "^evidence:[a-f0-9]{64}$"},
+        "revision": {"$ref": "#/$defs/digest"},
+        "evidenceType": {"const": "workspace.manifest-observations"},
+        "mediaType": {"const": "application/vnd.verify.workspace-observations+json"},
+        "contentDigest": {"$ref": "#/$defs/digest"},
+        "byteSize": {"type": "integer", "minimum": 0},
+        "classification": {"enum": ["LOCAL_SOURCE", "SENSITIVE_EVIDENCE", "MINIMAL_METADATA"]},
+        "body": {"type": ["array", "boolean", "null", "number", "object", "string"]},
+        "redactions": {"type": "integer", "minimum": 0}
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "evidenceRevision", "state", "reasonCodes", "validationDigest"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "evidenceRevision": {"$ref": "#/$defs/digest"},
+        "state": {"enum": ["valid", "rejected"]},
+        "reasonCodes": {"type": "array", "items": {"type": "string"}},
+        "validationDigest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

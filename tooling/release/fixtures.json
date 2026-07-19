@@ -1,0 +1,41 @@
+[
+  {
+    "name": "valid-minimal-package",
+    "expectValid": true,
+    "manifest": {
+      "name": "@verify-internal/contracts",
+      "version": "0.0.0",
+      "files": ["dist", "schemas", "README.md"]
+    },
+    "packedFiles": ["package.json", "README.md", "dist/index.js", "schemas/model.json"]
+  },
+  {
+    "name": "reject-lifecycle-script",
+    "expectValid": false,
+    "manifest": {
+      "name": "bad",
+      "scripts": {"postinstall": "node install.js"},
+      "files": ["dist"]
+    },
+    "packedFiles": ["package.json", "dist/index.js"]
+  },
+  {
+    "name": "reject-provider-sdk",
+    "expectValid": false,
+    "manifest": {
+      "name": "bad",
+      "dependencies": {"@octokit/rest": "1.0.0"},
+      "files": ["dist"]
+    },
+    "packedFiles": ["package.json", "dist/index.js"]
+  },
+  {
+    "name": "reject-undeclared-packed-file",
+    "expectValid": false,
+    "manifest": {
+      "name": "bad",
+      "files": ["dist"]
+    },
+    "packedFiles": ["package.json", "dist/index.js", "src/secret.ts"]
+  }
+]

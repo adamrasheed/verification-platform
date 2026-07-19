@@ -1,0 +1,12 @@
+operational status: completed
+verification outcome: violated
+application model: model:test@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+required promises:
+  - promise:test — proof:test: failed
+      reason: TEST_VIOLATION
+evidence references:
+  - evidence:test@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+next actions:
+  - repair:test: replace_ambiguous_range
+cache: miss
+invocation: invocation:test

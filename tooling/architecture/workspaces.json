@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "packageNamePrefix": "@verify-internal/",
+  "entries": [
+    {
+      "id": "contracts",
+      "path": "packages/contracts",
+      "kind": "package",
+      "owner": "domain-contracts",
+      "milestone": "M1",
+      "state": "active",
+      "allowedDependencies": [],
+      "governingClauses": ["Freeze §5", "Shared Contracts §Frozen package boundaries"]
+    },
+    {
+      "id": "events",
+      "path": "packages/events",
+      "kind": "package",
+      "owner": "domain-contracts",
+      "milestone": "M1",
+      "state": "active",
+      "allowedDependencies": ["contracts"],
+      "governingClauses": ["Freeze §16", "Shared Contracts §Event envelope"]
+    },
+    {
+      "id": "discovery",
+      "path": "packages/discovery",
+      "kind": "package",
+      "owner": "core-engine",
+      "milestone": "M2",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §7", "EDD §7"]
+    },
+    {
+      "id": "proofs",
+      "path": "packages/proofs",
+      "kind": "package",
+      "owner": "core-engine",
+      "milestone": "M2",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §§5.4–5.6", "EDD §§9–10"]
+    },
+    {
+      "id": "evidence",
+      "path": "packages/evidence",
+      "kind": "package",
+      "owner": "core-engine",
+      "milestone": "M3",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §5.7", "EDD §11"]
+    },
+    {
+      "id": "repair",
+      "path": "packages/repair",
+      "kind": "package",
+      "owner": "core-engine",
+      "milestone": "M4",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §5.8", "EDD §12"]
+    },
+    {
+      "id": "execution",
+      "path": "packages/execution",
+      "kind": "package",
+      "owner": "execution-platform",
+      "milestone": "M4",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §§8, 13", "EDD §§20–21"]
+    },
+    {
+      "id": "auth",
+      "path": "packages/auth",
+      "kind": "package",
+      "owner": "security",
+      "milestone": "M4",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §10", "EDD §§24–25"]
+    },
+    {
+      "id": "engine",
+      "path": "packages/engine",
+      "kind": "package",
+      "owner": "core-engine",
+      "milestone": "M4",
+      "state": "active",
+      "allowedDependencies": [
+        "contracts",
+        "events",
+        "discovery",
+        "proofs",
+        "evidence",
+        "repair",
+        "execution",
+        "auth"
+      ],
+      "governingClauses": ["Freeze §6", "EDD §5"]
+    },
+    {
+      "id": "protocol",
+      "path": "packages/protocol",
+      "kind": "package",
+      "owner": "domain-contracts",
+      "milestone": "M1",
+      "state": "active",
+      "allowedDependencies": ["contracts", "events"],
+      "governingClauses": ["Freeze §12", "EDD §16"]
+    },
+    {
+      "id": "cli",
+      "path": "apps/cli",
+      "kind": "application",
+      "owner": "developer-experience",
+      "milestone": "M5",
+      "state": "active",
+      "allowedDependencies": ["engine", "protocol"],
+      "governingClauses": ["Freeze §4", "EDD §15"]
+    }
+  ],
+  "prohibitedProductionDependencies": [
+    "@octokit/",
+    "@aws-sdk/",
+    "@google-cloud/",
+    "stripe",
+    "axios",
+    "got",
+    "node-fetch",
+    "undici"
+  ]
+}

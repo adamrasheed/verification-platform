@@ -1,0 +1,13 @@
+{
+  "actual": {
+    "currentMajor": 1,
+    "supported": [1],
+    "unsupported": [2]
+  },
+  "syntheticNextRelease": {
+    "currentMajor": 2,
+    "previousMajor": 1,
+    "current": { "schemaVersion": 2, "value": "current" },
+    "previous": { "schemaVersion": 1, "value": "previous" }
+  }
+}

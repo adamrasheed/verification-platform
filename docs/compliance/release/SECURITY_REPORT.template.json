@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "kind": "security",
+  "status": "pending",
+  "gates": [
+    {
+      "id": "M5-T06-MVP-CORPUS",
+      "command": "node tooling/conformance/run-mvp-corpus.mjs",
+      "status": "pending",
+      "stdoutSha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS"
+    },
+    {
+      "id": "M5-T07-OFFLINE-PASSIVE",
+      "command": "node tooling/conformance/check-offline.mjs",
+      "status": "pending",
+      "stdoutSha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS"
+    },
+    {
+      "id": "M5-T07-SECRET-CANARIES",
+      "command": "node tooling/conformance/run-mvp-corpus.mjs",
+      "status": "pending",
+      "stdoutSha256": "sha256:REPLACE_WITH_64_HEX_CHARACTERS"
+    }
+  ],
+  "claims": {
+    "zeroEngineNetwork": false,
+    "zeroRepositoryExecution": false,
+    "zeroCanaryLeakage": false,
+    "hostileCorpusPassed": false
+  }
+}

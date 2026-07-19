@@ -1,0 +1,12 @@
+[
+  {
+    "name": "unpaired-high-surrogate",
+    "input": "\ud800",
+    "code": "INVALID_STRING"
+  },
+  {
+    "name": "unpaired-low-surrogate",
+    "input": "\udc00",
+    "code": "INVALID_STRING"
+  }
+]

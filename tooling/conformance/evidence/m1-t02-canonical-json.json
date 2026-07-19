@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "m1-t02:canonical-json:2026-07-18",
+  "taskId": "M1-T02",
+  "owner": "domain-contracts",
+  "governingClauses": [
+    "Architecture Freeze §5.2",
+    "Shared Contracts §Identity and semantic comparison",
+    "Roadmap M1-T02"
+  ],
+  "testIds": [
+    "M1-CANONICAL-001",
+    "M1-CANONICAL-002",
+    "M1-CANONICAL-003"
+  ],
+  "command": "npm run test:m1",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/contracts/src/public/canonical-json.ts",
+      "digest": "sha256:87d7d937829f0b001c3b90737a72e7c26b1b9123a78ed64c25f6264c8cf870d6"
+    },
+    {
+      "path": "packages/contracts/fixtures/valid/canonical-json.json",
+      "digest": "sha256:8df60a429f8bb44993c706369504c7d58e38189f18d30ef0900d26c22e58b675"
+    }
+  ]
+}
