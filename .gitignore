@@ -1,5 +1,9 @@
 node_modules/
 dist/
+!tooling/release/test-fixtures/good/dist/
+!tooling/release/test-fixtures/good/dist/bin.js
+!tooling/release/test-fixtures/bad-lifecycle/dist/
+!tooling/release/test-fixtures/bad-lifecycle/dist/install.js
 coverage/
 *.log
 .DS_Store
