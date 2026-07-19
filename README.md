@@ -1,5 +1,9 @@
 # Verification Platform
 
+[![CI](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml)
+[![npm](https://img.shields.io/npm/v/%40adamrasheed%2Fverify)](https://www.npmjs.com/package/@adamrasheed/verify)
+
 Verification infrastructure for modern software.
 
 Applications make promises. Proofs verify promises. Evidence supports proofs.
@@ -20,6 +24,14 @@ frozen architectural concept. Changes require an accepted
 ## Run locally
 
 Requires Node.js 22.5 or newer.
+
+Run the published CLI:
+
+```sh
+npx @adamrasheed/verify@0.1.0 verify .
+```
+
+Or work from source:
 
 ```sh
 npm install
