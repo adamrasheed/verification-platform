@@ -114,3 +114,112 @@ export function repairApplyCliPolicy(
     grants: ["workspace.read", "history.read", "workspace.write"],
   };
 }
+
+export interface PluginOperationAuthorizationRequest {
+  readonly pluginId: string;
+  readonly operationId: string;
+  readonly destinationIds: readonly string[];
+  readonly secretReferenceIds: readonly string[];
+  readonly filesystemReadRoots: readonly string[];
+  readonly filesystemWriteRoots: readonly string[];
+  readonly subprocess: boolean;
+  readonly sideEffects: readonly string[];
+  readonly enforcementTier: string;
+  readonly expiresAt: string;
+}
+
+export interface PluginAuthorityPolicy {
+  readonly principalId: string;
+  readonly pluginIds: readonly string[];
+  readonly destinationIds: readonly string[];
+  readonly secretReferenceIds: readonly string[];
+  readonly filesystemReadRoots: readonly string[];
+  readonly allowFilesystemWrite: boolean;
+  readonly allowSubprocess: boolean;
+  readonly allowedSideEffects: readonly string[];
+  readonly enforcementTiers: readonly string[];
+  readonly maximumExpiresAt: string;
+}
+
+export type PluginAuthorizationDecision =
+  | {
+      readonly allowed: true;
+      readonly authorizationId: string;
+      readonly principalId: string;
+      readonly grant: PluginOperationAuthorizationRequest;
+    }
+  | {
+      readonly allowed: false;
+      readonly reasonCode:
+        | "UNAUTHENTICATED"
+        | "NO_EXTERNAL_GRANT"
+        | "PLUGIN_DENIED"
+        | "DESTINATION_DENIED"
+        | "SECRET_DENIED"
+        | "FILESYSTEM_DENIED"
+        | "SUBPROCESS_DENIED"
+        | "SIDE_EFFECT_DENIED"
+        | "ENFORCEMENT_TIER_DENIED"
+        | "EXPIRY_DENIED";
+    };
+
+function subset(requested: readonly string[], allowed: readonly string[]): boolean {
+  return requested.every((value) => allowed.includes(value));
+}
+
+export function authorizePluginOperation(
+  principal: LocalPrincipal,
+  request: PluginOperationAuthorizationRequest,
+  policy: PluginAuthorityPolicy | undefined,
+  authorizationId: string,
+  now: Date,
+): PluginAuthorizationDecision {
+  if (!principal.authenticated) return { allowed: false, reasonCode: "UNAUTHENTICATED" };
+  if (!policy || policy.principalId !== principal.id) {
+    return { allowed: false, reasonCode: "NO_EXTERNAL_GRANT" };
+  }
+  if (!policy.pluginIds.includes(request.pluginId)) {
+    return { allowed: false, reasonCode: "PLUGIN_DENIED" };
+  }
+  if (!subset(request.destinationIds, policy.destinationIds)) {
+    return { allowed: false, reasonCode: "DESTINATION_DENIED" };
+  }
+  if (!subset(request.secretReferenceIds, policy.secretReferenceIds)) {
+    return { allowed: false, reasonCode: "SECRET_DENIED" };
+  }
+  if (
+    !subset(request.filesystemReadRoots.map(normalizedRoot), policy.filesystemReadRoots.map(normalizedRoot))
+    || (request.filesystemWriteRoots.length > 0 && !policy.allowFilesystemWrite)
+  ) return { allowed: false, reasonCode: "FILESYSTEM_DENIED" };
+  if (request.subprocess && !policy.allowSubprocess) {
+    return { allowed: false, reasonCode: "SUBPROCESS_DENIED" };
+  }
+  if (!subset(request.sideEffects, policy.allowedSideEffects)) {
+    return { allowed: false, reasonCode: "SIDE_EFFECT_DENIED" };
+  }
+  if (!policy.enforcementTiers.includes(request.enforcementTier)) {
+    return { allowed: false, reasonCode: "ENFORCEMENT_TIER_DENIED" };
+  }
+  const expiry = Date.parse(request.expiresAt);
+  const maximum = Date.parse(policy.maximumExpiresAt);
+  if (
+    !Number.isFinite(expiry)
+    || !Number.isFinite(maximum)
+    || expiry <= now.getTime()
+    || expiry > maximum
+  ) return { allowed: false, reasonCode: "EXPIRY_DENIED" };
+  if (!authorizationId) return { allowed: false, reasonCode: "NO_EXTERNAL_GRANT" };
+  return {
+    allowed: true,
+    authorizationId,
+    principalId: principal.id,
+    grant: {
+      ...request,
+      destinationIds: [...request.destinationIds],
+      secretReferenceIds: [...request.secretReferenceIds],
+      filesystemReadRoots: request.filesystemReadRoots.map(normalizedRoot),
+      filesystemWriteRoots: request.filesystemWriteRoots.map(normalizedRoot),
+      sideEffects: [...request.sideEffects],
+    },
+  };
+}

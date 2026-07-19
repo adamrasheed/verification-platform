@@ -57,4 +57,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`workspace inventory valid: ${registry.entries.length} MVP entries, 0 future workspaces enabled`);
+const planned = registry.entries.filter((entry) => entry.state === "planned").length;
+console.log(
+  `workspace inventory valid: ${registry.entries.length} entries, ${planned} planned workspace(s)`,
+);

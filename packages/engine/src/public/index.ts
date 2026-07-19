@@ -39,6 +39,10 @@ import {
   type CanonicalRuntimeRecords,
 } from "./canonical-runtime.js";
 export { deriveCanonicalPromiseEvaluation } from "./canonical-runtime.js";
+export {
+  createEnginePluginRuntime,
+  createEngineProviderEgressBroker,
+} from "./plugin-services.js";
 
 export const ENGINE_VERSION = "0.2.0";
 export const ENGINE_ARTIFACT_DIGEST: `sha256:${string}` = `sha256:${createHash("sha256")

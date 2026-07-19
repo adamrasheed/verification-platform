@@ -1,5 +1,5 @@
 {
-  "name": "@verify-internal/engine",
+  "name": "@verify-internal/plugin-runtime",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,18 +8,16 @@
     ".": {
       "types": "./dist/public/index.d.ts",
       "default": "./dist/public/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
     }
   },
   "dependencies": {
     "@verify-internal/auth": "0.0.0",
     "@verify-internal/contracts": "0.0.0",
-    "@verify-internal/discovery": "0.0.0",
-    "@verify-internal/evidence": "0.0.0",
-    "@verify-internal/events": "0.0.0",
-    "@verify-internal/execution": "0.0.0",
-    "@verify-internal/plugin-runtime": "0.0.0",
-    "@verify-internal/proofs": "0.0.0",
-    "@verify-internal/repair": "0.0.0"
+    "@verify-internal/plugin-sdk": "0.0.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
