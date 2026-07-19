@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace @verify-internal/contracts && npm run build --workspace @verify-internal/auth && npm run build --workspace @verify-internal/discovery && npm run build --workspace @verify-internal/events && npm run build --workspace @verify-internal/evidence && npm run build --workspace @verify-internal/proofs && npm run build --workspace @verify-internal/repair && npm run build --workspace @verify-internal/execution && npm run build --workspace @verify-internal/protocol && npm run build --workspace @verify-internal/engine && npm run build --workspace @adamrasheed/verify",
     "check:inventory": "node tooling/architecture/check-inventory.mjs",
     "check:architecture": "node tooling/architecture/check-boundaries.mjs",
     "check:schemas": "node tooling/schema/generate.mjs --check && node tooling/schema/check-package-schemas.mjs",
@@ -33,7 +33,7 @@
     "test:m3": "npm run test:m2 && npm run test --workspace @verify-internal/evidence && npm run test --workspace @verify-internal/engine",
     "test:m4": "npm run test:m3 && npm run test --workspace @verify-internal/auth && npm run test --workspace @verify-internal/execution && npm run test --workspace @verify-internal/repair",
     "test:m5": "npm run test:m4 && npm run test --workspace @adamrasheed/verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
-    "test": "npm run test:m5"
+    "test": "npm run build && npm run test:m5"
   },
   "devDependencies": {
     "@types/node": "22.18.6",
