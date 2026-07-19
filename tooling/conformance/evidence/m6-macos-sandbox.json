@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-macos-sandbox",
+  "taskId": "M6-T06-macos-development",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§10.5,11.5,18", "EDD §§13,25,27"],
+  "testIds": ["plugin-runtime:11", "native-macos:1"],
+  "command": "npm run test --workspace @verify-internal/plugin-runtime",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/native/macos/VerifyPluginHost.swift",
+      "digest": "sha256:35945d9d1bce53ca2ca8452520a6dc26df1c6bc0678f64558b02bf45aa9dbaa5"
+    },
+    {
+      "path": "tooling/native/macos/verify-plugin-host.entitlements",
+      "digest": "sha256:efbc1d43dd7a1663d975e57df88684389d9eb76407aea6c409bb9d24eac9bc4c"
+    },
+    {
+      "path": "tooling/native/macos/verify-plugin-helper.entitlements",
+      "digest": "sha256:7bee30cad2286eec319f1e7bf942b967eaea693982bc974e9f09d98562da7776"
+    },
+    {
+      "path": "packages/plugin-runtime/src/public/macos-sandbox.ts",
+      "digest": "sha256:c4b3537208ca5384eafd7d11fee1122644029d3163abdc7adb3781daeb88194f"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "digest": "sha256:702d63e32874e31fdd6ee586dd70e3f74fb3350ebfcfdf12ceb1fb0a3573f513"
+    }
+  ]
+}

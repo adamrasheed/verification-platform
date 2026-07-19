@@ -32,6 +32,12 @@ export type {
   SandboxProcessExit,
 } from "./sandbox.js";
 export {
+  createMacOsAppSandboxLauncher,
+} from "./macos-sandbox.js";
+export type {
+  MacOsAppSandboxLauncherOptions,
+} from "./macos-sandbox.js";
+export {
   ProviderPluginRuntime,
 } from "./runtime.js";
 export type {

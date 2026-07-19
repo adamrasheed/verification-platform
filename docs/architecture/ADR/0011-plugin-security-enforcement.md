@@ -33,6 +33,14 @@ the effective tier is `unavailable` and dynamic execution fails closed. Test
 launchers use the visibly non-production `conformance-process-v1` tier and
 cannot satisfy a production authorization.
 
+The first macOS implementation packages a sandboxed background application and
+an inherited Node helper. Exact artifact bytes enter through a dedicated pipe,
+are rehashed and staged inside the application container, and execute with an
+empty environment and Node capability restrictions. Ad hoc signing is accepted
+only by the non-production development tier. Production remains unavailable
+until Developer ID identities and code-directory hashes are pinned and a hard
+memory supervisor passes its canary.
+
 Distributable plugins require:
 
 - an exact SHA-256 artifact digest;
