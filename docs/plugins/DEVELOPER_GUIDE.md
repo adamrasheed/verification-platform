@@ -72,3 +72,8 @@ conformance gates.
 Production dynamic execution is currently unavailable until the signed native
 sandbox host for the current platform passes ADR-0011. Do not instruct users to
 override this gate.
+
+The macOS development tier uses an App Sandbox application with an inherited
+Node helper. It is continuously exercised with ad hoc signatures, but cannot
+satisfy production authorization. Developer ID signatures, pinned host/helper
+code-directory hashes, and the hard memory canary remain release gates.

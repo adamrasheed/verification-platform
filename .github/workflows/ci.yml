@@ -41,3 +41,26 @@ jobs:
 
       - name: Run conformance suite
         run: npm test
+
+  native-macos:
+    name: Native macOS sandbox
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Run native sandbox conformance
+        run: npm run test --workspace @verify-internal/plugin-runtime

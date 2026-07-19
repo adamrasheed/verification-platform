@@ -199,6 +199,7 @@ export function invocation(manifest, {
   secretReferenceIds = [],
   allowLocalDevelopment = false,
   signal = new AbortController().signal,
+  enforcementTier = "conformance-process-v1",
 } = {}) {
   const expiresAt = new Date(Date.now() + deadlineMs + 1000).toISOString();
   const authorization = authorizePluginOperation(
@@ -212,7 +213,7 @@ export function invocation(manifest, {
       filesystemWriteRoots: [],
       subprocess: false,
       sideEffects: [],
-      enforcementTier: "conformance-process-v1",
+      enforcementTier,
       expiresAt,
     },
     {
@@ -224,7 +225,7 @@ export function invocation(manifest, {
       allowFilesystemWrite: false,
       allowSubprocess: false,
       allowedSideEffects: [],
-      enforcementTiers: ["conformance-process-v1"],
+      enforcementTiers: [enforcementTier],
       maximumExpiresAt: expiresAt,
     },
     "authorization:plugin-test",

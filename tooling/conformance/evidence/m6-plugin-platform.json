@@ -10,7 +10,7 @@
   "artifacts": [
     {
       "path": "docs/architecture/ADR/0011-plugin-security-enforcement.md",
-      "digest": "sha256:307f90bf5b22b5ced9b2355fce793dabb3c554a9b3ff5d1a857c86487757b7c0"
+      "digest": "sha256:a31fbd99144608e85bb2171665375852326ffe6bc951ea34073387d8708d1673"
     },
     {
       "path": "packages/plugin-sdk/src/public/manifest.ts",

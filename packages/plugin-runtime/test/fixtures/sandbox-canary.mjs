@@ -1,0 +1,69 @@
+import childProcess from "node:child_process";
+import fs from "node:fs";
+import net from "node:net";
+import readline from "node:readline";
+
+const lines = readline.createInterface({ input: process.stdin });
+
+function attempt(action) {
+  try {
+    action();
+    return "ALLOWED";
+  } catch (error) {
+    return error?.code ?? "DENIED";
+  }
+}
+
+async function networkAttempt() {
+  return new Promise((resolve) => {
+    const socket = net.connect({ host: "1.1.1.1", port: 443 });
+    const timer = setTimeout(() => {
+      socket.destroy();
+      resolve("TIMEOUT");
+    }, 1000);
+    socket.once("connect", () => {
+      clearTimeout(timer);
+      socket.destroy();
+      resolve("ALLOWED");
+    });
+    socket.once("error", (error) => {
+      clearTimeout(timer);
+      resolve(error.code ?? "DENIED");
+    });
+  });
+}
+
+for await (const line of lines) {
+  const message = JSON.parse(line);
+  if (message.messageType === "handshake.request") {
+    process.stdout.write(`${JSON.stringify({
+      protocolVersion: "1.0",
+      messageType: "handshake.response",
+      requestId: message.requestId,
+      payload: {
+        pluginId: "synthetic-sandbox",
+        selectedVersion: { major: 1, minor: 0 },
+      },
+    })}\n`);
+  }
+  if (message.messageType === "operation.request") {
+    const result = {
+      filesystem: attempt(() => fs.readFileSync("/etc/hosts")),
+      subprocess: attempt(() => childProcess.execFileSync("/bin/echo", ["unsafe"])),
+      network: await networkAttempt(),
+    };
+    process.stdout.write(`${JSON.stringify({
+      protocolVersion: "1.0",
+      messageType: "contribution",
+      requestId: message.requestId,
+      payload: result,
+    })}\n`);
+    process.stdout.write(`${JSON.stringify({
+      protocolVersion: "1.0",
+      messageType: "complete",
+      requestId: message.requestId,
+      payload: {},
+    })}\n`);
+  }
+  if (message.messageType === "cancel.request") process.exit(0);
+}
