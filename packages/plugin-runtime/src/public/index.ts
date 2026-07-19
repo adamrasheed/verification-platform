@@ -30,6 +30,7 @@ export type {
   SandboxLauncher,
   SandboxProcess,
   SandboxProcessExit,
+  SandboxResourceLimits,
 } from "./sandbox.js";
 export {
   createMacOsAppSandboxLauncher,

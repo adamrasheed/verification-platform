@@ -200,6 +200,11 @@ export function invocation(manifest, {
   allowLocalDevelopment = false,
   signal = new AbortController().signal,
   enforcementTier = "conformance-process-v1",
+  resourceLimits = {
+    maximumMemoryBytes: 0,
+    maximumCpuNanoseconds: 0,
+    maximumPluginProcesses: 0,
+  },
 } = {}) {
   const expiresAt = new Date(Date.now() + deadlineMs + 1000).toISOString();
   const authorization = authorizePluginOperation(
@@ -214,6 +219,7 @@ export function invocation(manifest, {
       subprocess: false,
       sideEffects: [],
       enforcementTier,
+      ...resourceLimits,
       expiresAt,
     },
     {
@@ -226,6 +232,7 @@ export function invocation(manifest, {
       allowSubprocess: false,
       allowedSideEffects: [],
       enforcementTiers: [enforcementTier],
+      ...resourceLimits,
       maximumExpiresAt: expiresAt,
     },
     "authorization:plugin-test",
@@ -243,6 +250,11 @@ export function invocation(manifest, {
       deadline: new Date(Date.now() + deadlineMs).toISOString(),
       cancellationRequestId: "cancellation:1",
       enforcementTier: "caller-value-must-not-win",
+      resourceLimits: {
+        maximumMemoryBytes: 0,
+        maximumCpuNanoseconds: 0,
+        maximumPluginProcesses: 0,
+      },
       grantedDestinationIds: destinationIds,
       secretReferenceIds,
       input: { repositoryBinding: "opaque:repository" },

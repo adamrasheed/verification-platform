@@ -29,6 +29,7 @@ export type {
   PluginMessage,
   PluginMessageType,
   PluginOperationRequest,
+  PluginResourceLimits,
   ProviderRequestPayload,
   ProviderResponsePayload,
 } from "./protocol.js";

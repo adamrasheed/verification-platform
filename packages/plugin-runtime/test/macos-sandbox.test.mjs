@@ -34,12 +34,20 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
   });
   assert.equal(await sandbox.available(), true);
   assert.equal(sandbox.production, false);
+  const productionIdentity = createMacOsAppSandboxLauncher({ appBundlePath });
+  assert.equal(productionIdentity.production, true);
+  assert.equal(await productionIdentity.available(), false);
+  const authorizedInvocation = (manifest, options = {}, launcher = sandbox) =>
+    invocation(manifest, {
+      ...options,
+      enforcementTier: launcher.enforcementTier,
+      resourceLimits: launcher.resourceLimits,
+    });
 
   const fast = await signedManifest("fast.mjs", "synthetic-fast");
   const baseBroker = brokerHarness();
   const runtime = runtimeHarness(baseBroker.broker, { sandbox });
-  const fastResult = await runtime.invoke(invocation(fast, {
-    enforcementTier: "macos-app-sandbox-development-v1",
+  const fastResult = await runtime.invoke(authorizedInvocation(fast, {
     deadlineMs: 10_000,
   }));
   assert.equal(fastResult.contributions[0].behavior, "fast");
@@ -50,8 +58,7 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
   });
   const provider = brokerHarness();
   const brokeredResult = await runtimeHarness(provider.broker, { sandbox }).invoke(
-    invocation(brokered, {
-      enforcementTier: "macos-app-sandbox-development-v1",
+    authorizedInvocation(brokered, {
       destinationIds: ["api"],
       secretReferenceIds: ["secret:provider"],
       deadlineMs: 10_000,
@@ -62,20 +69,55 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
 
   const slow = await signedManifest("slow.mjs", "synthetic-slow");
   await assert.rejects(
-    runtime.invoke(invocation(slow, {
-      enforcementTier: "macos-app-sandbox-development-v1",
+    runtime.invoke(authorizedInvocation(slow, {
       deadlineMs: 250,
     })),
     (error) => error.code === "VFY_PLUGIN_DEADLINE",
   );
 
   const manifest = await signedManifest("sandbox-canary.mjs", "synthetic-sandbox");
-  const result = await runtime.invoke(invocation(manifest, {
-    enforcementTier: "macos-app-sandbox-development-v1",
+  const result = await runtime.invoke(authorizedInvocation(manifest, {
     deadlineMs: 10_000,
   }));
   assert.equal(result.contributions.length, 1);
   assert.equal(result.contributions[0].filesystem, "ERR_ACCESS_DENIED");
   assert.equal(result.contributions[0].subprocess, "ERR_ACCESS_DENIED");
   assert.match(result.contributions[0].network, /^(?:EPERM|EACCES)$/);
+
+  const memoryFlood = await signedManifest(
+    "memory-flood.mjs",
+    "synthetic-memory-flood",
+  );
+  await assert.rejects(
+    runtime.invoke(authorizedInvocation(memoryFlood, {
+      deadlineMs: 10_000,
+    })),
+    (error) => error.code === "VFY_PLUGIN_RESOURCE_EXHAUSTED",
+  );
+
+  const cpuSandbox = createMacOsAppSandboxLauncher({
+    appBundlePath,
+    allowDevelopmentSignature: true,
+    maximumCpuNanoseconds: 1_000_000_000,
+  });
+  const cpuFlood = await signedManifest("cpu-flood.mjs", "synthetic-cpu-flood");
+  await assert.rejects(
+    runtimeHarness(brokerHarness().broker, { sandbox: cpuSandbox }).invoke(
+      authorizedInvocation(cpuFlood, {
+        deadlineMs: 10_000,
+      }, cpuSandbox),
+    ),
+    (error) => error.code === "VFY_PLUGIN_RESOURCE_EXHAUSTED",
+  );
+
+  const stderrFlood = await signedManifest(
+    "stderr-flood.mjs",
+    "synthetic-stderr-flood",
+  );
+  await assert.rejects(
+    runtime.invoke(authorizedInvocation(stderrFlood, {
+      deadlineMs: 10_000,
+    })),
+    (error) => error.code === "VFY_PLUGIN_STDERR_OVERSIZED",
+  );
 });

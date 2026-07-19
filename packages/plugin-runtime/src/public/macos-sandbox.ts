@@ -22,6 +22,9 @@ export interface MacOsAppSandboxLauncherOptions {
   readonly expectedTeamIdentifier?: string;
   readonly expectedHostCdHash?: string;
   readonly expectedHelperCdHash?: string;
+  readonly expectedSupervisorCdHash?: string;
+  readonly maximumMemoryBytes?: number;
+  readonly maximumCpuNanoseconds?: number;
   readonly allowDevelopmentSignature?: boolean;
 }
 
@@ -31,6 +34,7 @@ interface CodeIdentity {
   readonly cdHash: string;
   readonly authority: string | undefined;
   readonly entitlements: string;
+  readonly hardenedRuntime: boolean;
 }
 
 async function inspectCodeIdentity(executable: string): Promise<CodeIdentity> {
@@ -50,6 +54,7 @@ async function inspectCodeIdentity(executable: string): Promise<CodeIdentity> {
     cdHash,
     authority: value.match(/^Authority=(.+)$/m)?.[1],
     entitlements: value,
+    hardenedRuntime: /^CodeDirectory .+\([^)]*runtime[^)]*\)/m.test(value),
   };
 }
 
@@ -80,27 +85,40 @@ async function verifyBundle(
       options.appBundlePath,
       "Contents/Helpers/node",
     );
-    const [host, helper] = await Promise.all([
+    const supervisorPath = path.join(
+      options.appBundlePath,
+      "Contents/Helpers/VerifyPluginSupervisor",
+    );
+    const [host, helper, supervisor] = await Promise.all([
       inspectCodeIdentity(hostPath),
       inspectCodeIdentity(helperPath),
+      inspectCodeIdentity(supervisorPath),
     ]);
     if (
       host.identifier !== "dev.verify.plugin-host"
       || helper.identifier !== "dev.verify.plugin-host.node"
+      || supervisor.identifier !== "dev.verify.plugin-supervisor"
       || !hasTrueEntitlement(host, "com.apple.security.app-sandbox")
       || !hasTrueEntitlement(helper, "com.apple.security.app-sandbox")
       || !hasTrueEntitlement(helper, "com.apple.security.inherit")
       || !hasTrueEntitlement(helper, "com.apple.security.cs.allow-jit")
+      || hasTrueEntitlement(supervisor, "com.apple.security.app-sandbox")
+      || !host.hardenedRuntime
+      || !helper.hardenedRuntime
+      || !supervisor.hardenedRuntime
     ) return false;
     if (options.allowDevelopmentSignature) return true;
     return (
       typeof options.expectedTeamIdentifier === "string"
       && host.teamIdentifier === options.expectedTeamIdentifier
       && helper.teamIdentifier === options.expectedTeamIdentifier
+      && supervisor.teamIdentifier === options.expectedTeamIdentifier
       && host.authority?.startsWith("Developer ID Application:") === true
       && helper.authority?.startsWith("Developer ID Application:") === true
+      && supervisor.authority?.startsWith("Developer ID Application:") === true
       && host.cdHash === options.expectedHostCdHash
       && helper.cdHash === options.expectedHelperCdHash
+      && supervisor.cdHash === options.expectedSupervisorCdHash
     );
   } catch {
     return false;
@@ -129,11 +147,28 @@ function signalProcessGroup(
 export function createMacOsAppSandboxLauncher(
   options: MacOsAppSandboxLauncherOptions,
 ): SandboxLauncher {
-  const production = false;
-  const enforcementTier = "macos-app-sandbox-development-v1";
+  const production = options.allowDevelopmentSignature !== true;
+  const enforcementTier = production
+    ? "macos-app-sandbox-v1"
+    : "macos-app-sandbox-development-v1";
+  const maximumMemoryBytes = options.maximumMemoryBytes ?? 256 * 1024 * 1024;
+  const maximumCpuNanoseconds =
+    options.maximumCpuNanoseconds ?? 30 * 1_000_000_000;
+  if (
+    !Number.isSafeInteger(maximumMemoryBytes)
+    || maximumMemoryBytes < 64 * 1024 * 1024
+    || !Number.isSafeInteger(maximumCpuNanoseconds)
+    || maximumCpuNanoseconds < 1_000_000_000
+  ) throw new TypeError("macOS sandbox resource limits are invalid");
+  const resourceLimits = {
+    maximumMemoryBytes,
+    maximumCpuNanoseconds,
+    maximumPluginProcesses: 1,
+  } as const;
   return {
     production,
     enforcementTier,
+    resourceLimits,
     async available(): Promise<boolean> {
       return verifyBundle(options);
     },
@@ -148,9 +183,16 @@ export function createMacOsAppSandboxLauncher(
       const digest = `sha256:${createHash("sha256").update(artifact).digest("hex")}`;
       const executable = path.join(
         options.appBundlePath,
-        "Contents/MacOS/VerifyPluginHost",
+        "Contents/Helpers/VerifyPluginSupervisor",
       );
-      const child = spawn(executable, ["--artifact-digest", digest], {
+      const child = spawn(executable, [
+        "--artifact-digest",
+        digest,
+        "--maximum-memory-bytes",
+        String(maximumMemoryBytes),
+        "--maximum-cpu-nanoseconds",
+        String(maximumCpuNanoseconds),
+      ], {
         detached: true,
         env: {},
         stdio: ["pipe", "pipe", "pipe", "pipe"],
@@ -185,7 +227,12 @@ export function createMacOsAppSandboxLauncher(
           signalProcessGroup(child, "SIGTERM");
         },
         kill(): void {
-          signalProcessGroup(child, "SIGKILL");
+          signalProcessGroup(child, "SIGTERM");
+          const timer = setTimeout(
+            () => signalProcessGroup(child, "SIGKILL"),
+            50,
+          );
+          timer.unref();
         },
       };
     },

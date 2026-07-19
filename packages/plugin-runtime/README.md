@@ -14,4 +14,10 @@ JIT-entitled Node helper. The Engine sends exact digest-pinned artifact bytes
 over a dedicated inherited pipe; the helper receives an empty environment and
 Node capability restrictions while App Sandbox denies raw network and
 workspace access. It remains a non-production tier until distribution signing
-and a hard memory supervisor pass conformance.
+is available.
+
+The separate native supervisor sees only process identity and configured
+limits. It enforces physical-memory and CPU budgets, propagates cancellation to
+the sandbox tree, and maps exhaustion to a typed runtime error. A production
+launcher becomes available only when Developer ID authority, Team ID, hardened
+runtime, and exact supervisor/host/helper code-directory hashes all match.

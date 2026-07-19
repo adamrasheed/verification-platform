@@ -90,6 +90,15 @@ process.standardError = FileHandle.standardError
 
 do {
   try process.run()
+  let helperIdentifier = Data("\(process.processIdentifier)\n".utf8)
+  let pidWriteResult = helperIdentifier.withUnsafeBytes { bytes in
+    write(4, bytes.baseAddress, bytes.count)
+  }
+  close(4)
+  if pidWriteResult != helperIdentifier.count {
+    process.terminate()
+    fail("could not publish the helper identity")
+  }
   process.waitUntilExit()
   if process.terminationReason == .uncaughtSignal {
     raise(process.terminationStatus)

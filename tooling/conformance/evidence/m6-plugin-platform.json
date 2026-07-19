@@ -4,21 +4,25 @@
   "taskId": "M6-T01..M6-T05,M6-T08",
   "owner": "plugin-platform",
   "governingClauses": ["Freeze §§9–11,18", "EDD §§13,25,27"],
-  "testIds": ["plugin-sdk:5", "plugin-runtime:10", "auth:5"],
+  "testIds": ["plugin-sdk:5", "plugin-runtime:11", "auth:5"],
   "command": "npm test",
   "outcome": "passed",
   "artifacts": [
     {
       "path": "docs/architecture/ADR/0011-plugin-security-enforcement.md",
-      "digest": "sha256:a31fbd99144608e85bb2171665375852326ffe6bc951ea34073387d8708d1673"
+      "digest": "sha256:c67414b038ad274bfeb088096b7ad3ebe2ca36635585a4b887c8257486c28c7a"
     },
     {
       "path": "packages/plugin-sdk/src/public/manifest.ts",
       "digest": "sha256:b9785077a888f0fa30b5ace06cd097941e5010b90e16a0bd59d95d98b0e92344"
     },
     {
+      "path": "packages/plugin-sdk/src/public/protocol.ts",
+      "digest": "sha256:f57dc1749eb6eabf2b5dccd879b1df3f76d640310432141a058f48aaa8b86c40"
+    },
+    {
       "path": "packages/plugin-runtime/src/public/runtime.ts",
-      "digest": "sha256:57bf855a638987be24ad2e421543bc15276bf3c26405277e3664cc3c8856c8e0"
+      "digest": "sha256:0acd9b3314768c212768a0d5324b5d6a94eeb5d738031668e7bbf9d9d9844a69"
     },
     {
       "path": "packages/plugin-runtime/src/public/broker.ts",
@@ -26,7 +30,7 @@
     },
     {
       "path": "packages/auth/src/public/index.ts",
-      "digest": "sha256:d362ab8c37d6d5bd4cb3171c5dec1c48d7eedcf5a87d4ba79281a3d63eb7d7ea"
+      "digest": "sha256:cc9cabd727141c42b966feb009b35de45aed4a5e5b4eded27d372173df8b55f4"
     }
   ]
 }

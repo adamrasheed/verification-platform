@@ -16,7 +16,12 @@ for await (const line of lines) {
       protocolVersion: "1.0",
       messageType: "contribution",
       requestId: message.requestId,
-      payload: { kind: "synthetic", behavior: "fast", enforcementTier: message.payload.enforcementTier },
+      payload: {
+        kind: "synthetic",
+        behavior: "fast",
+        enforcementTier: message.payload.enforcementTier,
+        resourceLimits: message.payload.resourceLimits,
+      },
     })}\n`);
     process.stdout.write(`${JSON.stringify({
       protocolVersion: "1.0",

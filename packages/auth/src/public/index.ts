@@ -125,6 +125,9 @@ export interface PluginOperationAuthorizationRequest {
   readonly subprocess: boolean;
   readonly sideEffects: readonly string[];
   readonly enforcementTier: string;
+  readonly maximumMemoryBytes: number;
+  readonly maximumCpuNanoseconds: number;
+  readonly maximumPluginProcesses: number;
   readonly expiresAt: string;
 }
 
@@ -138,6 +141,9 @@ export interface PluginAuthorityPolicy {
   readonly allowSubprocess: boolean;
   readonly allowedSideEffects: readonly string[];
   readonly enforcementTiers: readonly string[];
+  readonly maximumMemoryBytes: number;
+  readonly maximumCpuNanoseconds: number;
+  readonly maximumPluginProcesses: number;
   readonly maximumExpiresAt: string;
 }
 
@@ -160,6 +166,7 @@ export type PluginAuthorizationDecision =
         | "SUBPROCESS_DENIED"
         | "SIDE_EFFECT_DENIED"
         | "ENFORCEMENT_TIER_DENIED"
+        | "RESOURCE_LIMIT_DENIED"
         | "EXPIRY_DENIED";
     };
 
@@ -200,6 +207,17 @@ export function authorizePluginOperation(
   if (!policy.enforcementTiers.includes(request.enforcementTier)) {
     return { allowed: false, reasonCode: "ENFORCEMENT_TIER_DENIED" };
   }
+  if (
+    !Number.isSafeInteger(request.maximumMemoryBytes)
+    || request.maximumMemoryBytes < 0
+    || request.maximumMemoryBytes > policy.maximumMemoryBytes
+    || !Number.isSafeInteger(request.maximumCpuNanoseconds)
+    || request.maximumCpuNanoseconds < 0
+    || request.maximumCpuNanoseconds > policy.maximumCpuNanoseconds
+    || !Number.isSafeInteger(request.maximumPluginProcesses)
+    || request.maximumPluginProcesses < 0
+    || request.maximumPluginProcesses > policy.maximumPluginProcesses
+  ) return { allowed: false, reasonCode: "RESOURCE_LIMIT_DENIED" };
   const expiry = Date.parse(request.expiresAt);
   const maximum = Date.parse(policy.maximumExpiresAt);
   if (
