@@ -1,7 +1,7 @@
 # Current Release Audit
 
 **Date:** 2026-07-18
-**Status:** release-candidate gates passed; authenticated publication authorized
+**Status:** `@adamrasheed/verify@0.1.0` published and independently verified
 
 ## Passing gates
 
@@ -23,6 +23,10 @@
   malformed, duplicate, empty, and hostile fixtures.
 - Public package audit: `@adamrasheed/verify@0.1.0` passed as a four-file, self-contained
   executable package with no lifecycle scripts or production dependencies.
+- The registry tarball is byte-identical to the tested candidate at SHA-256
+  `497d2f883dc961926115bf074981731844966a9ada47b9c1ca2c3ff63d05f9d3`.
+- npm registry signature verification passed, and a clean install executed
+  `verify version` successfully.
 - Engine suite: 20/20 passed, including progressive lifecycle transactions,
   crash-prefix recovery, projection reconciliation, exact cache provenance,
   Promise aggregation ownership, and model supersession.
@@ -30,13 +34,14 @@
   discipline, durable inspection/cache behavior, and cancellation under one
   second.
 
-## Publication authority
+## Publication record
 
 Candidate preparation binds the exact repository HEAD, performance report,
 security report, pack manifest, SBOM, provenance, and tested tarball bytes.
 Founder decisions F-001 and F-002 resolve the package as
 `@adamrasheed/verify` and the license as Apache-2.0. npm publication authority
-was authenticated as `adamrasheed` on 2026-07-18. Registry publication remains
-a separately recorded external action. The public npm registry applies its
-verifiable ECDSA signature to published package bytes; post-publication
-verification must confirm the registry integrity and signature records.
+was authenticated as `adamrasheed` on 2026-07-18. Version `0.1.0` was published
+from source revision `23ebdb36673f3339dbd4eedf04af37f48c040fad` and verified
+against the public registry on 2026-07-19. See
+[`PUBLISHED_RELEASE.json`](PUBLISHED_RELEASE.json) for the machine-readable
+integrity and signature record.

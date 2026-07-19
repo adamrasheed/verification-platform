@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "publishedNpmRelease",
+  "status": "verified",
+  "observedAt": "2026-07-19T04:02:59Z",
+  "package": {
+    "name": "@adamrasheed/verify",
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "distTag": "latest",
+    "registryUrl": "https://www.npmjs.com/package/@adamrasheed/verify/v/0.1.0",
+    "tarballUrl": "https://registry.npmjs.org/@adamrasheed/verify/-/verify-0.1.0.tgz"
+  },
+  "sourceRevision": "23ebdb36673f3339dbd4eedf04af37f48c040fad",
+  "testedArtifact": {
+    "sha256": "sha256:497d2f883dc961926115bf074981731844966a9ada47b9c1ca2c3ff63d05f9d3",
+    "size": 47012,
+    "registryBytesMatched": true
+  },
+  "registryIntegrity": {
+    "sha512": "sha512-Wt2cfFjqrwN9Saz3vQYcPbpURMvoe2UQa0QIQ9EQZhqnTBovzdU8gBziOtUV60W4eaitViyDOi3BsNXlGZoXow==",
+    "sha1": "a00b5596642b044ca2ed244f4154cd26f7b10d07"
+  },
+  "registrySignature": {
+    "status": "verified",
+    "keyId": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+  },
+  "runtimeSmokeTest": {
+    "status": "passed",
+    "command": "npx --yes @adamrasheed/verify@0.1.0 version",
+    "reportedCliVersion": "0.1.0",
+    "reportedEngineVersion": "0.1.0",
+    "reportedProtocolSchema": 1
+  }
+}
