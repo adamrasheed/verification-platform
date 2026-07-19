@@ -24,6 +24,7 @@ export type {
   CliParseError,
   CliParseResult,
   InspectCliCommand,
+  RepairCliCommand,
   StaticCliCommand,
   VerifyCliCommand,
 } from "./parser.js";

@@ -99,3 +99,18 @@ export function passiveCliPolicy(
     grants: ["workspace.read", "history.read", "cache.read", "cache.clear"],
   };
 }
+
+export function repairApplyCliPolicy(
+  principal: LocalPrincipal,
+  workspaceRoot: string,
+): AuthorityPolicy {
+  if (!principal.authenticated) {
+    throw new TypeError("cannot bind policy to unauthenticated principal");
+  }
+  return {
+    source: "cli-boundary",
+    principalId: principal.id,
+    workspaceRoots: [normalizedRoot(workspaceRoot)],
+    grants: ["workspace.read", "history.read", "workspace.write"],
+  };
+}

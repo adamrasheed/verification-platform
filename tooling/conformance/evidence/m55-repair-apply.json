@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m55-repair-apply",
+  "taskId": "M55-T01..M55-T03",
+  "owner": "repair-engine",
+  "governingClauses": ["Freeze §§3,5.8,5.10,10.2", "EDD §§12,37"],
+  "testIds": ["repair:5", "auth:4", "cli:20"],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/repair/src/public/apply.ts",
+      "digest": "sha256:37cba9315943bf1372674fdc4ab037b8b3a0a32b6fb85edfdef7be580b478445"
+    },
+    {
+      "path": "packages/engine/src/public/local-runtime.ts",
+      "digest": "sha256:58218ae05d3a66357726f3b05d8c2adfcad260bb0cbca1636fd5aa188da50d01"
+    },
+    {
+      "path": "packages/protocol/schemas/repair-command.schema.json",
+      "digest": "sha256:8e4826564635dbe28a0ec3fddfb78c28e3816078d56e0dfc89787bba229361d4"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -116,6 +116,89 @@ test("retained run, evidence, and cache commands use engine-owned persistence", 
     "--json",
   ]);
   assert.equal(retainedAfterClear.code, 0);
+});
+
+test("repair preview is read-only and explicit apply is atomically re-verified", async () => {
+  const workspace = await mkdtemp(join(tmpdir(), "verify-cli-repair-"));
+  try {
+    await mkdir(join(workspace, "packages", "a"), { recursive: true });
+    await mkdir(join(workspace, "packages", "b"), { recursive: true });
+    await writeFile(
+      join(workspace, "package.json"),
+      JSON.stringify({
+        name: "repair-root",
+        private: true,
+        workspaces: ["packages/*"],
+      }),
+    );
+    await writeFile(
+      join(workspace, "package-lock.json"),
+      JSON.stringify({
+        name: "repair-root",
+        lockfileVersion: 3,
+        packages: { "": { name: "repair-root", workspaces: ["packages/*"] } },
+      }),
+    );
+    const duplicate = JSON.stringify({
+      name: "@fixture/duplicate",
+      version: "1.0.0",
+    });
+    await writeFile(join(workspace, "packages", "a", "package.json"), duplicate);
+    await writeFile(join(workspace, "packages", "b", "package.json"), duplicate);
+
+    const violated = await execute(["verify", workspace, "--json"]);
+    assert.equal(violated.code, 1);
+    const result = JSON.parse(violated.stdout);
+    const repair = result.result.repairRecords[0];
+    assert.equal(repair.action.kind, "jsonPatch");
+    const target = join(workspace, repair.action.target);
+    const before = await readFile(target, "utf8");
+
+    const previewed = await execute([
+      "repair",
+      "preview",
+      result.invocationId,
+      repair.id,
+      "--workspace",
+      workspace,
+      "--json",
+    ]);
+    assert.equal(previewed.code, 0);
+    assert.equal(JSON.parse(previewed.stdout).writePerformed, false);
+    assert.equal(await readFile(target, "utf8"), before);
+
+    const missingGrant = await execute([
+      "repair",
+      "apply",
+      result.invocationId,
+      repair.id,
+      "--workspace",
+      workspace,
+      "--json",
+    ]);
+    assert.equal(missingGrant.code, 3);
+    assert.equal(await readFile(target, "utf8"), before);
+
+    const applied = await execute([
+      "repair",
+      "apply",
+      result.invocationId,
+      repair.id,
+      "--workspace",
+      workspace,
+      "--grant-workspace-write",
+      "--json",
+    ]);
+    assert.equal(applied.code, 0, applied.stderr);
+    const application = JSON.parse(applied.stdout);
+    assert.equal(application.writeAuthorized, true);
+    assert.equal(application.writePerformed, true);
+    assert.deepEqual(application.lifecycle, ["accepted", "applied", "verified"]);
+    assert.equal(application.verification.status, "passed");
+    assert.notEqual(await readFile(target, "utf8"), before);
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
 });
 
 test("SIGINT begins cancellation and yields the canonical cancelled exit", async () => {

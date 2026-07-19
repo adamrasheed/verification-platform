@@ -37,6 +37,8 @@ package performs no filesystem, process, credential, or network I/O.
 ## Source artifacts
 
 - `schemas/` contains source JSON Schemas.
+- `schemas/repair-command.schema.json` governs the local post-MVP preview/apply
+  result documents; write authority and write effects are distinct fields.
 - `fixtures/` contains current-major valid and invalid examples.
 - `test/` proves discriminants, compatibility, exit mapping, and JSONL terminal
   rules.
