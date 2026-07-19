@@ -163,14 +163,18 @@ export function createLinuxNamespaceSandboxLauncher(
         env: {},
         stdio: ["pipe", "pipe", "pipe", "pipe"],
       });
-      const artifactChannel = child.stdio[3];
-      if (!artifactChannel || !("end" in artifactChannel)) {
+      const artifactChannel =
+        child.stdio[3] as NodeJS.WritableStream | null | undefined;
+      if (!artifactChannel) {
         child.kill("SIGKILL");
         throw new PluginRuntimeError(
           "VFY_PLUGIN_PLATFORM_UNAVAILABLE",
           "the Linux sandbox artifact channel is unavailable",
         );
       }
+      artifactChannel.on("error", () => {
+        // The one-shot pipe may reset when the native host is terminated.
+      });
       artifactChannel.end(artifact);
       if (!child.stdin || !child.stdout || !child.stderr) {
         child.kill("SIGKILL");

@@ -22,7 +22,7 @@
     },
     {
       "path": "packages/plugin-runtime/src/public/linux-sandbox.ts",
-      "digest": "sha256:822dc970d5c0e190c950da107f41e10e7b41ddb25e028e8a478290692f20e827"
+      "digest": "sha256:c81b1cf0f53eefe1beb1a5fa2cb2d8526cf9af6ff3def372e3012728a35d8b6e"
     },
     {
       "path": ".github/workflows/ci.yml",
