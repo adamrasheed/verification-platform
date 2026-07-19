@@ -190,6 +190,9 @@ export function createLinuxNamespaceSandboxLauncher(
           "the Linux sandbox protocol pipes are unavailable",
         );
       }
+      child.stdin.on("error", () => {
+        // Live writes receive their callback error; termination may reset the pipe.
+      });
       return {
         enforcementTier: "linux-namespace-seccomp-v1",
         stdoutLines: boundedUtf8Lines(child.stdout),
