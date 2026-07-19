@@ -64,3 +64,31 @@ jobs:
 
       - name: Run native sandbox conformance
         run: npm run test --workspace @verify-internal/plugin-runtime
+
+  native-linux:
+    name: Native Linux sandbox
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - name: Install native sandbox dependencies
+        run: sudo apt-get update && sudo apt-get install --yes bubblewrap libssl-dev
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Run native sandbox conformance
+        env:
+          VERIFY_RUN_LINUX_NATIVE: "1"
+        run: npm run test --workspace @verify-internal/plugin-runtime
