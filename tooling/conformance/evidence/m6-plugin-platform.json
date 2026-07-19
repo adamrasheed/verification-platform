@@ -4,13 +4,13 @@
   "taskId": "M6-T01..M6-T05,M6-T08",
   "owner": "plugin-platform",
   "governingClauses": ["Freeze §§9–11,18", "EDD §§13,25,27"],
-  "testIds": ["plugin-sdk:5", "plugin-runtime:11", "auth:5"],
+  "testIds": ["plugin-sdk:5", "plugin-runtime:12", "auth:5"],
   "command": "npm test",
   "outcome": "passed",
   "artifacts": [
     {
       "path": "docs/architecture/ADR/0011-plugin-security-enforcement.md",
-      "digest": "sha256:c67414b038ad274bfeb088096b7ad3ebe2ca36635585a4b887c8257486c28c7a"
+      "digest": "sha256:9f90990c9d214779889a3278c4788a840cdea5f36740977f027f39d7824f0e09"
     },
     {
       "path": "packages/plugin-sdk/src/public/manifest.ts",

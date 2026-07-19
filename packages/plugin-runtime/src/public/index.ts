@@ -39,6 +39,12 @@ export type {
   MacOsAppSandboxLauncherOptions,
 } from "./macos-sandbox.js";
 export {
+  createLinuxNamespaceSandboxLauncher,
+} from "./linux-sandbox.js";
+export type {
+  LinuxNamespaceSandboxLauncherOptions,
+} from "./linux-sandbox.js";
+export {
   ProviderPluginRuntime,
 } from "./runtime.js";
 export type {

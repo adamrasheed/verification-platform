@@ -48,6 +48,19 @@ Production availability additionally requires Developer ID authority, one
 expected Team ID, hardened runtime on all three executables, and exact
 code-directory hashes for the supervisor, host, and helper.
 
+The Linux implementation uses a digest-pinned native host around a pinned
+bubblewrap and Node distribution. Bubblewrap constructs empty mount, user,
+PID, IPC, UTS, cgroup, and network namespaces; the host mounts only the exact
+Node helper, plugin artifact, runtime libraries, an isolated `/dev`, and the
+namespace-local `/proc`. A pinned post-exec preload installs an
+architecture-checked seccomp filter before Node initialization. The filter
+denies new processes, network sockets, filesystem mutation, namespace and
+privilege changes, tracing, and high-risk kernel interfaces while permitting
+Node's worker threads. The Node process runs as PID 1, receives an empty
+environment after filter installation, and is supervised by exact outer PID
+for RSS and CPU budgets. The tier is unavailable when any digest, ownership,
+permission, dependency, namespace, or resource-inspection check fails.
+
 Distributable plugins require:
 
 - an exact SHA-256 artifact digest;

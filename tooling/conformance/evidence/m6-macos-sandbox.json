@@ -4,7 +4,7 @@
   "taskId": "M6-T06-macos-development",
   "owner": "plugin-platform",
   "governingClauses": ["Freeze §§10.5,11.5,18", "EDD §§13,25,27"],
-  "testIds": ["plugin-runtime:11", "native-macos:1"],
+  "testIds": ["plugin-runtime:12", "native-macos:1"],
   "command": "npm run test --workspace @verify-internal/plugin-runtime",
   "outcome": "passed",
   "artifacts": [
@@ -34,7 +34,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "digest": "sha256:702d63e32874e31fdd6ee586dd70e3f74fb3350ebfcfdf12ceb1fb0a3573f513"
+      "digest": "sha256:03b3c605fe710a4e637e6a377d40190307941c34d107bf289f3561eeac80b061"
     }
   ]
 }
