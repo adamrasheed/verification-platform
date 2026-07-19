@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { authorize, passiveCliPolicy } from "../dist/public/index.js";
+import {
+  authorize,
+  passiveCliPolicy,
+  repairApplyCliPolicy,
+} from "../dist/public/index.js";
 
 const principal = { kind: "local-user", id: "uid:1000", authenticated: true };
 
@@ -39,4 +43,23 @@ test("workspace files cannot expand the bound root", () => {
   }, passiveCliPolicy(principal, "/workspace"));
   assert.equal(decision.allowed, false);
   assert.equal(decision.reasonCode, "WORKSPACE_OUT_OF_SCOPE");
+});
+
+test("Repair write authority is separate and scoped to one workspace", () => {
+  const policy = repairApplyCliPolicy(principal, "/workspace");
+  assert.equal(authorize(principal, {
+    operation: "applyRepair",
+    workspaceRoot: "/workspace",
+    permissions: ["workspace.write"],
+  }, policy).allowed, true);
+  assert.equal(authorize(principal, {
+    operation: "applyRepair",
+    workspaceRoot: "/outside",
+    permissions: ["workspace.write"],
+  }, policy).allowed, false);
+  assert.equal(authorize(principal, {
+    operation: "applyRepair",
+    workspaceRoot: "/workspace",
+    permissions: ["network"],
+  }, policy).allowed, false);
 });

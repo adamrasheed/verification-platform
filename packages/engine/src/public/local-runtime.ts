@@ -12,11 +12,22 @@ import { canonicalize } from "@verify-internal/contracts";
 import type {
   CanonicalValue,
   OpaqueId,
+  RepairSuggestion,
   RevisionDocument,
   RevisionRef,
   Rfc3339Utc,
   Sha256Digest,
 } from "@verify-internal/contracts";
+import {
+  authorize,
+  repairApplyCliPolicy,
+  type LocalPrincipal,
+} from "@verify-internal/auth";
+import {
+  RepairApplyConflict,
+  applyRepairPatch,
+  previewRepairPatch,
+} from "@verify-internal/repair";
 import type {
   EngineUnitOfWorkCommit,
   EventEnvelope,
@@ -50,6 +61,31 @@ export interface LocalRuntimeOptions {
   readonly checkpointFault?: CheckpointFaultInjector;
   readonly ownerLeaseMs?: number;
   readonly ownerHeartbeatIntervalMs?: number;
+}
+
+export interface RepairApplicationRecord {
+  readonly applicationInvocationId: OpaqueId;
+  readonly sourceInvocationId: OpaqueId;
+  readonly repair: RevisionRef;
+  readonly target: string;
+  readonly beforeDigest: Sha256Digest;
+  readonly afterDigest: Sha256Digest;
+  readonly principalId: string;
+}
+
+export interface RepairVerificationRecord {
+  readonly applicationInvocationId: OpaqueId;
+  readonly repair: RevisionRef;
+  readonly verifyingInvocationId: OpaqueId;
+  readonly verifyingProof: RevisionRef;
+  readonly verifyingAttemptId?: OpaqueId;
+  readonly resultDigest?: Sha256Digest;
+  readonly passed: boolean;
+}
+
+export interface LocalRepairCommandResult {
+  readonly document: CanonicalValue;
+  readonly passed?: boolean;
 }
 
 export type ProjectionFaultPoint =
@@ -231,6 +267,281 @@ export class LocalVerificationRuntime implements EngineCache, EngineHistory {
       history: this,
       now: this.#now,
     }).verify(request);
+  }
+
+  #retainedRepair(
+    sourceInvocationId: string,
+    repairId: string,
+  ): RepairSuggestion {
+    const retained = this.readRun(sourceInvocationId) as {
+      readonly repairRecords?: readonly RepairSuggestion[];
+    } | undefined;
+    if (retained === undefined) {
+      throw new RepairApplyConflict(
+        "INVALID_REPAIR_ACTION",
+        `source run not found: ${sourceInvocationId}`,
+      );
+    }
+    const matches = (retained.repairRecords ?? []).filter(
+      (repair) => repair.id === repairId,
+    );
+    if (matches.length !== 1) {
+      throw new RepairApplyConflict(
+        "INVALID_REPAIR_ACTION",
+        `exact retained Repair not found: ${repairId}`,
+      );
+    }
+    return matches[0]!;
+  }
+
+  previewRepair(
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+  ): LocalRepairCommandResult {
+    const preview = previewRepairPatch(
+      this.#retainedRepair(sourceInvocationId, repairId),
+      workspace,
+    );
+    return {
+      document: canonical({
+        schemaVersion: 1,
+        kind: "repairPreview",
+        sourceInvocationId,
+        writeAuthorized: false,
+        writePerformed: false,
+        preview,
+      }),
+    };
+  }
+
+  async applyRepair(
+    applicationInvocationId: string,
+    sourceInvocationId: string,
+    repairId: string,
+    workspace: string,
+    writeGranted: boolean,
+    signal: AbortSignal,
+  ): Promise<LocalRepairCommandResult> {
+    if (!writeGranted) {
+      throw new RepairApplyConflict(
+        "INVALID_REPAIR_ACTION",
+        "an explicit workspace write grant is required",
+      );
+    }
+    const principal: LocalPrincipal = {
+      kind: "local-user",
+      id: `local-user:${process.getuid?.() ?? "unknown"}`,
+      authenticated: true,
+    };
+    const decision = authorize(
+      principal,
+      {
+        operation: "applyRepair",
+        workspaceRoot: workspace,
+        permissions: ["workspace.write"],
+      },
+      repairApplyCliPolicy(principal, workspace),
+    );
+    if (!decision.allowed) {
+      throw new RepairApplyConflict(
+        "INVALID_REPAIR_ACTION",
+        `workspace write was denied: ${decision.reasonCode}`,
+      );
+    }
+    const repair = this.#retainedRepair(sourceInvocationId, repairId);
+    const preview = applyRepairPatch(repair, workspace);
+    const repairRef: RevisionRef = {
+      kind: "repair",
+      id: repair.id,
+      revision: repair.revision,
+      schemaVersion: repair.schemaVersion,
+    };
+    await this.recordRepairApplied({
+      applicationInvocationId: applicationInvocationId as OpaqueId,
+      sourceInvocationId: sourceInvocationId as OpaqueId,
+      repair: repairRef,
+      target: preview.target,
+      beforeDigest: preview.currentContentDigest,
+      afterDigest: preview.patchedContentDigest,
+      principalId: principal.id,
+    });
+    const verifyingInvocationId =
+      `${applicationInvocationId}:verification` as OpaqueId;
+    const verification = await this.verify({
+      schemaVersion: 1,
+      workspaceRoot: workspace,
+      invocationId: verifyingInvocationId,
+      signal,
+    }, true);
+    const exact = verification.proofExecutions.find((execution) =>
+      refKey(execution.proof) === refKey(repair.motivatingExecution.proof)
+    );
+    const passed = exact?.result?.status === "passed";
+    await this.recordRepairVerification({
+      applicationInvocationId: applicationInvocationId as OpaqueId,
+      repair: repairRef,
+      verifyingInvocationId,
+      verifyingProof: repair.motivatingExecution.proof,
+      ...(exact === undefined
+        ? {}
+        : {
+            verifyingAttemptId: exact.attemptId,
+            ...(exact.resultDigest === undefined
+              ? {}
+              : { resultDigest: exact.resultDigest }),
+          }),
+      passed,
+    });
+    return {
+      passed,
+      document: canonical({
+        schemaVersion: 1,
+        kind: "repairApply",
+        applicationInvocationId,
+        sourceInvocationId,
+        repair: repairRef,
+        writeAuthorized: true,
+        writePerformed: true,
+        preview,
+        lifecycle: [
+          "accepted",
+          "applied",
+          passed ? "verified" : "verification_failed",
+        ],
+        verification: {
+          invocationId: verification.invocationId,
+          outcome: verification.outcome,
+          proof: repair.motivatingExecution.proof,
+          status: exact?.result?.status ?? "not_evaluated",
+          ...(exact?.resultDigest === undefined
+            ? {}
+            : { resultDigest: exact.resultDigest }),
+        },
+      }),
+    };
+  }
+
+  async recordRepairApplied(record: RepairApplicationRecord): Promise<void> {
+    await this.#recovery;
+    const occurredAt = this.#now().toISOString() as Rfc3339Utc;
+    const producer = {
+      id: "@verify-internal/engine" as OpaqueId,
+      version: "0.1.0",
+      artifactDigest: `sha256:${createHash("sha256")
+        .update("@verify-internal/engine@0.1.0")
+        .digest("hex")}` as Sha256Digest,
+    };
+    await this.#unitOfWork.commit({
+      idempotencyKey:
+        `repair-application:${record.applicationInvocationId}:applied` as OpaqueId,
+      invocationId: record.applicationInvocationId,
+      expectedNextSequence: 1,
+      revisions: [],
+      events: [
+        {
+          schemaVersion: 1,
+          eventId: `${record.applicationInvocationId}:repair:accepted` as OpaqueId,
+          eventType: "RepairAccepted",
+          occurredAt,
+          invocationId: record.applicationInvocationId,
+          subject: record.repair,
+          correlationId: record.sourceInvocationId,
+          sequence: 1,
+          producer,
+          dataClassification: "MINIMAL_METADATA",
+          payload: canonical({
+            repair: record.repair,
+            from: "proposed",
+            to: "accepted",
+            actorRef: record.principalId,
+            reasonCode: "EXPLICIT_CLI_WRITE_GRANT",
+          }),
+        },
+        {
+          schemaVersion: 1,
+          eventId: `${record.applicationInvocationId}:repair:applied` as OpaqueId,
+          eventType: "RepairApplied",
+          occurredAt,
+          invocationId: record.applicationInvocationId,
+          subject: record.repair,
+          correlationId: record.sourceInvocationId,
+          sequence: 2,
+          producer,
+          dataClassification: "LOCAL_SOURCE",
+          payload: canonical({
+            repair: record.repair,
+            from: "accepted",
+            to: "applied",
+            actorRef: record.principalId,
+            authorizationDecisionRef:
+              `${record.applicationInvocationId}:workspace-write`,
+            reasonCode: "ATOMIC_PATCH_APPLIED",
+            target: record.target,
+            beforeDigest: record.beforeDigest,
+            afterDigest: record.afterDigest,
+          }),
+        },
+      ],
+      referenceEdges: [],
+      currentRevisionMutations: [],
+    });
+  }
+
+  async recordRepairVerification(
+    record: RepairVerificationRecord,
+  ): Promise<void> {
+    await this.#recovery;
+    const occurredAt = this.#now().toISOString() as Rfc3339Utc;
+    await this.#unitOfWork.commit({
+      idempotencyKey:
+        `repair-application:${record.applicationInvocationId}:verification` as OpaqueId,
+      invocationId: record.applicationInvocationId,
+      expectedNextSequence: 3,
+      revisions: [],
+      events: [{
+        schemaVersion: 1,
+        eventId:
+          `${record.applicationInvocationId}:repair:verification` as OpaqueId,
+        eventType: record.passed ? "RepairVerified" : "RepairVerificationFailed",
+        occurredAt,
+        invocationId: record.applicationInvocationId,
+        subject: record.repair,
+        correlationId: record.verifyingInvocationId,
+        sequence: 3,
+        producer: {
+          id: "@verify-internal/engine" as OpaqueId,
+          version: "0.1.0",
+          artifactDigest: `sha256:${createHash("sha256")
+            .update("@verify-internal/engine@0.1.0")
+            .digest("hex")}`,
+        },
+        dataClassification: "MINIMAL_METADATA",
+        payload: canonical({
+          repair: record.repair,
+          from: "applied",
+          to: record.passed ? "verified" : "verification_failed",
+          actorRef: "@verify-internal/engine",
+          reasonCode: record.passed
+            ? "LATER_EXACT_PROOF_PASSED"
+            : "LATER_EXACT_PROOF_DID_NOT_PASS",
+          verifyingInvocationId: record.verifyingInvocationId,
+          verifyingProof: record.verifyingProof,
+          ...(record.verifyingAttemptId === undefined
+            ? {}
+            : { verifyingAttemptId: record.verifyingAttemptId }),
+          ...(record.resultDigest === undefined
+            ? {}
+            : { resultDigest: record.resultDigest }),
+        }),
+      }],
+      referenceEdges: [{
+        source: record.repair,
+        relation: record.passed ? "verified-by-proof" : "verification-attempted-by-proof",
+        target: record.verifyingProof,
+      }],
+      currentRevisionMutations: [],
+    });
   }
 
   async admit(invocationId: string, workspaceRoot: string): Promise<void> {

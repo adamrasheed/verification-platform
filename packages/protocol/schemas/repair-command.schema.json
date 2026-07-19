@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:verify:schema:protocol:repair-command:v1",
+  "title": "Repair preview and application command results",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "sourceInvocationId",
+        "writeAuthorized",
+        "writePerformed",
+        "preview"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "repairPreview" },
+        "sourceInvocationId": { "type": "string", "minLength": 1 },
+        "writeAuthorized": { "const": false },
+        "writePerformed": { "const": false },
+        "preview": { "$ref": "#/$defs/preview" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "applicationInvocationId",
+        "sourceInvocationId",
+        "repair",
+        "writeAuthorized",
+        "writePerformed",
+        "preview",
+        "lifecycle",
+        "verification"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "repairApply" },
+        "applicationInvocationId": { "type": "string", "minLength": 1 },
+        "sourceInvocationId": { "type": "string", "minLength": 1 },
+        "repair": { "$ref": "#/$defs/revisionRef" },
+        "writeAuthorized": { "const": true },
+        "writePerformed": { "const": true },
+        "preview": { "$ref": "#/$defs/preview" },
+        "lifecycle": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "accepted" },
+            { "const": "applied" },
+            { "enum": ["verified", "verification_failed"] }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "verification": {
+          "type": "object",
+          "required": ["invocationId", "outcome", "proof", "status"],
+          "properties": {
+            "invocationId": { "type": "string", "minLength": 1 },
+            "outcome": {
+              "enum": ["satisfied", "violated", "indeterminate", "not_evaluated"]
+            },
+            "proof": { "$ref": "#/$defs/revisionRef" },
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "indeterminate",
+                "error",
+                "cancelled",
+                "not_evaluated"
+              ]
+            },
+            "resultDigest": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "revisionRef": {
+      "type": "object",
+      "required": ["kind", "id", "revision", "schemaVersion"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "id": { "type": "string", "minLength": 1 },
+        "revision": { "$ref": "#/$defs/digest" },
+        "schemaVersion": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "repair",
+        "target",
+        "expectedContentDigest",
+        "currentContentDigest",
+        "patchedContentDigest",
+        "operations",
+        "before",
+        "after"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "repairPatchPreview" },
+        "repair": { "$ref": "#/$defs/revisionRef" },
+        "target": { "type": "string", "minLength": 1 },
+        "expectedContentDigest": { "$ref": "#/$defs/digest" },
+        "currentContentDigest": { "$ref": "#/$defs/digest" },
+        "patchedContentDigest": { "$ref": "#/$defs/digest" },
+        "operations": { "type": "array", "minItems": 1 },
+        "before": {},
+        "after": {}
+      }
+    }
+  }
+}

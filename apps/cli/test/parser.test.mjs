@@ -53,6 +53,16 @@ test("the complete MVP command grammar parses", () => {
     [["inspect", "evidence", "evidence:1"], "inspectEvidence"],
     [["cache", "inspect"], "cacheInspect"],
     [["cache", "clear"], "cacheClear"],
+    [["repair", "preview", "run:1", "repair:1"], "repairPreview"],
+    [[
+      "repair",
+      "apply",
+      "run:1",
+      "repair:1",
+      "--workspace",
+      "/repo",
+      "--grant-workspace-write",
+    ], "repairApply"],
     [["version"], "version"],
     [["schema"], "schema"],
   ];
@@ -70,6 +80,8 @@ test("invalid flags and conflicting machine modes are rejected", () => {
     ["--json", "--jsonl"],
     ["inspect", "run"],
     ["cache", "delete"],
+    ["repair", "apply", "run:1", "repair:1"],
+    ["repair", "preview", "run:1", "repair:1", "--grant-workspace-write"],
   ]) {
     const parsed = parseCli(argv, "/repo");
     assert.equal(parsed.ok, false);
