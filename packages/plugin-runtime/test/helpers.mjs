@@ -29,7 +29,7 @@ export async function signedManifest(
     subprocess = false,
   } = {},
 ) {
-  const entryPoint = path.join("test", "fixtures", fixtureName);
+  const entryPoint = ["test", "fixtures", fixtureName].join("/");
   const artifact = await readFile(path.resolve(entryPoint));
   const manifest = {
     schemaVersion: 1,

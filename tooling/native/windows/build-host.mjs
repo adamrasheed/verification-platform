@@ -73,5 +73,5 @@ try {
     "cl.exe",
     ...compilerArguments.map(quote),
   ].join(" ");
-  execFileSync("cmd.exe", ["/d", "/s", "/c", command], { stdio: "inherit" });
+  execFileSync("cmd.exe", ["/d", "/c", command], { stdio: "inherit" });
 }
