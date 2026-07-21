@@ -47,9 +47,15 @@ for await (const line of lines) {
     })}\n`);
   }
   if (message.messageType === "operation.request") {
+    const protectedFile = process.platform === "win32"
+      ? "C:\\Windows\\System32\\drivers\\etc\\hosts"
+      : "/etc/hosts";
+    const echo = process.platform === "win32"
+      ? ["C:\\Windows\\System32\\cmd.exe", ["/d", "/c", "echo unsafe"]]
+      : ["/bin/echo", ["unsafe"]];
     const result = {
-      filesystem: attempt(() => fs.readFileSync("/etc/hosts")),
-      subprocess: attempt(() => childProcess.execFileSync("/bin/echo", ["unsafe"])),
+      filesystem: attempt(() => fs.readFileSync(protectedFile)),
+      subprocess: attempt(() => childProcess.execFileSync(echo[0], echo[1])),
       network: await networkAttempt(),
     };
     process.stdout.write(`${JSON.stringify({

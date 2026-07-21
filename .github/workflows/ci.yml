@@ -92,3 +92,28 @@ jobs:
         env:
           VERIFY_RUN_LINUX_NATIVE: "1"
         run: npm run test --workspace @verify-internal/plugin-runtime
+
+  native-windows:
+    name: Native Windows sandbox
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: Run native sandbox conformance
+        env:
+          VERIFY_RUN_WINDOWS_NATIVE: "1"
+        run: npm run test --workspace @verify-internal/plugin-runtime

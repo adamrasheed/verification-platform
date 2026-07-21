@@ -45,6 +45,12 @@ export type {
   LinuxNamespaceSandboxLauncherOptions,
 } from "./linux-sandbox.js";
 export {
+  createWindowsAppContainerSandboxLauncher,
+} from "./windows-sandbox.js";
+export type {
+  WindowsAppContainerSandboxLauncherOptions,
+} from "./windows-sandbox.js";
+export {
   ProviderPluginRuntime,
 } from "./runtime.js";
 export type {
