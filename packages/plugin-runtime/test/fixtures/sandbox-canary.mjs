@@ -14,6 +14,34 @@ function attempt(action) {
   }
 }
 
+async function subprocessAttempt(executable, arguments_) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+    let child;
+    try {
+      child = childProcess.spawn(executable, arguments_, { stdio: "ignore" });
+    } catch (error) {
+      resolve(error?.code ?? "DENIED");
+      return;
+    }
+    const timer = setTimeout(() => {
+      child.kill();
+      finish("TIMEOUT");
+    }, 1000);
+    child.once("spawn", () => {
+      child.kill();
+      finish("ALLOWED");
+    });
+    child.once("error", (error) => finish(error.code ?? "DENIED"));
+  });
+}
+
 async function networkAttempt() {
   return new Promise((resolve) => {
     const socket = net.connect({ host: "1.1.1.1", port: 443 });
@@ -54,11 +82,8 @@ for await (const line of lines) {
       ? ["C:\\Windows\\System32\\cmd.exe", ["/d", "/c", "echo unsafe"]]
       : ["/bin/echo", ["unsafe"]];
     const filesystem = attempt(() => fs.readFileSync(protectedFile));
-    if (process.platform === "win32") process.stderr.write("canary:filesystem-complete\n");
-    const subprocess = attempt(() => childProcess.execFileSync(echo[0], echo[1]));
-    if (process.platform === "win32") process.stderr.write("canary:subprocess-complete\n");
+    const subprocess = await subprocessAttempt(echo[0], echo[1]);
     const network = await networkAttempt();
-    if (process.platform === "win32") process.stderr.write("canary:network-complete\n");
     const result = { filesystem, subprocess, network };
     process.stdout.write(`${JSON.stringify({
       protocolVersion: "1.0",
