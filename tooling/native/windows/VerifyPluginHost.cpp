@@ -275,6 +275,36 @@ void grantReadExecute(const std::wstring& path, PSID sid, bool directory) {
   if (writeResult != ERROR_SUCCESS) fail(L"could not grant sandbox access");
 }
 
+void grantProtocolAccess(HANDLE handle, PSID sid, ACCESS_MASK permissions) {
+  PACL existing = nullptr;
+  PSECURITY_DESCRIPTOR descriptor = nullptr;
+  const DWORD readResult = GetSecurityInfo(
+    handle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
+    nullptr, nullptr, &existing, nullptr, &descriptor
+  );
+  if (readResult != ERROR_SUCCESS) fail(L"could not read protocol ACL");
+  EXPLICIT_ACCESSW access{};
+  access.grfAccessPermissions = permissions;
+  access.grfAccessMode = SET_ACCESS;
+  access.grfInheritance = NO_INHERITANCE;
+  access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
+  access.Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+  access.Trustee.ptstrName = static_cast<LPWSTR>(sid);
+  PACL updated = nullptr;
+  const DWORD mergeResult = SetEntriesInAclW(1, &access, existing, &updated);
+  if (mergeResult != ERROR_SUCCESS) {
+    LocalFree(descriptor);
+    fail(L"could not build protocol ACL");
+  }
+  const DWORD writeResult = SetSecurityInfo(
+    handle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
+    nullptr, nullptr, updated, nullptr
+  );
+  LocalFree(updated);
+  LocalFree(descriptor);
+  if (writeResult != ERROR_SUCCESS) fail(L"could not grant protocol access");
+}
+
 std::wstring quoteArgument(const std::wstring& value) {
   if (value.find_first_of(L" \t\n\v\"") == std::wstring::npos) return value;
   std::wstring result = L"\"";
@@ -360,6 +390,9 @@ int launchSandbox(
       fail(L"could not secure protocol handle inheritance");
     }
   }
+  grantProtocolAccess(protocolHandles[0], sid, GENERIC_READ);
+  grantProtocolAccess(protocolHandles[1], sid, GENERIC_WRITE);
+  grantProtocolAccess(protocolHandles[2], sid, GENERIC_WRITE);
   SIZE_T attributeBytes = 0;
   InitializeProcThreadAttributeList(nullptr, 3, 0, &attributeBytes);
   auto* attributes = static_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
