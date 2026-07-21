@@ -392,7 +392,13 @@ int launchSandbox(
   const std::wstring systemDrive = systemRoot.size() >= 2
     ? systemRoot.substr(0, 2)
     : L"C:";
-  std::wstring environment = L"SystemDrive=" + systemDrive;
+  const std::wstring invocationDrive = invocationRoot.size() >= 2
+    && invocationRoot[1] == L':'
+    ? invocationRoot.substr(0, 2)
+    : systemDrive;
+  std::wstring environment = L"=" + invocationDrive + L"=" + invocationRoot;
+  environment.push_back(L'\0');
+  environment += L"SystemDrive=" + systemDrive;
   environment.push_back(L'\0');
   environment += L"SystemRoot=" + systemRoot;
   environment.push_back(L'\0');
