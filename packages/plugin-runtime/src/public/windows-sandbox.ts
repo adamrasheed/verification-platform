@@ -105,6 +105,23 @@ function childExit(child: ChildProcess): Promise<SandboxProcessExit> {
   });
 }
 
+function windowsHostEnvironment(): NodeJS.ProcessEnv {
+  const environment: NodeJS.ProcessEnv = {};
+  for (const name of [
+    "SystemDrive",
+    "SystemRoot",
+    "WINDIR",
+    "LOCALAPPDATA",
+    "USERPROFILE",
+    "TEMP",
+    "TMP",
+  ]) {
+    const value = process.env[name];
+    if (value) environment[name] = value;
+  }
+  return environment;
+}
+
 export function createWindowsAppContainerSandboxLauncher(
   options: WindowsAppContainerSandboxLauncherOptions,
 ): SandboxLauncher {
@@ -156,7 +173,7 @@ export function createWindowsAppContainerSandboxLauncher(
         String(maximumCpuNanoseconds),
       ], {
         detached: false,
-        env: {},
+        env: windowsHostEnvironment(),
         stdio: ["pipe", "pipe", "pipe", "pipe"],
         windowsHide: true,
       });
