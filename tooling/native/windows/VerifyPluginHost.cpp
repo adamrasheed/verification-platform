@@ -349,13 +349,24 @@ int launchSandbox(
   SECURITY_CAPABILITIES capabilities{};
   capabilities.AppContainerSid = sid;
   DWORD childPolicy = PROCESS_CREATION_CHILD_PROCESS_RESTRICTED;
+  std::array<HANDLE, 3> protocolHandles = {
+    GetStdHandle(STD_INPUT_HANDLE),
+    GetStdHandle(STD_OUTPUT_HANDLE),
+    GetStdHandle(STD_ERROR_HANDLE),
+  };
+  for (const HANDLE handle : protocolHandles) {
+    if (handle == nullptr || handle == INVALID_HANDLE_VALUE
+        || !SetHandleInformation(handle, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT)) {
+      fail(L"could not secure protocol handle inheritance");
+    }
+  }
   SIZE_T attributeBytes = 0;
-  InitializeProcThreadAttributeList(nullptr, 2, 0, &attributeBytes);
+  InitializeProcThreadAttributeList(nullptr, 3, 0, &attributeBytes);
   auto* attributes = static_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
     HeapAlloc(GetProcessHeap(), 0, attributeBytes)
   );
   if (attributes == nullptr
-      || !InitializeProcThreadAttributeList(attributes, 2, 0, &attributeBytes)) {
+      || !InitializeProcThreadAttributeList(attributes, 3, 0, &attributeBytes)) {
     fail(L"could not initialize process attributes");
   }
   if (!UpdateProcThreadAttribute(
@@ -364,6 +375,9 @@ int launchSandbox(
     ) || !UpdateProcThreadAttribute(
       attributes, 0, PROC_THREAD_ATTRIBUTE_CHILD_PROCESS_POLICY,
       &childPolicy, sizeof(childPolicy), nullptr, nullptr
+    ) || !UpdateProcThreadAttribute(
+      attributes, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+      protocolHandles.data(), sizeof(protocolHandles), nullptr, nullptr
     )) {
     DeleteProcThreadAttributeList(attributes);
     HeapFree(GetProcessHeap(), 0, attributes);
@@ -372,9 +386,9 @@ int launchSandbox(
   STARTUPINFOEXW startup{};
   startup.StartupInfo.cb = sizeof(startup);
   startup.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
-  startup.StartupInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-  startup.StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-  startup.StartupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+  startup.StartupInfo.hStdInput = protocolHandles[0];
+  startup.StartupInfo.hStdOutput = protocolHandles[1];
+  startup.StartupInfo.hStdError = protocolHandles[2];
   startup.lpAttributeList = attributes;
   const std::wstring command = quoteArgument(node)
     + L" --disable-proto=throw --preserve-symlinks --preserve-symlinks-main "
