@@ -53,11 +53,13 @@ for await (const line of lines) {
     const echo = process.platform === "win32"
       ? ["C:\\Windows\\System32\\cmd.exe", ["/d", "/c", "echo unsafe"]]
       : ["/bin/echo", ["unsafe"]];
-    const result = {
-      filesystem: attempt(() => fs.readFileSync(protectedFile)),
-      subprocess: attempt(() => childProcess.execFileSync(echo[0], echo[1])),
-      network: await networkAttempt(),
-    };
+    const filesystem = attempt(() => fs.readFileSync(protectedFile));
+    if (process.platform === "win32") process.stderr.write("canary:filesystem-complete\n");
+    const subprocess = attempt(() => childProcess.execFileSync(echo[0], echo[1]));
+    if (process.platform === "win32") process.stderr.write("canary:subprocess-complete\n");
+    const network = await networkAttempt();
+    if (process.platform === "win32") process.stderr.write("canary:network-complete\n");
+    const result = { filesystem, subprocess, network };
     process.stdout.write(`${JSON.stringify({
       protocolVersion: "1.0",
       messageType: "contribution",
