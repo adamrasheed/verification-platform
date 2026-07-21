@@ -14,6 +14,33 @@ function attempt(action) {
   }
 }
 
+async function subprocessAttempt(executable, arguments_) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+    let child;
+    try {
+      child = childProcess.spawn(executable, arguments_, {
+        stdio: ["ignore", "pipe", "ignore"],
+      });
+    } catch (error) {
+      resolve(error?.code ?? "DENIED");
+      return;
+    }
+    const timer = setTimeout(() => {
+      child.kill();
+      finish("TIMEOUT");
+    }, 1000);
+    child.once("error", (error) => finish(error.code ?? "DENIED"));
+    child.once("close", (code) => finish(code === 0 ? "ALLOWED" : `EXIT_${code}`));
+  });
+}
+
 async function networkAttempt() {
   return new Promise((resolve) => {
     const socket = net.connect({ host: "1.1.1.1", port: 443 });
@@ -47,11 +74,16 @@ for await (const line of lines) {
     })}\n`);
   }
   if (message.messageType === "operation.request") {
-    const result = {
-      filesystem: attempt(() => fs.readFileSync("/etc/hosts")),
-      subprocess: attempt(() => childProcess.execFileSync("/bin/echo", ["unsafe"])),
-      network: await networkAttempt(),
-    };
+    const protectedFile = process.platform === "win32"
+      ? "C:\\Windows\\System32\\config\\SAM"
+      : "/etc/hosts";
+    const echo = process.platform === "win32"
+      ? ["C:\\Windows\\System32\\cmd.exe", ["/d", "/c", "echo unsafe"]]
+      : ["/bin/echo", ["unsafe"]];
+    const filesystem = attempt(() => fs.readFileSync(protectedFile));
+    const subprocess = await subprocessAttempt(echo[0], echo[1]);
+    const network = await networkAttempt();
+    const result = { filesystem, subprocess, network };
     process.stdout.write(`${JSON.stringify({
       protocolVersion: "1.0",
       messageType: "contribution",
