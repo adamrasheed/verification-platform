@@ -25,7 +25,9 @@ async function subprocessAttempt(executable, arguments_) {
     };
     let child;
     try {
-      child = childProcess.spawn(executable, arguments_, { stdio: "ignore" });
+      child = childProcess.spawn(executable, arguments_, {
+        stdio: ["ignore", "pipe", "ignore"],
+      });
     } catch (error) {
       resolve(error?.code ?? "DENIED");
       return;
@@ -34,11 +36,8 @@ async function subprocessAttempt(executable, arguments_) {
       child.kill();
       finish("TIMEOUT");
     }, 1000);
-    child.once("spawn", () => {
-      child.kill();
-      finish("ALLOWED");
-    });
     child.once("error", (error) => finish(error.code ?? "DENIED"));
+    child.once("close", (code) => finish(code === 0 ? "ALLOWED" : `EXIT_${code}`));
   });
 }
 
