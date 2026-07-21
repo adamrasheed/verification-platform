@@ -275,34 +275,39 @@ void grantReadExecute(const std::wstring& path, PSID sid, bool directory) {
   if (writeResult != ERROR_SUCCESS) fail(L"could not grant sandbox access");
 }
 
-void grantProtocolAccess(HANDLE handle, PSID sid, ACCESS_MASK permissions) {
-  PACL existing = nullptr;
-  PSECURITY_DESCRIPTOR descriptor = nullptr;
-  const DWORD readResult = GetSecurityInfo(
-    handle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
-    nullptr, nullptr, &existing, nullptr, &descriptor
-  );
-  if (readResult != ERROR_SUCCESS) fail(L"could not read protocol ACL");
-  EXPLICIT_ACCESSW access{};
-  access.grfAccessPermissions = permissions;
-  access.grfAccessMode = SET_ACCESS;
-  access.grfInheritance = NO_INHERITANCE;
-  access.Trustee.TrusteeForm = TRUSTEE_IS_SID;
-  access.Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
-  access.Trustee.ptstrName = static_cast<LPWSTR>(sid);
-  PACL updated = nullptr;
-  const DWORD mergeResult = SetEntriesInAclW(1, &access, existing, &updated);
-  if (mergeResult != ERROR_SUCCESS) {
-    LocalFree(descriptor);
-    fail(L"could not build protocol ACL");
+PSECURITY_DESCRIPTOR protocolSecurityDescriptor(PSID appContainer) {
+  HANDLE token = nullptr;
+  if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+    fail(L"could not inspect protocol owner");
   }
-  const DWORD writeResult = SetSecurityInfo(
-    handle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION,
-    nullptr, nullptr, updated, nullptr
-  );
-  LocalFree(updated);
-  LocalFree(descriptor);
-  if (writeResult != ERROR_SUCCESS) fail(L"could not grant protocol access");
+  DWORD required = 0;
+  GetTokenInformation(token, TokenUser, nullptr, 0, &required);
+  std::vector<unsigned char> tokenBytes(required);
+  if (required == 0 || !GetTokenInformation(
+      token, TokenUser, tokenBytes.data(), required, &required
+    )) {
+    CloseHandle(token);
+    fail(L"could not read protocol owner");
+  }
+  CloseHandle(token);
+  const auto* user = reinterpret_cast<const TOKEN_USER*>(tokenBytes.data());
+  LPWSTR userText = nullptr;
+  LPWSTR appContainerText = nullptr;
+  if (!ConvertSidToStringSidW(user->User.Sid, &userText)
+      || !ConvertSidToStringSidW(appContainer, &appContainerText)) {
+    if (userText != nullptr) LocalFree(userText);
+    fail(L"could not encode protocol identities");
+  }
+  const std::wstring sddl = L"D:P(A;;GA;;;SY)(A;;GA;;;"
+    + std::wstring(userText)
+    + L")(A;;GRGW;;;" + std::wstring(appContainerText) + L")";
+  LocalFree(userText);
+  LocalFree(appContainerText);
+  PSECURITY_DESCRIPTOR descriptor = nullptr;
+  if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(
+      sddl.c_str(), SDDL_REVISION_1, &descriptor, nullptr
+    )) fail(L"could not create protocol security descriptor");
+  return descriptor;
 }
 
 struct PipeBridge {
@@ -416,6 +421,7 @@ int launchSandbox(
   SECURITY_ATTRIBUTES pipeSecurity{};
   pipeSecurity.nLength = sizeof(pipeSecurity);
   pipeSecurity.bInheritHandle = TRUE;
+  pipeSecurity.lpSecurityDescriptor = protocolSecurityDescriptor(sid);
   HANDLE childStdin = nullptr;
   HANDLE hostStdin = nullptr;
   HANDLE hostStdout = nullptr;
@@ -428,8 +434,10 @@ int launchSandbox(
       || !SetHandleInformation(hostStdin, HANDLE_FLAG_INHERIT, 0)
       || !SetHandleInformation(hostStdout, HANDLE_FLAG_INHERIT, 0)
       || !SetHandleInformation(hostStderr, HANDLE_FLAG_INHERIT, 0)) {
+    LocalFree(pipeSecurity.lpSecurityDescriptor);
     fail(L"could not create private protocol pipes");
   }
+  LocalFree(pipeSecurity.lpSecurityDescriptor);
   std::array<HANDLE, 3> protocolHandles = {
     childStdin,
     childStdout,
@@ -441,9 +449,6 @@ int launchSandbox(
       fail(L"could not secure protocol handle inheritance");
     }
   }
-  grantProtocolAccess(childStdin, sid, GENERIC_READ);
-  grantProtocolAccess(childStdout, sid, GENERIC_WRITE);
-  grantProtocolAccess(childStderr, sid, GENERIC_WRITE);
   SIZE_T attributeBytes = 0;
   InitializeProcThreadAttributeList(nullptr, 3, 0, &attributeBytes);
   auto* attributes = static_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
