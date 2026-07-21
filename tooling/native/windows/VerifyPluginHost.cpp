@@ -305,6 +305,40 @@ void grantProtocolAccess(HANDLE handle, PSID sid, ACCESS_MASK permissions) {
   if (writeResult != ERROR_SUCCESS) fail(L"could not grant protocol access");
 }
 
+struct PipeBridge {
+  HANDLE source;
+  HANDLE target;
+  bool closeTarget;
+};
+
+DWORD WINAPI bridgePipe(LPVOID raw) {
+  const auto* bridge = static_cast<PipeBridge*>(raw);
+  std::array<unsigned char, 64 * 1024> buffer{};
+  for (;;) {
+    DWORD count = 0;
+    if (!ReadFile(
+        bridge->source, buffer.data(), static_cast<DWORD>(buffer.size()),
+        &count, nullptr
+      ) || count == 0) break;
+    DWORD offset = 0;
+    while (offset < count) {
+      DWORD written = 0;
+      if (!WriteFile(
+          bridge->target, buffer.data() + offset, count - offset,
+          &written, nullptr
+        ) || written == 0) {
+        offset = count;
+        count = 0;
+        break;
+      }
+      offset += written;
+    }
+    if (count == 0) break;
+  }
+  if (bridge->closeTarget) CloseHandle(bridge->target);
+  return 0;
+}
+
 std::wstring quoteArgument(const std::wstring& value) {
   if (value.find_first_of(L" \t\n\v\"") == std::wstring::npos) return value;
   std::wstring result = L"\"";
@@ -379,10 +413,27 @@ int launchSandbox(
   SECURITY_CAPABILITIES capabilities{};
   capabilities.AppContainerSid = sid;
   DWORD childPolicy = PROCESS_CREATION_CHILD_PROCESS_RESTRICTED;
+  SECURITY_ATTRIBUTES pipeSecurity{};
+  pipeSecurity.nLength = sizeof(pipeSecurity);
+  pipeSecurity.bInheritHandle = TRUE;
+  HANDLE childStdin = nullptr;
+  HANDLE hostStdin = nullptr;
+  HANDLE hostStdout = nullptr;
+  HANDLE childStdout = nullptr;
+  HANDLE hostStderr = nullptr;
+  HANDLE childStderr = nullptr;
+  if (!CreatePipe(&childStdin, &hostStdin, &pipeSecurity, 0)
+      || !CreatePipe(&hostStdout, &childStdout, &pipeSecurity, 0)
+      || !CreatePipe(&hostStderr, &childStderr, &pipeSecurity, 0)
+      || !SetHandleInformation(hostStdin, HANDLE_FLAG_INHERIT, 0)
+      || !SetHandleInformation(hostStdout, HANDLE_FLAG_INHERIT, 0)
+      || !SetHandleInformation(hostStderr, HANDLE_FLAG_INHERIT, 0)) {
+    fail(L"could not create private protocol pipes");
+  }
   std::array<HANDLE, 3> protocolHandles = {
-    GetStdHandle(STD_INPUT_HANDLE),
-    GetStdHandle(STD_OUTPUT_HANDLE),
-    GetStdHandle(STD_ERROR_HANDLE),
+    childStdin,
+    childStdout,
+    childStderr,
   };
   for (const HANDLE handle : protocolHandles) {
     if (handle == nullptr || handle == INVALID_HANDLE_VALUE
@@ -390,9 +441,9 @@ int launchSandbox(
       fail(L"could not secure protocol handle inheritance");
     }
   }
-  grantProtocolAccess(protocolHandles[0], sid, GENERIC_READ);
-  grantProtocolAccess(protocolHandles[1], sid, GENERIC_WRITE);
-  grantProtocolAccess(protocolHandles[2], sid, GENERIC_WRITE);
+  grantProtocolAccess(childStdin, sid, GENERIC_READ);
+  grantProtocolAccess(childStdout, sid, GENERIC_WRITE);
+  grantProtocolAccess(childStderr, sid, GENERIC_WRITE);
   SIZE_T attributeBytes = 0;
   InitializeProcThreadAttributeList(nullptr, 3, 0, &attributeBytes);
   auto* attributes = static_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(
@@ -480,6 +531,25 @@ int launchSandbox(
   DeleteProcThreadAttributeList(attributes);
   HeapFree(GetProcessHeap(), 0, attributes);
   if (!created) fail(L"could not launch AppContainer process");
+  CloseHandle(childStdin);
+  CloseHandle(childStdout);
+  CloseHandle(childStderr);
+  PipeBridge inputBridge{GetStdHandle(STD_INPUT_HANDLE), hostStdin, true};
+  PipeBridge outputBridge{hostStdout, GetStdHandle(STD_OUTPUT_HANDLE), false};
+  PipeBridge errorBridge{hostStderr, GetStdHandle(STD_ERROR_HANDLE), false};
+  HANDLE bridgeThreads[3] = {
+    CreateThread(nullptr, 0, bridgePipe, &inputBridge, 0, nullptr),
+    CreateThread(nullptr, 0, bridgePipe, &outputBridge, 0, nullptr),
+    CreateThread(nullptr, 0, bridgePipe, &errorBridge, 0, nullptr),
+  };
+  if (bridgeThreads[0] == nullptr
+      || bridgeThreads[1] == nullptr
+      || bridgeThreads[2] == nullptr) {
+    TerminateProcess(process.hProcess, 126);
+    CloseHandle(process.hThread);
+    CloseHandle(process.hProcess);
+    fail(L"could not bridge sandbox protocol");
+  }
   if (!AssignProcessToJobObject(sandboxJob, process.hProcess)) {
     TerminateProcess(process.hProcess, 126);
     CloseHandle(process.hThread);
@@ -505,6 +575,8 @@ int launchSandbox(
       TerminateJobObject(sandboxJob, 125);
       WaitForSingleObject(process.hProcess, 5000);
       CloseHandle(process.hProcess);
+      WaitForMultipleObjects(2, &bridgeThreads[1], TRUE, 1000);
+      for (const HANDLE thread : bridgeThreads) CloseHandle(thread);
       return 125;
     }
   }
@@ -514,6 +586,8 @@ int launchSandbox(
     maximumMemoryBytes, maximumCpuNanoseconds
   );
   CloseHandle(process.hProcess);
+  WaitForMultipleObjects(2, &bridgeThreads[1], TRUE, 1000);
+  for (const HANDLE thread : bridgeThreads) CloseHandle(thread);
   return exhausted ? 125 : static_cast<int>(exitCode);
 }
 
