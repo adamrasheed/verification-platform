@@ -75,7 +75,7 @@ for await (const line of lines) {
   }
   if (message.messageType === "operation.request") {
     const protectedFile = process.platform === "win32"
-      ? "C:\\Windows\\System32\\drivers\\etc\\hosts"
+      ? "C:\\Windows\\System32\\config\\SAM"
       : "/etc/hosts";
     const echo = process.platform === "win32"
       ? ["C:\\Windows\\System32\\cmd.exe", ["/d", "/c", "echo unsafe"]]
