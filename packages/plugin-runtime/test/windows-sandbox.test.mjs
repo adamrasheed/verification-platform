@@ -35,7 +35,12 @@ test("Windows native host runs synthetic providers and denies ambient capabiliti
   timeout: 90_000,
 }, async (context) => {
   const nativeDirectory = path.resolve(".tmp/native-windows-test");
-  context.after(async () => rm(nativeDirectory, { recursive: true, force: true }));
+  context.after(async () => rm(nativeDirectory, {
+    recursive: true,
+    force: true,
+    maxRetries: 50,
+    retryDelay: 200,
+  }));
   await executeFile(process.execPath, [
     path.join(repositoryRoot, "tooling/native/windows/build-host.mjs"),
     "--output",
