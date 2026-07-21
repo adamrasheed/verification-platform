@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-windows-sandbox",
+  "taskId": "M6-T06-windows-development,M6-T07-windows-development",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§10.5,11.5,18", "EDD §§13,25,27"],
+  "testIds": ["plugin-runtime:13", "native-windows:1"],
+  "command": "VERIFY_RUN_WINDOWS_NATIVE=1 npm run test --workspace @verify-internal/plugin-runtime",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/native/windows/VerifyPluginHost.cpp",
+      "digest": "sha256:fccf704313880afe7f1cf0d1c083a5e2c0684911139b922bfd4b5286119e86ca"
+    },
+    {
+      "path": "tooling/native/windows/build-host.mjs",
+      "digest": "sha256:c030d45dc09b58e738734dbed57e7d051db2fd64397b8128ff55f2c51cf53ce7"
+    },
+    {
+      "path": "packages/plugin-runtime/src/public/windows-sandbox.ts",
+      "digest": "sha256:0be10000bd43e1272cd27773a85042d4f21498f8e7c720926481b3e27e9dcc90"
+    },
+    {
+      "path": "packages/plugin-runtime/test/windows-sandbox.test.mjs",
+      "digest": "sha256:27d5720926b47cc69c5ce077adc4512a7816ebf0a243d91cbe10e703026a77b7"
+    },
+    {
+      "path": "packages/plugin-runtime/test/fixtures/sandbox-canary.mjs",
+      "digest": "sha256:b8feec38a478d45bc76a68d1e4bfc8267b526b40d1cb9fb5563d01695ef32d4d"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "digest": "sha256:285b5fc18d942206b3bcc114a87e4e1dab26e9d2d51a9b43497de290a475642d"
+    }
+  ]
+}

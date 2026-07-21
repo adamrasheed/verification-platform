@@ -196,9 +196,6 @@ export function createWindowsAppContainerSandboxLauncher(
           "the Windows sandbox protocol pipes are unavailable",
         );
       }
-      if (process.env.VERIFY_DEBUG_WINDOWS_NATIVE === "1") {
-        child.stderr.pipe(process.stderr, { end: false });
-      }
       child.stdin.on("error", () => {
         // Live writes receive their callback error; termination may reset the pipe.
       });

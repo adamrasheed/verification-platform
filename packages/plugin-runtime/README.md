@@ -29,3 +29,10 @@ user/PID/network/IPC/UTS/cgroup namespaces, a deny profile for process,
 network, mutation, tracing, namespace, and kernel-attack syscalls, and native
 RSS/CPU supervision. Kernels or host policies that deny required namespaces
 remain explicitly unavailable.
+
+On Windows, the native host stages exact digest-pinned artifact bytes into an
+AppContainer-readable private directory and launches a digest-pinned Node
+helper with no capabilities, a minimal environment, private protocol pipes,
+child-process restrictions, and Job Object memory, CPU, and process limits.
+Development identity is explicit; production remains unavailable unless the
+configured host and Node Authenticode signer thumbprints also match.

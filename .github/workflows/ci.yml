@@ -119,5 +119,4 @@ jobs:
       - name: Run native sandbox conformance
         env:
           VERIFY_RUN_WINDOWS_NATIVE: "1"
-          VERIFY_DEBUG_WINDOWS_NATIVE: "1"
         run: npm run test --workspace @verify-internal/plugin-runtime

@@ -314,7 +314,6 @@ struct PipeBridge {
   HANDLE source;
   HANDLE target;
   bool closeTarget;
-  const wchar_t* name;
 };
 
 DWORD WINAPI bridgePipe(LPVOID raw) {
@@ -326,12 +325,6 @@ DWORD WINAPI bridgePipe(LPVOID raw) {
         bridge->source, buffer.data(), static_cast<DWORD>(buffer.size()),
         &count, nullptr
       ) || count == 0) break;
-    fwprintf(
-      stderr,
-      L"verify-plugin-windows-host: bridge %ls read %lu bytes\n",
-      bridge->name,
-      static_cast<unsigned long>(count)
-    );
     DWORD offset = 0;
     while (offset < count) {
       DWORD written = 0;
@@ -348,11 +341,6 @@ DWORD WINAPI bridgePipe(LPVOID raw) {
     if (count == 0) break;
   }
   if (bridge->closeTarget) CloseHandle(bridge->target);
-  fwprintf(
-    stderr,
-    L"verify-plugin-windows-host: bridge %ls closed\n",
-    bridge->name
-  );
   return 0;
 }
 
@@ -551,15 +539,9 @@ int launchSandbox(
   CloseHandle(childStdin);
   CloseHandle(childStdout);
   CloseHandle(childStderr);
-  PipeBridge inputBridge{
-    GetStdHandle(STD_INPUT_HANDLE), hostStdin, true, L"stdin"
-  };
-  PipeBridge outputBridge{
-    hostStdout, GetStdHandle(STD_OUTPUT_HANDLE), false, L"stdout"
-  };
-  PipeBridge errorBridge{
-    hostStderr, GetStdHandle(STD_ERROR_HANDLE), false, L"stderr"
-  };
+  PipeBridge inputBridge{GetStdHandle(STD_INPUT_HANDLE), hostStdin, true};
+  PipeBridge outputBridge{hostStdout, GetStdHandle(STD_OUTPUT_HANDLE), false};
+  PipeBridge errorBridge{hostStderr, GetStdHandle(STD_ERROR_HANDLE), false};
   HANDLE bridgeThreads[3] = {
     CreateThread(nullptr, 0, bridgePipe, &inputBridge, 0, nullptr),
     CreateThread(nullptr, 0, bridgePipe, &outputBridge, 0, nullptr),
