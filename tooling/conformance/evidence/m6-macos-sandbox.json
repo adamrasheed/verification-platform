@@ -18,7 +18,7 @@
     },
     {
       "path": "tooling/native/macos/build-host.mjs",
-      "digest": "sha256:9c23d2879adc8b7cc39359b0053c60808ef38422d55bdbb391cf6ae1df0d3ae3"
+      "digest": "sha256:5c6b325aa6f4543363c8452f1f1d1ddc8be18fa915a1fcb0706d0c532f994938"
     },
     {
       "path": "tooling/native/macos/verify-plugin-host.entitlements",
@@ -30,7 +30,7 @@
     },
     {
       "path": "packages/plugin-runtime/src/public/macos-sandbox.ts",
-      "digest": "sha256:cf6c44d1eca9ad1226b3dcc27bedf83e7bea300b6078bdeb3525fc5a0befe0c1"
+      "digest": "sha256:eb9441e4d7949587be6ec3592faf0ab4f15dd2b233b95a47d36ed27297947258"
     },
     {
       "path": ".github/workflows/ci.yml",

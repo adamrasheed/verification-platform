@@ -23,6 +23,7 @@
     "check:performance": "node tooling/conformance/benchmark.mjs",
     "check:corpus": "node tooling/conformance/run-mvp-corpus.mjs",
     "check:release-tools": "node tooling/release/test-release-tools.mjs",
+    "check:native-release-tools": "node tooling/native/release/test-native-release-tools.mjs",
     "check:release-pack": "node tooling/release/audit-pack.mjs apps/cli",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:packages": "npm run test --workspaces --if-present",
@@ -33,7 +34,7 @@
     "test:m3": "npm run test:m2 && npm run test --workspace @verify-internal/evidence && npm run test --workspace @verify-internal/engine",
     "test:m4": "npm run test:m3 && npm run test --workspace @verify-internal/auth && npm run test --workspace @verify-internal/execution && npm run test --workspace @verify-internal/repair",
     "test:m5": "npm run test:m4 && npm run test --workspace @adamrasheed/verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
-    "test:m6": "npm run test:m5 && npm run test --workspace @verify-internal/plugin-sdk && npm run test --workspace @verify-internal/plugin-runtime",
+    "test:m6": "npm run test:m5 && npm run check:native-release-tools && npm run test --workspace @verify-internal/plugin-sdk && npm run test --workspace @verify-internal/plugin-runtime",
     "test": "npm run build && npm run test:m6"
   },
   "devDependencies": {

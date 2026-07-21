@@ -24,6 +24,8 @@ if (process.platform !== "darwin") {
 }
 
 const identity = option("--identity", "-");
+const keychain = option("--keychain", undefined);
+const release = process.argv.includes("--release");
 const nodeBinary = path.resolve(option("--node", process.execPath));
 const output = path.resolve(option(
   "--output",
@@ -33,6 +35,25 @@ const contents = path.join(output, "Contents");
 const host = path.join(contents, "MacOS/VerifyPluginHost");
 const helper = path.join(contents, "Helpers/node");
 const supervisor = path.join(contents, "Helpers/VerifyPluginSupervisor");
+
+if (release && identity === "-") {
+  throw new Error("release builds require a non-ad-hoc signing identity");
+}
+
+function sign(target, identifier, entitlements) {
+  const arguments_ = [
+    "--force",
+    release ? "--timestamp" : "--timestamp=none",
+    "--options",
+    "runtime",
+    "--sign",
+    identity,
+  ];
+  if (keychain) arguments_.push("--keychain", path.resolve(keychain));
+  if (entitlements) arguments_.push("--entitlements", entitlements);
+  arguments_.push("--identifier", identifier, target);
+  execFileSync("codesign", arguments_, { stdio: "inherit" });
+}
 
 rmSync(output, { recursive: true, force: true });
 mkdirSync(path.dirname(host), { recursive: true, mode: 0o755 });
@@ -52,43 +73,17 @@ execFileSync("swiftc", [
   supervisor,
   path.join(scriptRoot, "VerifyPluginSupervisor.swift"),
 ], { stdio: "inherit" });
-execFileSync("codesign", [
-  "--force",
-  "--timestamp=none",
-  "--options",
-  "runtime",
-  "--sign",
-  identity,
-  "--identifier",
-  "dev.verify.plugin-supervisor",
-  supervisor,
-], { stdio: "inherit" });
-execFileSync("codesign", [
-  "--force",
-  "--timestamp=none",
-  "--options",
-  "runtime",
-  "--sign",
-  identity,
-  "--entitlements",
-  path.join(scriptRoot, "verify-plugin-helper.entitlements"),
-  "--identifier",
-  "dev.verify.plugin-host.node",
+sign(supervisor, "dev.verify.plugin-supervisor");
+sign(
   helper,
-], { stdio: "inherit" });
-execFileSync("codesign", [
-  "--force",
-  "--timestamp=none",
-  "--options",
-  "runtime",
-  "--sign",
-  identity,
-  "--entitlements",
-  path.join(scriptRoot, "verify-plugin-host.entitlements"),
-  "--identifier",
-  "dev.verify.plugin-host",
+  "dev.verify.plugin-host.node",
+  path.join(scriptRoot, "verify-plugin-helper.entitlements"),
+);
+sign(
   output,
-], { stdio: "inherit" });
+  "dev.verify.plugin-host",
+  path.join(scriptRoot, "verify-plugin-host.entitlements"),
+);
 execFileSync("codesign", [
   "--verify",
   "--deep",

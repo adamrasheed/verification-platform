@@ -1,0 +1,267 @@
+name: Sign native plugin hosts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer version for the native host artifact set
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-host-release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  macos:
+    name: Sign and notarize macOS host
+    runs-on: macos-15
+    timeout-minutes: 30
+    environment: native-host-release
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - name: Require protected signing inputs
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_DEVELOPER_ID_APPLICATION: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION }}
+          MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          APPLE_NOTARY_KEY_BASE64: ${{ secrets.APPLE_NOTARY_KEY_BASE64 }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          for name in \
+            MACOS_CERTIFICATE_P12_BASE64 \
+            MACOS_CERTIFICATE_PASSWORD \
+            MACOS_DEVELOPER_ID_APPLICATION \
+            MACOS_TEAM_ID \
+            APPLE_NOTARY_KEY_BASE64 \
+            APPLE_NOTARY_KEY_ID \
+            APPLE_NOTARY_ISSUER_ID
+          do
+            test -n "${!name:-}" || { echo "missing protected secret: $name" >&2; exit 2; }
+          done
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Import the Developer ID identity
+        shell: bash
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERTIFICATE_PATH="$RUNNER_TEMP/verify-developer-id.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/verify-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 32)"
+          printf '%s' "$MACOS_CERTIFICATE_P12_BASE64" | /usr/bin/base64 -D > "$CERTIFICATE_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$MACOS_CERTIFICATE_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Build, sign, notarize, and seal macOS pins
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+          MACOS_DEVELOPER_ID_APPLICATION: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION }}
+          MACOS_TEAM_ID: ${{ secrets.MACOS_TEAM_ID }}
+          APPLE_NOTARY_KEY_BASE64: ${{ secrets.APPLE_NOTARY_KEY_BASE64 }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          RELEASE_ROOT="$RUNNER_TEMP/native-macos-release"
+          KEYCHAIN_PATH="$RUNNER_TEMP/verify-signing.keychain-db"
+          APP="$RELEASE_ROOT/VerifyPluginHost.app"
+          SUBMISSION="$RELEASE_ROOT/notarization-submission.zip"
+          ARCHIVE="$RELEASE_ROOT/VerifyPluginHost-macos-$VERSION.zip"
+          NOTARY_KEY="$RUNNER_TEMP/AuthKey_$APPLE_NOTARY_KEY_ID.p8"
+          mkdir -p "$RELEASE_ROOT"
+          printf '%s' "$APPLE_NOTARY_KEY_BASE64" | /usr/bin/base64 -D > "$NOTARY_KEY"
+          chmod 600 "$NOTARY_KEY"
+          node tooling/native/macos/build-host.mjs \
+            --release \
+            --identity "$MACOS_DEVELOPER_ID_APPLICATION" \
+            --keychain "$KEYCHAIN_PATH" \
+            --output "$APP"
+          ditto -c -k --keepParent "$APP" "$SUBMISSION"
+          xcrun notarytool submit "$SUBMISSION" \
+            --key "$NOTARY_KEY" \
+            --key-id "$APPLE_NOTARY_KEY_ID" \
+            --issuer "$APPLE_NOTARY_ISSUER_ID" \
+            --wait
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+          ditto -c -k --keepParent "$APP" "$ARCHIVE"
+          node tooling/native/release/create-macos-manifest.mjs \
+            --app "$APP" \
+            --archive "$ARCHIVE" \
+            --output "$RELEASE_ROOT/manifest.json" \
+            --version "$VERSION" \
+            --team-id "$MACOS_TEAM_ID" \
+            --authority "$MACOS_DEVELOPER_ID_APPLICATION"
+          node tooling/native/release/check-manifest.mjs \
+            "$RELEASE_ROOT/manifest.json" \
+            "$RELEASE_ROOT"
+          rm -f "$SUBMISSION" "$NOTARY_KEY"
+
+      - name: Remove imported signing material
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          rm -f "$RUNNER_TEMP/verify-developer-id.p12" "$RUNNER_TEMP"/AuthKey_*.p8
+          security delete-keychain "$RUNNER_TEMP/verify-signing.keychain-db" || true
+
+      - name: Retain the signed macOS release
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: VerifyPluginHost-macos-${{ inputs.version }}
+          path: |
+            ${{ runner.temp }}/native-macos-release/VerifyPluginHost-macos-${{ inputs.version }}.zip
+            ${{ runner.temp }}/native-macos-release/manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
+  windows:
+    name: Sign Windows host
+    runs-on: windows-2025
+    timeout-minutes: 25
+    environment: native-host-release
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+          package-manager-cache: false
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+
+      - name: Require protected signing inputs
+        shell: pwsh
+        env:
+          VERSION: ${{ inputs.version }}
+          WINDOWS_CERTIFICATE_PFX_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_PFX_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          WINDOWS_HOST_SIGNER_THUMBPRINT: ${{ secrets.WINDOWS_HOST_SIGNER_THUMBPRINT }}
+          WINDOWS_NODE_SIGNER_THUMBPRINT: ${{ secrets.WINDOWS_NODE_SIGNER_THUMBPRINT }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          if ($env:VERSION -notmatch '^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$') {
+            throw "version must be SemVer"
+          }
+          @(
+            'WINDOWS_CERTIFICATE_PFX_BASE64',
+            'WINDOWS_CERTIFICATE_PASSWORD',
+            'WINDOWS_HOST_SIGNER_THUMBPRINT',
+            'WINDOWS_NODE_SIGNER_THUMBPRINT',
+            'WINDOWS_TIMESTAMP_URL'
+          ) | ForEach-Object {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_))) {
+              throw "missing protected secret: $_"
+            }
+          }
+
+      - name: Install exact dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build, sign, and seal Windows pins
+        shell: pwsh
+        env:
+          VERSION: ${{ inputs.version }}
+          WINDOWS_CERTIFICATE_PFX_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_PFX_BASE64 }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          WINDOWS_HOST_SIGNER_THUMBPRINT: ${{ secrets.WINDOWS_HOST_SIGNER_THUMBPRINT }}
+          WINDOWS_NODE_SIGNER_THUMBPRINT: ${{ secrets.WINDOWS_NODE_SIGNER_THUMBPRINT }}
+          WINDOWS_TIMESTAMP_URL: ${{ secrets.WINDOWS_TIMESTAMP_URL }}
+        run: |
+          $releaseRoot = Join-Path $env:RUNNER_TEMP 'native-windows-release'
+          $bundle = Join-Path $releaseRoot 'bundle'
+          $certificate = Join-Path $env:RUNNER_TEMP 'verify-code-signing.pfx'
+          $archive = Join-Path $releaseRoot "VerifyPluginHost-windows-$env:VERSION.zip"
+          New-Item -ItemType Directory -Force -Path $releaseRoot | Out-Null
+          [IO.File]::WriteAllBytes(
+            $certificate,
+            [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_PFX_BASE64)
+          )
+          node tooling/native/windows/build-host.mjs --output $bundle
+          Copy-Item (Get-Command node.exe).Source (Join-Path $bundle 'node.exe')
+          $signTool = (Get-Command signtool.exe).Source
+          $host = Join-Path $bundle 'VerifyPluginHost.exe'
+          $node = Join-Path $bundle 'node.exe'
+          $signArguments = @(
+            'sign',
+            '/fd', 'SHA256',
+            '/tr', $env:WINDOWS_TIMESTAMP_URL,
+            '/td', 'SHA256',
+            '/f', $certificate,
+            '/p', $env:WINDOWS_CERTIFICATE_PASSWORD,
+            $host
+          )
+          & $signTool @signArguments
+          if ($LASTEXITCODE -ne 0) { throw "signtool failed" }
+          & $signTool verify /pa /all $host
+          if ($LASTEXITCODE -ne 0) { throw "host signature verification failed" }
+          & $signTool verify /pa /all $node
+          if ($LASTEXITCODE -ne 0) { throw "Node signature verification failed" }
+          Compress-Archive -Path (Join-Path $bundle '*') -DestinationPath $archive
+          $manifest = Join-Path $releaseRoot 'manifest.json'
+          $manifestArguments = @(
+            'tooling/native/release/create-windows-manifest.mjs',
+            '--directory', $bundle,
+            '--archive', $archive,
+            '--output', $manifest,
+            '--version', $env:VERSION,
+            '--host-thumbprint', $env:WINDOWS_HOST_SIGNER_THUMBPRINT,
+            '--node-thumbprint', $env:WINDOWS_NODE_SIGNER_THUMBPRINT
+          )
+          & node @manifestArguments
+          if ($LASTEXITCODE -ne 0) { throw "Windows manifest generation failed" }
+          node tooling/native/release/check-manifest.mjs $manifest $releaseRoot
+          Remove-Item -Force $certificate
+
+      - name: Remove imported signing material
+        if: ${{ always() }}
+        shell: pwsh
+        run: Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $env:RUNNER_TEMP 'verify-code-signing.pfx')
+
+      - name: Retain the signed Windows release
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: VerifyPluginHost-windows-${{ inputs.version }}
+          path: |
+            ${{ runner.temp }}/native-windows-release/VerifyPluginHost-windows-${{ inputs.version }}.zip
+            ${{ runner.temp }}/native-windows-release/manifest.json
+          if-no-files-found: error
+          retention-days: 30
