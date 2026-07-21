@@ -33,7 +33,13 @@ void cleanup() {
 }
 
 [[noreturn]] void fail(const wchar_t* message, int status = 126) {
-  fwprintf(stderr, L"verify-plugin-windows-host: %ls\n", message);
+  const DWORD error = GetLastError();
+  fwprintf(
+    stderr,
+    L"verify-plugin-windows-host: %ls (win32=%lu)\n",
+    message,
+    static_cast<unsigned long>(error)
+  );
   cleanup();
   ExitProcess(static_cast<UINT>(status));
 }
