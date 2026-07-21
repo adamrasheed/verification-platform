@@ -377,7 +377,8 @@ int launchSandbox(
   startup.StartupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
   startup.lpAttributeList = attributes;
   const std::wstring command = quoteArgument(node)
-    + L" --disable-proto=throw " + quoteArgument(artifactPath);
+    + L" --disable-proto=throw --preserve-symlinks --preserve-symlinks-main "
+    + quoteArgument(artifactPath);
   std::vector<wchar_t> commandLine(command.begin(), command.end());
   commandLine.push_back(L'\0');
   wchar_t windowsDirectory[MAX_PATH + 1]{};
