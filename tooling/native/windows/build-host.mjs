@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,39 +39,4 @@ const compilerArguments = [
   "advapi32.lib",
 ];
 
-try {
-  execFileSync("cl.exe", compilerArguments, { stdio: "inherit" });
-} catch (directError) {
-  const programFiles = process.env["ProgramFiles(x86)"];
-  const vswhere = programFiles
-    ? path.join(programFiles, "Microsoft Visual Studio", "Installer", "vswhere.exe")
-    : undefined;
-  if (!vswhere || !existsSync(vswhere)) throw directError;
-  const installation = execFileSync(vswhere, [
-    "-latest",
-    "-products",
-    "*",
-    "-requires",
-    "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
-    "-property",
-    "installationPath",
-  ], { encoding: "utf8" }).trim();
-  if (!installation) throw directError;
-  const developmentShell = path.join(
-    installation,
-    "Common7",
-    "Tools",
-    "VsDevCmd.bat",
-  );
-  const quote = (value) => `"${value.replaceAll('"', '\\"')}"`;
-  const command = [
-    "call",
-    quote(developmentShell),
-    "-arch=x64",
-    "-host_arch=x64",
-    "&&",
-    "cl.exe",
-    ...compilerArguments.map(quote),
-  ].join(" ");
-  execFileSync("cmd.exe", ["/d", "/c", command], { stdio: "inherit" });
-}
+execFileSync("cl.exe", compilerArguments, { stdio: "inherit" });

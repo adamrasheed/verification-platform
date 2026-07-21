@@ -107,6 +107,9 @@ jobs:
           node-version: "22"
           package-manager-cache: false
 
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+
       - name: Install exact dependencies
         run: npm ci --ignore-scripts
 
