@@ -37,6 +37,7 @@ const compilerArguments = [
   "bcrypt.lib",
   "userenv.lib",
   "advapi32.lib",
+  "ole32.lib",
 ];
 
 execFileSync("cl.exe", compilerArguments, { stdio: "inherit" });

@@ -5,6 +5,7 @@
 #include <bcrypt.h>
 #include <io.h>
 #include <fcntl.h>
+#include <sddl.h>
 #include <userenv.h>
 
 #include <algorithm>
@@ -396,11 +397,30 @@ int launchSandbox(
     && invocationRoot[1] == L':'
     ? invocationRoot.substr(0, 2)
     : systemDrive;
+  LPWSTR sidText = nullptr;
+  if (!ConvertSidToStringSidW(sid, &sidText)) {
+    fail(L"could not encode AppContainer identity");
+  }
+  PWSTR profileText = nullptr;
+  const HRESULT profileResult = GetAppContainerFolderPath(sidText, &profileText);
+  LocalFree(sidText);
+  if (FAILED(profileResult) || profileText == nullptr) {
+    fail(L"could not locate AppContainer profile");
+  }
+  const std::wstring profile(profileText);
+  CoTaskMemFree(profileText);
+  const std::wstring profileTemp = profile + L"\\Temp";
   std::wstring environment = L"=" + invocationDrive + L"=" + invocationRoot;
+  environment.push_back(L'\0');
+  environment += L"LOCALAPPDATA=" + profile;
   environment.push_back(L'\0');
   environment += L"SystemDrive=" + systemDrive;
   environment.push_back(L'\0');
   environment += L"SystemRoot=" + systemRoot;
+  environment.push_back(L'\0');
+  environment += L"TEMP=" + profileTemp;
+  environment.push_back(L'\0');
+  environment += L"TMP=" + profileTemp;
   environment.push_back(L'\0');
   environment += L"WINDIR=" + systemRoot;
   environment.push_back(L'\0');
