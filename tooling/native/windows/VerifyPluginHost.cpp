@@ -381,12 +381,29 @@ int launchSandbox(
     + L" " + quoteArgument(artifactPath);
   std::vector<wchar_t> commandLine(command.begin(), command.end());
   commandLine.push_back(L'\0');
-  wchar_t emptyEnvironment[2] = {L'\0', L'\0'};
+  wchar_t windowsDirectory[MAX_PATH + 1]{};
+  const UINT windowsDirectoryLength = GetWindowsDirectoryW(
+    windowsDirectory, MAX_PATH
+  );
+  if (windowsDirectoryLength == 0 || windowsDirectoryLength > MAX_PATH) {
+    fail(L"could not construct sandbox environment");
+  }
+  const std::wstring systemRoot(windowsDirectory, windowsDirectoryLength);
+  const std::wstring systemDrive = systemRoot.size() >= 2
+    ? systemRoot.substr(0, 2)
+    : L"C:";
+  std::wstring environment = L"SystemDrive=" + systemDrive;
+  environment.push_back(L'\0');
+  environment += L"SystemRoot=" + systemRoot;
+  environment.push_back(L'\0');
+  environment += L"WINDIR=" + systemRoot;
+  environment.push_back(L'\0');
+  environment.push_back(L'\0');
   PROCESS_INFORMATION process{};
   const BOOL created = CreateProcessW(
     node.c_str(), commandLine.data(), nullptr, nullptr, TRUE,
     EXTENDED_STARTUPINFO_PRESENT | CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT,
-    emptyEnvironment, invocationRoot.c_str(), &startup.StartupInfo, &process
+    environment.data(), invocationRoot.c_str(), &startup.StartupInfo, &process
   );
   DeleteProcThreadAttributeList(attributes);
   HeapFree(GetProcessHeap(), 0, attributes);
