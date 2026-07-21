@@ -20,6 +20,7 @@ const executeFile = promisify(execFile);
 export interface MacOsAppSandboxLauncherOptions {
   readonly appBundlePath: string;
   readonly expectedTeamIdentifier?: string;
+  readonly expectedSigningAuthority?: string;
   readonly expectedHostCdHash?: string;
   readonly expectedHelperCdHash?: string;
   readonly expectedSupervisorCdHash?: string;
@@ -108,14 +109,40 @@ async function verifyBundle(
       || !supervisor.hardenedRuntime
     ) return false;
     if (options.allowDevelopmentSignature) return true;
+    const expectedTeam = options.expectedTeamIdentifier;
+    const expectedAuthority = options.expectedSigningAuthority;
+    if (
+      typeof expectedTeam !== "string"
+      || !/^[A-Z0-9]{10}$/.test(expectedTeam)
+      || typeof expectedAuthority !== "string"
+      || !expectedAuthority.startsWith("Developer ID Application:")
+      || !expectedAuthority.endsWith(` (${expectedTeam})`)
+    ) return false;
+    const requirement = [
+      "=anchor apple generic",
+      "certificate 1[field.1.2.840.113635.100.6.2.6] exists",
+      "certificate leaf[field.1.2.840.113635.100.6.1.13] exists",
+      `certificate leaf[subject.OU] = \"${expectedTeam}\"`,
+      `certificate leaf[subject.CN] = \"${expectedAuthority.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"")}\"`,
+    ].join(" and ");
+    await Promise.all([
+      path.join(options.appBundlePath, "Contents/MacOS/VerifyPluginHost"),
+      path.join(options.appBundlePath, "Contents/Helpers/node"),
+      path.join(options.appBundlePath, "Contents/Helpers/VerifyPluginSupervisor"),
+    ].map((executable) => executeFile("/usr/bin/codesign", [
+      "--verify",
+      "--strict",
+      "--test-requirement",
+      requirement,
+      executable,
+    ])));
     return (
-      typeof options.expectedTeamIdentifier === "string"
-      && host.teamIdentifier === options.expectedTeamIdentifier
-      && helper.teamIdentifier === options.expectedTeamIdentifier
-      && supervisor.teamIdentifier === options.expectedTeamIdentifier
-      && host.authority?.startsWith("Developer ID Application:") === true
-      && helper.authority?.startsWith("Developer ID Application:") === true
-      && supervisor.authority?.startsWith("Developer ID Application:") === true
+      host.teamIdentifier === expectedTeam
+      && helper.teamIdentifier === expectedTeam
+      && supervisor.teamIdentifier === expectedTeam
+      && host.authority === expectedAuthority
+      && helper.authority === expectedAuthority
+      && supervisor.authority === expectedAuthority
       && host.cdHash === options.expectedHostCdHash
       && helper.cdHash === options.expectedHelperCdHash
       && supervisor.cdHash === options.expectedSupervisorCdHash

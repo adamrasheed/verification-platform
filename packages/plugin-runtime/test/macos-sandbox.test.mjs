@@ -28,6 +28,17 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
     "--output",
     appBundlePath,
   ]);
+  await assert.rejects(
+    executeFile(process.execPath, [
+      path.join(repositoryRoot, "tooling/native/macos/build-host.mjs"),
+      "--release",
+      "--output",
+      path.resolve(".tmp/native-macos-test/unsigned.app"),
+    ]),
+    (error) => error.stderr.includes(
+      "release builds require a non-ad-hoc signing identity",
+    ),
+  );
   const sandbox = createMacOsAppSandboxLauncher({
     appBundlePath,
     allowDevelopmentSignature: true,

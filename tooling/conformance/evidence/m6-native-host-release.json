@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-native-host-release",
+  "taskId": "M6-T06-native-release-pipeline",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§ 10.5,14.4,18", "EDD §§ 13,25,27"],
+  "testIds": ["native-release:5", "plugin-runtime:13"],
+  "command": "npm run check:native-release-tools && npm run test --workspace @verify-internal/plugin-runtime",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": ".github/workflows/native-host-release.yml",
+      "digest": "sha256:baad395d0a08213190246f8a8b2d83b098970c2dc8563221915fb630c45fe8c7"
+    },
+    {
+      "path": "tooling/native/release/lib.mjs",
+      "digest": "sha256:7e29552bc0382b8b8761ddf6a7921a67af7eaf22131150d75ddfa8bcae321de3"
+    },
+    {
+      "path": "tooling/native/release/check-manifest.mjs",
+      "digest": "sha256:671aea11249c7f13f5fdd30de7f55f3c2030944741ddfff637b6c89851aec397"
+    },
+    {
+      "path": "tooling/native/release/create-macos-manifest.mjs",
+      "digest": "sha256:0640f76eb8392f7c393a5304de6eb6c875ce4171219fe416b0012921db4cef6a"
+    },
+    {
+      "path": "tooling/native/release/create-windows-manifest.mjs",
+      "digest": "sha256:b3e8053bdd99a5f02cc9d25fb79d11f7c3e3b4281cb52f6275722d09580c597b"
+    },
+    {
+      "path": "tooling/native/macos/build-host.mjs",
+      "digest": "sha256:5c6b325aa6f4543363c8452f1f1d1ddc8be18fa915a1fcb0706d0c532f994938"
+    },
+    {
+      "path": "packages/plugin-runtime/src/public/macos-sandbox.ts",
+      "digest": "sha256:eb9441e4d7949587be6ec3592faf0ab4f15dd2b233b95a47d36ed27297947258"
+    }
+  ]
+}

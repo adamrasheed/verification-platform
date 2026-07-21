@@ -20,7 +20,8 @@ The separate native supervisor sees only process identity and configured
 limits. It enforces physical-memory and CPU budgets, propagates cancellation to
 the sandbox tree, and maps exhaustion to a typed runtime error. A production
 launcher becomes available only when Developer ID authority, Team ID, hardened
-runtime, and exact supervisor/host/helper code-directory hashes all match.
+runtime, an Apple-anchored certificate requirement, and exact
+supervisor/host/helper code-directory hashes all match.
 
 On supported Linux kernels, the production launcher requires exact SHA-256
 identities for the native host, bundled Node helper, system bubblewrap, and
@@ -36,3 +37,7 @@ helper with no capabilities, a minimal environment, private protocol pipes,
 child-process restrictions, and Job Object memory, CPU, and process limits.
 Development identity is explicit; production remains unavailable unless the
 configured host and Node Authenticode signer thumbprints also match.
+
+The protected native-host release workflow and its exact runtime-pin manifests
+are documented in
+[`tooling/native/release`](../../tooling/native/release/README.md).

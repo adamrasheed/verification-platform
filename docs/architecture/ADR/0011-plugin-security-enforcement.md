@@ -48,6 +48,14 @@ Production availability additionally requires Developer ID authority, one
 expected Team ID, hardened runtime on all three executables, and exact
 code-directory hashes for the supervisor, host, and helper.
 
+macOS and Windows distributable hosts are produced only by a manually
+dispatched, protected release environment. The macOS job requires an
+Apple-anchored Developer ID Application chain, trusted timestamp, accepted
+notarization, and stapled ticket. The Windows job requires a trusted
+Authenticode chain and RFC 3161 timestamp. Both jobs emit a digest-bound
+manifest containing the exact runtime identity pins; absent credentials or a
+pin mismatch produce no retained release artifact.
+
 The Linux implementation uses a digest-pinned native host around a pinned
 bubblewrap and Node distribution. Bubblewrap constructs empty mount, user,
 PID, IPC, UTS, cgroup, and network namespaces; the host mounts only the exact
