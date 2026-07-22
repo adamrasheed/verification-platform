@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
@@ -18,36 +19,7 @@ import {
 const executeFile = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../../..");
 
-test("macOS native host runs synthetic providers and denies ambient capabilities", {
-  skip: process.platform !== "darwin",
-  timeout: 60_000,
-}, async () => {
-  const appBundlePath = path.resolve(".tmp/native-macos-test/VerifyPluginHost.app");
-  await executeFile(process.execPath, [
-    path.join(repositoryRoot, "tooling/native/macos/build-host.mjs"),
-    "--output",
-    appBundlePath,
-  ]);
-  await assert.rejects(
-    executeFile(process.execPath, [
-      path.join(repositoryRoot, "tooling/native/macos/build-host.mjs"),
-      "--release",
-      "--output",
-      path.resolve(".tmp/native-macos-test/unsigned.app"),
-    ]),
-    (error) => error.stderr.includes(
-      "release builds require a non-ad-hoc signing identity",
-    ),
-  );
-  const sandbox = createMacOsAppSandboxLauncher({
-    appBundlePath,
-    allowDevelopmentSignature: true,
-  });
-  assert.equal(await sandbox.available(), true);
-  assert.equal(sandbox.production, false);
-  const productionIdentity = createMacOsAppSandboxLauncher({ appBundlePath });
-  assert.equal(productionIdentity.production, true);
-  assert.equal(await productionIdentity.available(), false);
+async function runMacOsSandboxConformance(sandbox, createCpuSandbox) {
   const authorizedInvocation = (manifest, options = {}, launcher = sandbox) =>
     invocation(manifest, {
       ...options,
@@ -106,11 +78,7 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
     (error) => error.code === "VFY_PLUGIN_RESOURCE_EXHAUSTED",
   );
 
-  const cpuSandbox = createMacOsAppSandboxLauncher({
-    appBundlePath,
-    allowDevelopmentSignature: true,
-    maximumCpuNanoseconds: 1_000_000_000,
-  });
+  const cpuSandbox = createCpuSandbox();
   const cpuFlood = await signedManifest("cpu-flood.mjs", "synthetic-cpu-flood");
   await assert.rejects(
     runtimeHarness(brokerHarness().broker, { sandbox: cpuSandbox }).invoke(
@@ -131,4 +99,79 @@ test("macOS native host runs synthetic providers and denies ambient capabilities
     })),
     (error) => error.code === "VFY_PLUGIN_STDERR_OVERSIZED",
   );
+}
+
+test("macOS native host runs synthetic providers and denies ambient capabilities", {
+  skip: process.platform !== "darwin",
+  timeout: 60_000,
+}, async () => {
+  const appBundlePath = path.resolve(".tmp/native-macos-test/VerifyPluginHost.app");
+  await executeFile(process.execPath, [
+    path.join(repositoryRoot, "tooling/native/macos/build-host.mjs"),
+    "--output",
+    appBundlePath,
+  ]);
+  await assert.rejects(
+    executeFile(process.execPath, [
+      path.join(repositoryRoot, "tooling/native/macos/build-host.mjs"),
+      "--release",
+      "--output",
+      path.resolve(".tmp/native-macos-test/unsigned.app"),
+    ]),
+    (error) => error.stderr.includes(
+      "release builds require a non-ad-hoc signing identity",
+    ),
+  );
+  const sandbox = createMacOsAppSandboxLauncher({
+    appBundlePath,
+    allowDevelopmentSignature: true,
+  });
+  assert.equal(await sandbox.available(), true);
+  assert.equal(sandbox.production, false);
+  const productionIdentity = createMacOsAppSandboxLauncher({ appBundlePath });
+  assert.equal(productionIdentity.production, true);
+  assert.equal(await productionIdentity.available(), false);
+  await runMacOsSandboxConformance(sandbox, () => createMacOsAppSandboxLauncher({
+    appBundlePath,
+    allowDevelopmentSignature: true,
+    maximumCpuNanoseconds: 1_000_000_000,
+  }));
 });
+
+test("signed macOS production host passes the same conformance suite", {
+  skip: process.platform !== "darwin"
+    || process.env.VERIFY_RUN_MACOS_PRODUCTION !== "1",
+  timeout: 60_000,
+}, async () => {
+  const appBundlePath = path.resolve(
+    assertRequiredEnvironment("VERIFY_MACOS_PRODUCTION_APP"),
+  );
+  const manifestPath = path.resolve(
+    assertRequiredEnvironment("VERIFY_MACOS_PRODUCTION_MANIFEST"),
+  );
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  assert.equal(manifest.platform, "macos");
+  assert.equal(manifest.identity.notarized, true);
+  assert.equal(manifest.identity.timestamped, true);
+  const launcherOptions = {
+    appBundlePath,
+    expectedTeamIdentifier: manifest.identity.teamIdentifier,
+    expectedSigningAuthority: manifest.identity.signingAuthority,
+    expectedHostCdHash: manifest.identity.host.cdHash,
+    expectedHelperCdHash: manifest.identity.helper.cdHash,
+    expectedSupervisorCdHash: manifest.identity.supervisor.cdHash,
+  };
+  const sandbox = createMacOsAppSandboxLauncher(launcherOptions);
+  assert.equal(sandbox.production, true);
+  assert.equal(await sandbox.available(), true);
+  await runMacOsSandboxConformance(sandbox, () => createMacOsAppSandboxLauncher({
+    ...launcherOptions,
+    maximumCpuNanoseconds: 1_000_000_000,
+  }));
+});
+
+function assertRequiredEnvironment(name) {
+  const value = process.env[name];
+  assert.ok(value, `${name} is required for production conformance`);
+  return value;
+}
