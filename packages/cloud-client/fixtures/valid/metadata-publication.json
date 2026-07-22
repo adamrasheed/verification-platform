@@ -8,7 +8,7 @@
   "idempotencyKey": "idempotency:fixture",
   "applicationModel": {
     "objectType": "applicationModel",
-    "publicationId": "pub:model",
+    "publicationId": "pub_v1_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     "tenantBinding": "tenant:fixture"
   },
   "operationalStatus": "completed",

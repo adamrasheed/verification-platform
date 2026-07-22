@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/publication-outbox-event/v1",
+  "title": "PublicationOutboxEventV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "eventId", "eventType", "tenantId", "aggregateType",
+    "aggregateId", "occurredAt", "payload"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "eventId": { "$ref": "#/$defs/id" },
+    "eventType": { "const": "PublishedRunAccepted" },
+    "tenantId": { "$ref": "#/$defs/id" },
+    "aggregateType": { "const": "publishedRun" },
+    "aggregateId": { "$ref": "#/$defs/id" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publishedRunId", "payloadDigest"],
+      "properties": {
+        "publishedRunId": { "$ref": "#/$defs/id" },
+        "payloadDigest": { "$ref": "#/$defs/digest" }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

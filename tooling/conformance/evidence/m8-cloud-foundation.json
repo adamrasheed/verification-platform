@@ -26,7 +26,7 @@
     },
     {
       "path": "packages/cloud-client/src/public/validation.ts",
-      "digest": "sha256:bacf87c51b9fe234fb49e5dd8c3b3396b8e5d68dc29a4da69b984672212db37b"
+      "digest": "sha256:5ffbd4a480ab060aa4292edd3836d6ab6975f3de7cde38370035f37126a68ccb"
     },
     {
       "path": "packages/cloud-client/src/public/policy.ts",
@@ -34,7 +34,7 @@
     },
     {
       "path": "packages/cloud-client/schemas/metadata-publication.schema.json",
-      "digest": "sha256:4f2a4d4198207aa31d773aa16a0d7f482d850d007deb4aab8bfdfd31ed699f25"
+      "digest": "sha256:eee117f7b9fb728bb78d180001db2d4e54b55b80c049ec4385f2edcc7c7d41f6"
     },
     {
       "path": "packages/cloud-client/schemas/disclosure-manifest.schema.json",
@@ -46,7 +46,7 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:286323c57d51172e99e6285ece60af309a85a05b5c326b3e49e3f517e06d9e55"
+      "digest": "sha256:17228880445fe956575de3e80275853cc11135ca69786eea156cdec151be340d"
     },
     {
       "path": "docs/architecture/ADR/0012-metadata-publication-identifier-lifecycle.md",

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-projection-outbox",
+  "taskId": "M8-T07-T09",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.3-11.4", "EDD §§19-21,23,27,33", "ADR-0005", "ADR-0007"],
+  "testIds": [
+    "cloud-client:immutable-projection-read",
+    "cloud-client:raw-revision-disclosure-rejection",
+    "cloud-client:atomic-projection-outbox-admission",
+    "cloud-client:outbox-stable-retry-identity",
+    "cloud-client:outbox-stale-fence-rejection",
+    "m8-projection-outbox-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/published-runs.ts",
+      "digest": "sha256:7474000245d971d4b99cb97df598c9ab07b56b20f55713373e100b4b5814504b"
+    },
+    {
+      "path": "packages/cloud-client/src/public/publication-intent.ts",
+      "digest": "sha256:220f1884c7685cc21652e720806259efadca4c72c613ebf0b2e2f4fb6f1db042"
+    },
+    {
+      "path": "packages/cloud-client/schemas/metadata-publication.schema.json",
+      "digest": "sha256:eee117f7b9fb728bb78d180001db2d4e54b55b80c049ec4385f2edcc7c7d41f6"
+    },
+    {
+      "path": "packages/cloud-client/schemas/published-run-record.schema.json",
+      "digest": "sha256:c906a2001bc1671633acf71f550bca30aa271660401058e7a1e3579b2f74521c"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-outbox-event.schema.json",
+      "digest": "sha256:689850bb6b8ec612d0e9b30df517282a031f73d1f9a73708c098b6bc6438a098"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-ingestion-receipt.schema.json",
+      "digest": "sha256:d468403b273a665b1d3370a95d0b65bf1bdd43c2b63af4750c59d985f578afe4"
+    },
+    {
+      "path": "packages/cloud-client/test/cloud-client.test.mjs",
+      "digest": "sha256:17228880445fe956575de3e80275853cc11135ca69786eea156cdec151be340d"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:3fb6385ba0e805bf7145c87b36eeef46f9b8570879f56f029b9f9bdd5f1cb1ec"
+    }
+  ]
+}

@@ -24,5 +24,13 @@ store implementation to consume nonce and idempotency state atomically. An
 exact retry returns the original receipt; changed bytes and nonce replay fail
 closed.
 
+Successful admission atomically retains the exact validated
+`PublishedVerificationResult`, its receipt, and one minimal
+`PublishedRunAccepted` outbox event. Tenant/project reads return a defensive
+copy of that immutable projection and never rerun Promise or Proof logic.
+Provider-neutral outbox conformance uses expiring fenced leases, a stable event
+identity, bounded attempts, and idempotent acknowledgement; the production
+PostgreSQL/queue adapter remains gated on the provider decision.
+
 Schemas and compatibility are owned by Founding Engineering. M8 foundation
 acceptance is covered by `cloud-client:test`; release status is experimental.
