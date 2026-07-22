@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "kind": "publishedVerification",
+  "purpose": "verification.metadata",
+  "tenantId": "tenant:fixture",
+  "projectId": "project:fixture",
+  "runId": "run:fixture",
+  "idempotencyKey": "idempotency:fixture",
+  "source": "must never cross the default Cloud Boundary"
+}

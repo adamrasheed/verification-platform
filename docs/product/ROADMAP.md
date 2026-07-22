@@ -157,10 +157,25 @@ production dependency in M7.
 
 **Milestone:** first hosted verification through a customer-controlled workload.
 
-Tasks: cloud schemas with literal allowlist; tenant/auth matrix; PostgreSQL and
-outbox; dispatch/idempotency/fenced lease; workload acknowledgement/cancellation;
-publication preview/projection; deletion/retention; SLO/DR/security gates.
-Product-hosted source is excluded.
+| Task | Status | Work | Acceptance/test requirement |
+|---|---|---|---|
+| M8-T01 | **Complete** | Add `cloud-client` publication, disclosure, and policy schemas | Closed schemas reject unknown fields and tenant-mismatched references |
+| M8-T02 | **Foundation complete** — durable Engine mapping integration remains | Resolve and implement publication-identifier lifecycle | ADR-0012; keyed tenant/object separation, rotation stability, and collision failure |
+| M8-T03 | **Complete** | Implement disclosure manifest and exact-byte comparison | Canonical bytes, field inventory, destination, retention, expiry, and approved digest remain bound |
+| M8-T04 | Pending D-002 and cloud action/tenant decisions | Scaffold closed `cloud-api` identity and tenant boundaries | Cross-tenant resources remain indistinguishable and deny-default |
+| M8-T05 | Pending | Implement short-lived publication intents | Exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
+| M8-T06 | Pending | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes conflict atomically |
+| M8-T07 | Pending | Persist immutable run projections | No verdict recalculation or raw local revision disclosure |
+| M8-T08 | **Contract foundation complete** | Distribute signed tenant policies | Exact canonical bytes, tenant, signature, issue, and expiry validated |
+| M8-T09 | Pending | Implement transactional outbox/projection workers | Source fact and outbox commit together; retries are idempotent |
+| M8-T10 | Pending | Implement retention, deletion, and tombstones | Active, backup, and restore-time deletion gates pass |
+| M8-T11 | Pending | Implement bounded read APIs and pagination | Stable cursor ordering and exact tenant authorization |
+| M8-T12 | Pending | Run cross-tenant negative matrix | API, store, cache, queue, backup, and migration isolation pass |
+| M8-T13 | Pending | Run cloud canary and secondary-sink inventory | Source, secret, and tenant canaries absent from every unauthorized sink |
+| M8-T14 | Pending | Publish metadata-cloud release Evidence | SLO, DR, security, supply-chain, and exact artifact evidence retained |
+
+Product-hosted source remains excluded. Provider-specific deployment does not
+begin until D-002 and the remaining hosted entry decisions are recorded.
 
 ## Critical Path Checkpoints
 

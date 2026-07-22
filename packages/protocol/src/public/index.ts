@@ -12,6 +12,10 @@ export type {
   SchemaMajorSupport,
   VersionedDocument,
 } from "./compatibility.js";
+export {
+  encodeCanonicalProtocolDocument,
+  parseCanonicalProtocolDocument,
+} from "./canonical-document.js";
 export { decodeCommandEnvelope, decodeCommandRequest } from "./decode.js";
 export type { ProtocolReadResult } from "./decode.js";
 export {

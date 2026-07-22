@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "publishedVerification",
+  "purpose": "verification.metadata",
+  "tenantId": "tenant:fixture",
+  "projectId": "project:fixture",
+  "runId": "run:fixture",
+  "idempotencyKey": "idempotency:fixture",
+  "applicationModel": {
+    "objectType": "applicationModel",
+    "publicationId": "pub:model",
+    "tenantBinding": "tenant:fixture"
+  },
+  "operationalStatus": "completed",
+  "outcome": "satisfied",
+  "engine": {
+    "id": "engine",
+    "version": "1.0.0",
+    "artifactDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "protocolVersion": 1,
+  "plugins": [],
+  "promises": [],
+  "proofs": [],
+  "evidence": [],
+  "summary": {
+    "promiseCount": 0,
+    "proofCount": 0,
+    "evidenceCount": 0,
+    "durationMs": 1
+  },
+  "auditCorrelationId": "audit:fixture",
+  "retentionClass": "metadata-30d"
+}

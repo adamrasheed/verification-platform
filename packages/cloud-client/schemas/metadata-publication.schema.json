@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/metadata-publication/v1",
+  "title": "MetadataPublicationV1",
+  "type": "object",
+  "required": [
+    "schemaVersion", "kind", "purpose", "tenantId", "projectId", "runId",
+    "idempotencyKey", "applicationModel", "operationalStatus", "outcome",
+    "engine", "protocolVersion", "plugins", "promises", "proofs", "evidence",
+    "summary", "auditCorrelationId", "retentionClass"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "publishedVerification" },
+    "purpose": { "$ref": "#/$defs/shortString" },
+    "tenantId": { "$ref": "#/$defs/opaqueId" },
+    "projectId": { "$ref": "#/$defs/opaqueId" },
+    "runId": { "$ref": "#/$defs/opaqueId" },
+    "idempotencyKey": { "$ref": "#/$defs/opaqueId" },
+    "applicationModel": { "$ref": "#/$defs/applicationModelRef" },
+    "operationalStatus": {
+      "enum": ["completed", "invalid", "blocked", "cancelled", "internal_error"]
+    },
+    "outcome": {
+      "enum": ["satisfied", "violated", "indeterminate", "not_evaluated"]
+    },
+    "engine": { "$ref": "#/$defs/artifact" },
+    "protocolVersion": { "type": "integer", "minimum": 1 },
+    "plugins": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "promises": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "required": ["promise", "status", "reasonCodes"],
+        "properties": {
+          "promise": { "$ref": "#/$defs/promiseRef" },
+          "status": { "enum": ["satisfied", "violated", "indeterminate"] },
+          "reasonCodes": { "$ref": "#/$defs/reasonCodes" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "maxItems": 50000,
+      "items": {
+        "type": "object",
+        "required": ["proof", "status", "reasonCodes"],
+        "properties": {
+          "proof": { "$ref": "#/$defs/proofRef" },
+          "status": { "enum": ["passed", "failed", "indeterminate", "error", "cancelled"] },
+          "reasonCodes": { "$ref": "#/$defs/reasonCodes" },
+          "durationMs": { "$ref": "#/$defs/nonNegativeInteger" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 50000,
+      "items": {
+        "type": "object",
+        "required": ["evidence", "evidenceType", "byteSize", "sensitivityClass"],
+        "properties": {
+          "evidence": { "$ref": "#/$defs/evidenceRef" },
+          "evidenceType": { "$ref": "#/$defs/shortString" },
+          "byteSize": { "$ref": "#/$defs/nonNegativeInteger" },
+          "sensitivityClass": {
+            "enum": ["LOCAL_SOURCE", "SENSITIVE_EVIDENCE", "MINIMAL_METADATA", "EXPLICIT_SHARE"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["promiseCount", "proofCount", "evidenceCount", "durationMs"],
+      "properties": {
+        "promiseCount": { "$ref": "#/$defs/nonNegativeInteger" },
+        "proofCount": { "$ref": "#/$defs/nonNegativeInteger" },
+        "evidenceCount": { "$ref": "#/$defs/nonNegativeInteger" },
+        "durationMs": { "$ref": "#/$defs/nonNegativeInteger" }
+      },
+      "additionalProperties": false
+    },
+    "applicationAlias": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "auditCorrelationId": { "$ref": "#/$defs/opaqueId" },
+    "retentionClass": { "$ref": "#/$defs/shortString" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "opaqueId": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "shortString": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "nonNegativeInteger": { "type": "integer", "minimum": 0 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "reasonCodes": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": { "$ref": "#/$defs/shortString" }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["id", "version", "artifactDigest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/opaqueId" },
+        "version": { "$ref": "#/$defs/opaqueId" },
+        "artifactDigest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "publishedRef": {
+      "type": "object",
+      "required": ["objectType", "publicationId", "tenantBinding"],
+      "properties": {
+        "objectType": { "type": "string" },
+        "publicationId": { "$ref": "#/$defs/opaqueId" },
+        "tenantBinding": { "$ref": "#/$defs/opaqueId" }
+      },
+      "additionalProperties": false
+    },
+    "applicationModelRef": {
+      "allOf": [
+        { "$ref": "#/$defs/publishedRef" },
+        { "properties": { "objectType": { "const": "applicationModel" } } }
+      ]
+    },
+    "promiseRef": {
+      "allOf": [
+        { "$ref": "#/$defs/publishedRef" },
+        { "properties": { "objectType": { "const": "promise" } } }
+      ]
+    },
+    "proofRef": {
+      "allOf": [
+        { "$ref": "#/$defs/publishedRef" },
+        { "properties": { "objectType": { "const": "proof" } } }
+      ]
+    },
+    "evidenceRef": {
+      "allOf": [
+        { "$ref": "#/$defs/publishedRef" },
+        { "properties": { "objectType": { "const": "evidence" } } }
+      ]
+    }
+  }
+}

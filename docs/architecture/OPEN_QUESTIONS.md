@@ -35,6 +35,7 @@ changes use ADRs. Business decisions remain founder-owned.
 | ID | Resolution | Mechanism | Resolved |
 |---|---|---|---|
 | D-001 | Dynamic plugins require a signed native sandbox host: Linux namespaces+seccomp, macOS App Sandbox, or Windows AppContainer. A missing host is `unavailable`; deprecated Seatbelt and Node permissions are not treated as malicious-code isolation. Publisher trust uses digest-pinned Ed25519 manifests and revocation. Provider secrets are attached only inside the Engine egress broker. | [ADR-0011](ADR/0011-plugin-security-enforcement.md) | 2026-07-19 |
+| D-005 | Metadata publication identifiers use locally held HMAC-SHA-256 keys, tenant/object domain separation, durable mappings across rotation, and no cloud key escrow. | [ADR-0012](ADR/0012-metadata-publication-identifier-lifecycle.md) | 2026-07-22 |
 
 ## Resolution rules
 

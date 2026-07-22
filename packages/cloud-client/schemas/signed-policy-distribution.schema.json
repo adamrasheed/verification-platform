@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/signed-policy-distribution/v1",
+  "title": "SignedPolicyDistributionV1",
+  "type": "object",
+  "required": ["bundle", "signature"],
+  "properties": {
+    "bundle": {
+      "type": "object",
+      "required": [
+        "schemaVersion", "tenantId", "policyId", "revisionId", "issuedAt",
+        "expiresAt", "actions", "publicationRules"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "tenantId": { "$ref": "#/$defs/opaqueId" },
+        "policyId": { "$ref": "#/$defs/opaqueId" },
+        "revisionId": { "$ref": "#/$defs/opaqueId" },
+        "issuedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "actions": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 1000,
+          "items": { "$ref": "#/$defs/shortString" }
+        },
+        "publicationRules": {
+          "type": "array",
+          "maxItems": 1000,
+          "items": {
+            "type": "object",
+            "required": ["purpose", "payloadSchemaMajor", "retentionClasses"],
+            "properties": {
+              "purpose": { "$ref": "#/$defs/shortString" },
+              "payloadSchemaMajor": { "type": "integer", "minimum": 1 },
+              "retentionClasses": {
+                "type": "array",
+                "uniqueItems": true,
+                "maxItems": 100,
+                "items": { "$ref": "#/$defs/shortString" }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "required": ["algorithm", "keyId", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "keyId": { "$ref": "#/$defs/opaqueId" },
+        "value": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "opaqueId": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "shortString": { "type": "string", "minLength": 1, "maxLength": 128 }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/disclosure-manifest/v1",
+  "title": "DisclosureManifestV1",
+  "type": "object",
+  "required": [
+    "schemaVersion", "destination", "purpose", "payloadSchema",
+    "retentionPolicy", "expiresAt", "payloadDigest", "encodedPayloadBytes", "fields"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "destination": {
+      "type": "object",
+      "required": ["tenantId", "projectId"],
+      "properties": {
+        "tenantId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "projectId": { "type": "string", "minLength": 1, "maxLength": 256 }
+      },
+      "additionalProperties": false
+    },
+    "purpose": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "payloadSchema": {
+      "type": "object",
+      "required": ["id", "major", "minor"],
+      "properties": {
+        "id": { "const": "verify.metadata-publication" },
+        "major": { "const": 1 },
+        "minor": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "retentionPolicy": {
+      "type": "object",
+      "required": ["id", "revision"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "revision": { "type": "string", "minLength": 1, "maxLength": 256 }
+      },
+      "additionalProperties": false
+    },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "payloadDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "encodedPayloadBytes": { "type": "integer", "minimum": 0, "maximum": 1048576 },
+    "fields": {
+      "type": "array",
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "required": ["path", "classification", "encodedBytes"],
+        "properties": {
+          "path": { "type": "string", "maxLength": 2048 },
+          "classification": { "const": "MINIMAL_METADATA" },
+          "encodedBytes": { "type": "integer", "minimum": 0, "maximum": 1048576 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
