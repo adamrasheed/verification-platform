@@ -29,7 +29,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
-          package-manager-cache: false
 
       - name: Require protected signing inputs
         shell: bash
@@ -65,6 +64,7 @@ jobs:
         env:
           MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
           MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_DEVELOPER_ID_APPLICATION: ${{ secrets.MACOS_DEVELOPER_ID_APPLICATION }}
         run: |
           set -euo pipefail
           CERTIFICATE_PATH="$RUNNER_TEMP/verify-developer-id.p12"
@@ -74,6 +74,12 @@ jobs:
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          EXISTING_KEYCHAINS=()
+          while IFS= read -r existing_keychain; do
+            existing_keychain="${existing_keychain//\"/}"
+            test -n "$existing_keychain" && EXISTING_KEYCHAINS+=("$existing_keychain")
+          done < <(security list-keychains -d user)
+          security list-keychains -d user -s "$KEYCHAIN_PATH" "${EXISTING_KEYCHAINS[@]}"
           security import "$CERTIFICATE_PATH" \
             -k "$KEYCHAIN_PATH" \
             -P "$MACOS_CERTIFICATE_PASSWORD" \
@@ -86,6 +92,22 @@ jobs:
             -k "$KEYCHAIN_PASSWORD" \
             "$KEYCHAIN_PATH"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          IDENTITY_LINES="$(
+            security find-identity -v -p codesigning "$KEYCHAIN_PATH" \
+              | grep -F "\"$MACOS_DEVELOPER_ID_APPLICATION\"" \
+              || true
+          )"
+          IDENTITY_COUNT="$(printf '%s\n' "$IDENTITY_LINES" | sed '/^$/d' | wc -l | tr -d ' ')"
+          test "$IDENTITY_COUNT" -eq 1 || {
+            echo "expected exactly one matching Developer ID identity, found $IDENTITY_COUNT" >&2
+            exit 2
+          }
+          SIGNING_IDENTITY_SHA1="$(
+            printf '%s\n' "$IDENTITY_LINES" \
+              | sed -E 's/^[[:space:]]*[0-9]+\)[[:space:]]+([0-9A-F]{40}).*/\1/'
+          )"
+          [[ "$SIGNING_IDENTITY_SHA1" =~ ^[0-9A-F]{40}$ ]]
+          printf 'MACOS_SIGNING_IDENTITY_SHA1=%s\n' "$SIGNING_IDENTITY_SHA1" >> "$GITHUB_ENV"
 
       - name: Build, sign, notarize, and seal macOS pins
         shell: bash
@@ -109,7 +131,7 @@ jobs:
           chmod 600 "$NOTARY_KEY"
           node tooling/native/macos/build-host.mjs \
             --release \
-            --identity "$MACOS_DEVELOPER_ID_APPLICATION" \
+            --identity "$MACOS_SIGNING_IDENTITY_SHA1" \
             --keychain "$KEYCHAIN_PATH" \
             --output "$APP"
           ditto -c -k --keepParent "$APP" "$SUBMISSION"
@@ -163,7 +185,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
-          package-manager-cache: false
 
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756

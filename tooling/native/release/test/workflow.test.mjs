@@ -33,3 +33,13 @@ test("native signing workflow timestamps, notarizes, checks pins, and deletes ke
     "RFC 3161 digest selection must follow /tr",
   );
 });
+
+test("macOS signing exposes the temporary keychain and selects one exact identity", () => {
+  for (const control of [
+    'security list-keychains -d user -s "$KEYCHAIN_PATH"',
+    'grep -F "\\\"$MACOS_DEVELOPER_ID_APPLICATION\\\""',
+    'test "$IDENTITY_COUNT" -eq 1',
+    'MACOS_SIGNING_IDENTITY_SHA1',
+    '--identity "$MACOS_SIGNING_IDENTITY_SHA1"',
+  ]) assert.ok(workflow.includes(control), `missing macOS identity control: ${control}`);
+});
