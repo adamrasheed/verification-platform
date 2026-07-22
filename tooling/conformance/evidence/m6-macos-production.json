@@ -5,12 +5,12 @@
   "owner": "plugin-platform",
   "governingClauses": ["Freeze §§10.5,11.5,14.4,18", "EDD §§13,25,27"],
   "testIds": ["plugin-runtime:13", "native-macos-production:1"],
-  "command": "gh run watch 29894539381 --repo adamrasheed/verification-platform --exit-status",
+  "command": "gh run watch 29896962096 --repo adamrasheed/verification-platform --exit-status",
   "outcome": "passed",
   "artifacts": [
     {
       "path": "tooling/native/release/pins/macos-0.1.0.json",
-      "digest": "sha256:9a6f383ec46985c2d142fe6a62920a9ff92fff846348eb3f6fd3a835f2c7ec77"
+      "digest": "sha256:827ad2f0e931afb1856fbbdc5bf84aa499b19c3df383ab9403f622606ff6e149"
     },
     {
       "path": ".github/workflows/native-host-release.yml",

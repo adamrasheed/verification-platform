@@ -48,7 +48,7 @@ hardened runtime, trusted timestamp, accepted notarization, and a stapled
 ticket. It then reruns the synthetic providers and containment canaries through
 the signed host using the exact manifest pins. The accepted `0.1.0` production
 pins are retained in `pins/macos-0.1.0.json`; they were produced and exercised
-by [Actions run 29894539381](https://github.com/adamrasheed/verification-platform/actions/runs/29894539381).
+by [Actions run 29896962096](https://github.com/adamrasheed/verification-platform/actions/runs/29896962096).
 
 The Windows gate requires trusted Authenticode signatures, RFC 3161
 timestamping, exact signer pins, and exact file digests.

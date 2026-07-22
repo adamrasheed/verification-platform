@@ -10,7 +10,7 @@
     "native-macos-provider-development:1",
     "native-macos-provider-production:1"
   ],
-  "command": "npm run test --workspace @verify-internal/github-repository-policy",
+  "command": "gh run watch 29896887190 --repo adamrasheed/verification-platform --exit-status && gh run watch 29896962096 --repo adamrasheed/verification-platform --exit-status",
   "outcome": "passed",
   "artifacts": [
     {
