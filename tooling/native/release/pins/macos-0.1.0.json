@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "verify-native-host-release",
+  "platform": "macos",
+  "version": "0.1.0",
+  "artifact": {
+    "file": "VerifyPluginHost-macos-0.1.0.zip",
+    "sha256": "sha256:947088c4a5c5f080e91d0875dd0c69a23e2619eb9a17525624e6a6ed2ea8f663"
+  },
+  "identity": {
+    "teamIdentifier": "47SF35MKK7",
+    "signingAuthority": "Developer ID Application: Creatix, LLC (47SF35MKK7)",
+    "host": {
+      "identifier": "dev.verify.plugin-host",
+      "cdHash": "9b0981e1828dd4d1f43f02ea90ca28b58961fd7b"
+    },
+    "helper": {
+      "identifier": "dev.verify.plugin-host.node",
+      "cdHash": "cf0f57145b768c1a1a8498575bf337d0a5fec6eb"
+    },
+    "supervisor": {
+      "identifier": "dev.verify.plugin-supervisor",
+      "cdHash": "46fcb298878e9df32b50cb50abf33ead68f99a89"
+    },
+    "notarized": true,
+    "timestamped": true
+  }
+}
