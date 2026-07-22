@@ -27,6 +27,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@verify-internal/adapter-core": "0.0.0",
     "@verify-internal/engine": "0.0.0",
     "@verify-internal/protocol": "0.0.0"
   },

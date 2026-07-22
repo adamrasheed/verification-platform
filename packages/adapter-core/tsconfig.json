@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "dist/adapter-core.tsbuildinfo",
+    "types": ["node"],
+    "paths": {
+      "@verify-internal/contracts": ["../contracts/src/public/index.ts"],
+      "@verify-internal/engine": ["../engine/src/public/index.ts"],
+      "@verify-internal/protocol": ["../protocol/src/public/index.ts"]
+    }
+  },
+  "references": [
+    { "path": "../contracts" },
+    { "path": "../engine" },
+    { "path": "../protocol" }
+  ],
+  "include": ["src/**/*.ts"]
+}

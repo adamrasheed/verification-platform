@@ -139,8 +139,19 @@ when its expected artifact and acceptance Evidence are committed.
 
 **Milestone:** local MCP and GitHub Action produce canonical-equivalent results.
 
-Tasks: local MCP tools/resources; MCP cancellation; GitHub Action adapter;
-minimal check projector; interface parity matrix. No remote dispatch dependency.
+| Task | Status | Work | Acceptance/test requirement |
+|---|---|---|---|
+| M7-T01 | **Complete** | Create shared adapter parity harness from CLI golden fixtures | CLI, MCP, and Action preserve the same Engine semantic result |
+| M7-T02 | **Complete** | Bind local MCP to one explicit workspace | Cross-root and malformed requests fail closed without path disclosure |
+| M7-T03 | **Complete** | Implement canonical verification and retained reads | Verify, run, event, Evidence, and exact-provenance responses remain canonical and bounded |
+| M7-T04 | **Complete** | Propagate MCP deadline, progress, and cancellation | Standard MCP cancellation reaches the Engine and cannot yield a verdict |
+| M7-T05 | **Complete** | Implement GitHub Action adapter | Canonical offline Engine runs inside the existing workflow checkout |
+| M7-T06 | **Complete** | Implement minimal GitHub check projector | Exact conclusion mapping and metadata allowlist; no source annotations |
+| M7-T07 | **Complete** | Run integration security fixtures | Hostile text, workspace confusion, missing/read-only token, and fixed egress pass |
+| M7-T08 | **Complete** | Publish adapter compatibility matrix | Version selections, parity fields, volatile differences, and deferred surfaces documented |
+
+There is no remote dispatch, GitHub App, cloud, Repair mutation, or Windows
+production dependency in M7.
 
 ## Epic M8 — Metadata Cloud and Hosted Verification
 

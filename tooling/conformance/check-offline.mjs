@@ -25,11 +25,14 @@ const forbiddenExecution = [
   /\bspawn\s*\(/,
   /\bfork\s*\(/,
 ];
+const allowedNetworkImports = new Map([
+  ["apps/github-action/src/public/check-client.ts", new Set(["node:https"])],
+]);
 const failures = [];
 
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
-    if (["dist", "node_modules", "test", "fixtures"].includes(entry.name)) continue;
+    if (["dist", "lib", "node_modules", "test", "fixtures"].includes(entry.name)) continue;
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) {
       if (
@@ -40,10 +43,14 @@ async function walk(directory) {
     }
     if (!entry.isFile() || !/\.[cm]?[jt]s$/.test(entry.name)) continue;
     const text = await readFile(target, "utf8");
+    const relative = path.relative(root, target).split(path.sep).join("/");
     for (const specifier of forbiddenImports) {
       const quoted = [`"${specifier}"`, `'${specifier}'`];
-      if (quoted.some((value) => text.includes(value))) {
-        failures.push(`${path.relative(root, target)}: forbidden MVP import ${specifier}`);
+      if (
+        quoted.some((value) => text.includes(value))
+        && !allowedNetworkImports.get(relative)?.has(specifier)
+      ) {
+        failures.push(`${relative}: forbidden MVP import ${specifier}`);
       }
     }
     for (const expression of forbiddenExecution) {
@@ -59,4 +66,6 @@ if (failures.length > 0) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log("offline/passive core source gate passed: plugin runtime is outside the default execution graph");
+console.log(
+  "offline/passive verification source gate passed: only the audited GitHub check publisher has network authority",
+);

@@ -17,6 +17,11 @@ The first local CLI MVP is implemented against the approved
 It passively verifies npm, pnpm, and Yarn workspace integrity without executing
 repository code, contacting a network, reading credentials, or writing source.
 
+M7 local integrations are also implemented: a one-workspace stdio MCP server
+and a bundled GitHub Action both use the same canonical dispatcher as the CLI.
+The Action's optional GitHub check is a metadata-only projection. See the
+[adapter compatibility matrix](docs/architecture/ADAPTER_COMPATIBILITY.md).
+
 No document, package, application, or integration may silently redefine a
 frozen architectural concept. Changes require an accepted
 [Architecture Decision Record](docs/architecture/ADR/README.md).
@@ -41,8 +46,9 @@ node apps/cli/dist/verify.js verify . --json
 ```
 
 The CLI also supports human and JSONL output, retained run/Evidence inspection,
-cache inspection/clear, version, and schema commands. See
-[the CLI README](apps/cli/README.md).
+cache inspection/clear, version, and schema commands. See the
+[CLI README](apps/cli/README.md), [MCP README](apps/mcp-server/README.md), and
+[GitHub Action README](apps/github-action/README.md).
 
 ## Repository map
 

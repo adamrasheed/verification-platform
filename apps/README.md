@@ -8,4 +8,6 @@ dispatcher. They MUST NOT reimplement discovery, evaluation, aggregation,
 authorization, repair selection, or exit semantics.
 
 The CLI is the canonical public interface and structured-output conformance
-oracle.
+oracle. Local MCP and GitHub Action adapters share its dispatcher and preserve
+the Engine-owned result; GitHub check publication uses a separate minimal
+presentation projection.

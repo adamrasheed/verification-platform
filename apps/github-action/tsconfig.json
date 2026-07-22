@@ -2,19 +2,19 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist",
+    "outDir": "lib",
     "composite": true,
-    "tsBuildInfoFile": "dist/cli.tsbuildinfo",
+    "tsBuildInfoFile": "lib/github-action.tsbuildinfo",
     "types": ["node"],
     "paths": {
       "@verify-internal/adapter-core": ["../../packages/adapter-core/src/public/index.ts"],
-      "@verify-internal/engine": ["../../packages/engine/src/public/index.ts"],
+      "@verify-internal/github-check-projector": ["../../packages/github-check-projector/src/public/index.ts"],
       "@verify-internal/protocol": ["../../packages/protocol/src/public/index.ts"]
     }
   },
   "references": [
     { "path": "../../packages/adapter-core" },
-    { "path": "../../packages/engine" },
+    { "path": "../../packages/github-check-projector" },
     { "path": "../../packages/protocol" }
   ],
   "include": ["src/**/*.ts"]

@@ -143,14 +143,54 @@
       "governingClauses": ["Freeze §12", "EDD §16"]
     },
     {
+      "id": "adapter-core",
+      "path": "packages/adapter-core",
+      "kind": "package",
+      "owner": "integrations",
+      "milestone": "M7",
+      "state": "active",
+      "allowedDependencies": ["contracts", "engine", "protocol"],
+      "governingClauses": ["Freeze §§4,12", "EDD §§15–18"]
+    },
+    {
+      "id": "github-check-projector",
+      "path": "packages/github-check-projector",
+      "kind": "package",
+      "owner": "integrations",
+      "milestone": "M7",
+      "state": "active",
+      "allowedDependencies": ["protocol"],
+      "governingClauses": ["Freeze §§4,11.3,12", "EDD §18"]
+    },
+    {
       "id": "cli",
       "path": "apps/cli",
       "kind": "application",
       "owner": "developer-experience",
       "milestone": "M5",
       "state": "active",
-      "allowedDependencies": ["engine", "protocol"],
+      "allowedDependencies": ["adapter-core", "engine", "protocol"],
       "governingClauses": ["Freeze §4", "EDD §15"]
+    },
+    {
+      "id": "mcp-server",
+      "path": "apps/mcp-server",
+      "kind": "application",
+      "owner": "integrations",
+      "milestone": "M7",
+      "state": "active",
+      "allowedDependencies": ["adapter-core", "protocol"],
+      "governingClauses": ["Freeze §§4,12", "EDD §17"]
+    },
+    {
+      "id": "github-action",
+      "path": "apps/github-action",
+      "kind": "application",
+      "owner": "integrations",
+      "milestone": "M7",
+      "state": "active",
+      "allowedDependencies": ["adapter-core", "github-check-projector", "protocol"],
+      "governingClauses": ["Freeze §§4,11.3,12", "EDD §18"]
     }
   ],
   "prohibitedProductionDependencies": [
