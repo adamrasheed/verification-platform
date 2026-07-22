@@ -247,6 +247,30 @@ bounded expiring leases and monotonically increasing fences. Only the current
 unexpired fence may acknowledge or release a delivery, retries reuse the same
 event, and exhausted attempts retain sanitized metadata only.
 
+## Published-run deletion and bounded reads
+
+Published-run deletion is one atomic unit: the active projection and any queued
+acceptance event are removed, a minimal tombstone is installed, and one
+digest-free `PublishedRunDeleted` outbox event is created. Tombstones contain
+only object type, opaque ID, deletion time, authority, reason class, and stable
+affected-edge IDs. Reads return `deleted_reference` at the same exact
+tenant/project resource; wrong-scope active and deleted resources remain
+indistinguishable. Restore tooling must apply the tombstone ledger before it can
+admit restored records.
+
+Published-run lists use stable `(publishedAt, publishedRunId)` ordering and a
+limit from 1 through 100. Continuation cursors are random opaque tokens, expire
+after five minutes, live in a bounded cursor store, and are bound to the exact
+tenant and project. Malformed, unknown, expired, and cross-scope cursors return
+the same cursor-invalid condition. Deletion preserves the non-sensitive order
+slot so pagination and traversal expose an explicit deleted reference rather
+than silently omitting history.
+
+The provider-neutral contract does not choose retention duration, backup
+expiry, replica/index propagation, or legal-hold policy. Those production
+values and adapters remain gated on D-002; callers cannot infer a default from
+the conformance store.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.

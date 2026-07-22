@@ -22,11 +22,11 @@
     },
     {
       "path": "packages/cloud-client/src/public/types.ts",
-      "digest": "sha256:85d656bb484bda5711ec404c7b23970fe7eca476c3540b8c5fe522bd34ccdc5f"
+      "digest": "sha256:c5bb3e7ac16e156edc15faf241a6d545ef60ec63c0f5cb2f324d74a4265fec37"
     },
     {
       "path": "packages/cloud-client/src/public/index.ts",
-      "digest": "sha256:a46b78348fabddd9c3c01c0acd1d448d36812041ef84a78b60536413a900b52d"
+      "digest": "sha256:de866de6af1c4bd23ddd7c40f5210fd03e645df61e3ecf981220881932b5a632"
     },
     {
       "path": "packages/cloud-client/schemas/publication-intent.schema.json",
@@ -34,11 +34,11 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:17228880445fe956575de3e80275853cc11135ca69786eea156cdec151be340d"
+      "digest": "sha256:8c41c140b1eb1abd395749558104b5dc9ae89354a2265ac607831acaadb2d300"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",
-      "digest": "sha256:3fb6385ba0e805bf7145c87b36eeef46f9b8570879f56f029b9f9bdd5f1cb1ec"
+      "digest": "sha256:5b2ae7bb2ebbc1e09f961824515f86da4a1b77308203928a8d1f64ee54d6cb11"
     }
   ]
 }

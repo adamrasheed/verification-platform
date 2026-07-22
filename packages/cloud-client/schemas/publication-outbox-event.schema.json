@@ -11,12 +11,31 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "eventId": { "$ref": "#/$defs/id" },
-    "eventType": { "const": "PublishedRunAccepted" },
+    "eventType": { "enum": ["PublishedRunAccepted", "PublishedRunDeleted"] },
     "tenantId": { "$ref": "#/$defs/id" },
     "aggregateType": { "const": "publishedRun" },
     "aggregateId": { "$ref": "#/$defs/id" },
     "occurredAt": { "type": "string", "format": "date-time" },
-    "payload": {
+    "payload": { "type": "object" }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "eventType": { "const": "PublishedRunAccepted" },
+        "payload": { "$ref": "#/$defs/acceptedPayload" }
+      }
+    },
+    {
+      "properties": {
+        "eventType": { "const": "PublishedRunDeleted" },
+        "payload": { "$ref": "#/$defs/deletedPayload" }
+      }
+    }
+  ],
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "acceptedPayload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["publishedRunId", "payloadDigest"],
@@ -24,10 +43,16 @@
         "publishedRunId": { "$ref": "#/$defs/id" },
         "payloadDigest": { "$ref": "#/$defs/digest" }
       }
+    },
+    "deletedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["publishedRunId", "authority", "reasonClass"],
+      "properties": {
+        "publishedRunId": { "$ref": "#/$defs/id" },
+        "authority": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "reasonClass": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$" }
+      }
     }
-  },
-  "$defs": {
-    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
-    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
   }
 }

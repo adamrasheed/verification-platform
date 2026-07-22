@@ -32,5 +32,17 @@ Provider-neutral outbox conformance uses expiring fenced leases, a stable event
 identity, bounded attempts, and idempotent acknowledgement; the production
 PostgreSQL/queue adapter remains gated on the provider decision.
 
+Authorized deletion atomically removes the active projection and any queued
+acceptance event, installs a minimal digest-free tombstone, and emits one
+`PublishedRunDeleted` event. Exact reads then return `deleted_reference`, and
+restore tooling must pass the tombstone gate before reintroducing a record.
+Concrete active-retention durations, backup expiry, and secondary-store
+propagation remain gated on D-002 rather than being invented by this package.
+
+List reads are bounded to 100 items and ordered by `(publishedAt,
+publishedRunId)`. Continuation cursors are random, opaque, expire after five
+minutes, are retained in a bounded store, and are bound to the exact tenant and
+project; malformed, expired, and cross-scope cursors fail identically.
+
 Schemas and compatibility are owned by Founding Engineering. M8 foundation
 acceptance is covered by `cloud-client:test`; release status is experimental.
