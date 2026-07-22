@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-macos-production",
+  "taskId": "M6-T06-macos-production,M6-T07-macos",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§10.5,11.5,14.4,18", "EDD §§13,25,27"],
+  "testIds": ["plugin-runtime:13", "native-macos-production:1"],
+  "command": "gh run watch 29894539381 --repo adamrasheed/verification-platform --exit-status",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/native/release/pins/macos-0.1.0.json",
+      "digest": "sha256:9a6f383ec46985c2d142fe6a62920a9ff92fff846348eb3f6fd3a835f2c7ec77"
+    },
+    {
+      "path": ".github/workflows/native-host-release.yml",
+      "digest": "sha256:de91dacb9b8e6ce4d90ae1d8459e85fe9397631a4ea850f6b4233d32a55cf72f"
+    },
+    {
+      "path": "packages/plugin-runtime/test/macos-sandbox.test.mjs",
+      "digest": "sha256:7b8d9f5408bceb467d71f67222aea415e701992fc7cb4c64db760a2b27a74a1e"
+    },
+    {
+      "path": "tooling/native/release/create-macos-manifest.mjs",
+      "digest": "sha256:0640f76eb8392f7c393a5304de6eb6c875ce4171219fe416b0012921db4cef6a"
+    },
+    {
+      "path": "packages/plugin-runtime/src/public/macos-sandbox.ts",
+      "digest": "sha256:eb9441e4d7949587be6ec3592faf0ab4f15dd2b233b95a47d36ed27297947258"
+    }
+  ]
+}
