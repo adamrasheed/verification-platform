@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-cloud-foundation",
+  "taskId": "M8-T01-T03",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.2-11.4", "EDD §§16,27,33-34", "ADR-0012"],
+  "testIds": [
+    "cloud-client:closed-allowlist",
+    "cloud-client:disclosure-byte-binding",
+    "cloud-client:duplicate-key-rejection",
+    "cloud-client:publication-id-lifecycle",
+    "cloud-client:publication-id-collision",
+    "cloud-client:signed-policy-binding",
+    "m8-foundation-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/publication-identifiers.ts",
+      "digest": "sha256:9fdfe72918dc99273c7919fa1ea523d9df492fd3e0117ff30bb61aa1acfbad31"
+    },
+    {
+      "path": "packages/cloud-client/src/public/disclosure.ts",
+      "digest": "sha256:4259398c8fd788cf2e85779fb21e1f6241c733517cddb089838028818682a467"
+    },
+    {
+      "path": "packages/cloud-client/src/public/validation.ts",
+      "digest": "sha256:bacf87c51b9fe234fb49e5dd8c3b3396b8e5d68dc29a4da69b984672212db37b"
+    },
+    {
+      "path": "packages/cloud-client/src/public/policy.ts",
+      "digest": "sha256:2093b3736099cae2bb433f1a5975a1cbaa07ca75519062d34f898c5c755e8fef"
+    },
+    {
+      "path": "packages/cloud-client/schemas/metadata-publication.schema.json",
+      "digest": "sha256:4f2a4d4198207aa31d773aa16a0d7f482d850d007deb4aab8bfdfd31ed699f25"
+    },
+    {
+      "path": "packages/cloud-client/schemas/disclosure-manifest.schema.json",
+      "digest": "sha256:028b2df6e9e6ec35bb72b37c4c3a771ed83d9eae8058b08665be7532ad31b393"
+    },
+    {
+      "path": "packages/cloud-client/schemas/signed-policy-distribution.schema.json",
+      "digest": "sha256:dd260b4bd3eb9a9487eae3028ed37f4e1e694e1a83f71964674888c4500bf851"
+    },
+    {
+      "path": "packages/cloud-client/test/cloud-client.test.mjs",
+      "digest": "sha256:7d0f91bdae9fde6643a76d95bc32125bbcf19a1ae7cc8968a5ec559db64fd0cc"
+    },
+    {
+      "path": "docs/architecture/ADR/0012-metadata-publication-identifier-lifecycle.md",
+      "digest": "sha256:7110cb62faeb5c7759be405a8b1a4110cc1b2b2e0c3a0a15ecae22a2ea02cf76"
+    }
+  ]
+}

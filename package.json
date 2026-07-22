@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace @verify-internal/contracts && npm run build --workspace @verify-internal/auth && npm run build --workspace @verify-internal/discovery && npm run build --workspace @verify-internal/events && npm run build --workspace @verify-internal/evidence && npm run build --workspace @verify-internal/proofs && npm run build --workspace @verify-internal/repair && npm run build --workspace @verify-internal/execution && npm run build --workspace @verify-internal/plugin-sdk && npm run build --workspace @verify-internal/plugin-runtime && npm run build --workspace @verify-internal/github-repository-policy && npm run build --workspace @verify-internal/protocol && npm run build --workspace @verify-internal/engine && npm run build --workspace @verify-internal/adapter-core && npm run build --workspace @verify-internal/github-check-projector && npm run build --workspace @adamrasheed/verify && npm run build --workspace @verify-internal/mcp-server && npm run build --workspace @verify-internal/github-action",
+    "build": "npm run build --workspace @verify-internal/contracts && npm run build --workspace @verify-internal/auth && npm run build --workspace @verify-internal/discovery && npm run build --workspace @verify-internal/events && npm run build --workspace @verify-internal/evidence && npm run build --workspace @verify-internal/proofs && npm run build --workspace @verify-internal/repair && npm run build --workspace @verify-internal/execution && npm run build --workspace @verify-internal/plugin-sdk && npm run build --workspace @verify-internal/plugin-runtime && npm run build --workspace @verify-internal/github-repository-policy && npm run build --workspace @verify-internal/protocol && npm run build --workspace @verify-internal/cloud-client && npm run build --workspace @verify-internal/engine && npm run build --workspace @verify-internal/adapter-core && npm run build --workspace @verify-internal/github-check-projector && npm run build --workspace @adamrasheed/verify && npm run build --workspace @verify-internal/mcp-server && npm run build --workspace @verify-internal/github-action",
     "check:inventory": "node tooling/architecture/check-inventory.mjs",
     "check:architecture": "node tooling/architecture/check-boundaries.mjs",
     "check:schemas": "node tooling/schema/generate.mjs --check && node tooling/schema/check-package-schemas.mjs",
@@ -36,7 +36,8 @@
     "test:m5": "npm run test:m4 && npm run test --workspace @adamrasheed/verify && npm run check:offline && npm run check:corpus && npm run check:performance && npm run check:release-tools && npm run check:release-pack",
     "test:m6": "npm run test:m5 && npm run check:native-release-tools && npm run test --workspace @verify-internal/plugin-sdk && npm run test --workspace @verify-internal/plugin-runtime && npm run test --workspace @verify-internal/github-repository-policy",
     "test:m7": "npm run test:m6 && npm run test --workspace @verify-internal/adapter-core && npm run test --workspace @verify-internal/mcp-server && npm run test --workspace @verify-internal/github-check-projector && npm run test --workspace @verify-internal/github-action",
-    "test": "npm run build && npm run test:m7"
+    "test:m8-foundation": "npm run test:m7 && npm run test --workspace @verify-internal/cloud-client",
+    "test": "npm run build && npm run test:m8-foundation"
   },
   "devDependencies": {
     "@types/node": "26.1.1",

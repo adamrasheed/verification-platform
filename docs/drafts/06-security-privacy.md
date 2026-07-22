@@ -1009,7 +1009,6 @@ bytes remain locally installed for forensic identity.
 | Evidence attestation and independent verification | Architecture Freeze §20.1(8), D-003 | Third-party attestation exchange |
 | Feature-specific sharing of `LOCAL_SOURCE` or `SENSITIVE_EVIDENCE` | Architecture Freeze §§11.2, 20 | Product-hosted source execution, provider source disclosure, or cloud Evidence sharing |
 | Credential broker delivery and per-platform handle semantics | Required implementation security decision under Freeze §10.5; ADR if observable guarantees or boundaries change | Provider-secret use |
-| Locally keyed publication-identifier lifecycle | Required implementation privacy decision under Freeze §11.3 | Metadata publication |
 | Cloud action catalog, role expansion, membership, operator access, and emergency access | Required implementation authorization decision under Freeze §10.4 | Multi-user cloud operations |
 | Hosted worker threat model, isolation lifecycle, cleanup, egress, and service boundary | Requires the preceding ADRs and an architecture review | Product-hosted execution |
 

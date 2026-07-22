@@ -143,6 +143,16 @@
       "governingClauses": ["Freeze §12", "EDD §16"]
     },
     {
+      "id": "cloud-client",
+      "path": "packages/cloud-client",
+      "kind": "package",
+      "owner": "cloud-boundary",
+      "milestone": "M8",
+      "state": "active",
+      "allowedDependencies": ["protocol", "auth", "events"],
+      "governingClauses": ["Freeze §11", "EDD §§16,27"]
+    },
+    {
       "id": "adapter-core",
       "path": "packages/adapter-core",
       "kind": "package",

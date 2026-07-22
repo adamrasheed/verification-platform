@@ -75,9 +75,10 @@ retry, timeout, redaction, publication, and deletion behavior.
 ## Deferred Decisions
 
 Founder input remains necessary only for product/npm naming, public license and
-commercial packaging, and pricing/hosted allowance. OS sandbox backend, cloud
-vendor/region, publication-key lifecycle, and optional local encryption are
-feature gates documented in `OPEN_QUESTIONS.md`.
+commercial packaging, and pricing/hosted allowance. Cloud vendor/region and
+optional local encryption remain feature gates documented in
+`OPEN_QUESTIONS.md`; the OS sandbox and publication-key lifecycle selections
+have since been resolved by ADR-0011 and ADR-0012.
 
 None blocks M0–M5.
 
