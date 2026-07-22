@@ -185,7 +185,44 @@ export interface PublishedRunRecord {
   readonly projection: MetadataPublicationPayload;
 }
 
-export interface PublicationOutboxEvent {
+export interface PublishedRunTombstone {
+  readonly schemaVersion: 1;
+  readonly objectType: "publishedRun";
+  readonly opaqueId: string;
+  readonly deletedAt: string;
+  readonly authority: string;
+  readonly reasonClass: string;
+  readonly affectedEdgeIds: readonly string[];
+}
+
+export interface PublishedRunDeletionOptions {
+  readonly deletedAt: string;
+  readonly authority: string;
+  readonly reasonClass: string;
+  readonly affectedEdgeIds: readonly string[];
+}
+
+export type PublishedRunResolution =
+  | {
+    readonly state: "active";
+    readonly publishedAt: string;
+    readonly publishedRunId: string;
+    readonly projection: MetadataPublicationPayload;
+  }
+  | {
+    readonly state: "deleted_reference";
+    readonly publishedAt: string;
+    readonly publishedRunId: string;
+    readonly tombstone: PublishedRunTombstone;
+  };
+
+export interface PublishedRunListPage {
+  readonly schemaVersion: 1;
+  readonly items: readonly PublishedRunResolution[];
+  readonly nextCursor?: string;
+}
+
+export interface PublishedRunAcceptedOutboxEvent {
   readonly schemaVersion: 1;
   readonly eventId: string;
   readonly eventType: "PublishedRunAccepted";
@@ -198,6 +235,25 @@ export interface PublicationOutboxEvent {
     readonly payloadDigest: `sha256:${string}`;
   };
 }
+
+export interface PublishedRunDeletedOutboxEvent {
+  readonly schemaVersion: 1;
+  readonly eventId: string;
+  readonly eventType: "PublishedRunDeleted";
+  readonly tenantId: string;
+  readonly aggregateType: "publishedRun";
+  readonly aggregateId: string;
+  readonly occurredAt: string;
+  readonly payload: {
+    readonly publishedRunId: string;
+    readonly authority: string;
+    readonly reasonClass: string;
+  };
+}
+
+export type PublicationOutboxEvent =
+  | PublishedRunAcceptedOutboxEvent
+  | PublishedRunDeletedOutboxEvent;
 
 export interface PublicationOutboxClaim {
   readonly event: PublicationOutboxEvent;

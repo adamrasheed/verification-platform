@@ -168,8 +168,8 @@ production dependency in M7.
 | M8-T07 | **Contract foundation complete** — PostgreSQL adapter remains pending D-002 | Persist immutable run projections | Exact validated projection retained; no verdict recalculation or raw local revision disclosure |
 | M8-T08 | **Contract foundation complete** | Distribute signed tenant policies | Exact canonical bytes, tenant, signature, issue, and expiry validated |
 | M8-T09 | **Contract foundation complete** — queue adapter remains pending D-002 | Implement transactional outbox/projection workers | Source fact and outbox commit together; stable event identity, fenced lease, and idempotent acknowledgement |
-| M8-T10 | Pending | Implement retention, deletion, and tombstones | Active, backup, and restore-time deletion gates pass |
-| M8-T11 | Pending | Implement bounded read APIs and pagination | Stable cursor ordering and exact tenant authorization |
+| M8-T10 | **Contract foundation complete** — production retention/backup propagation remains pending D-002 | Implement retention, deletion, and tombstones | Atomic active deletion, digest-free tombstone, deletion event, and restore-time gate pass |
+| M8-T11 | **Contract foundation complete** — service deployment remains pending D-002 | Implement bounded read APIs and pagination | Stable ordering, opaque expiring cursors, bounded limits, and exact tenant/project scope pass |
 | M8-T12 | Pending | Run cross-tenant negative matrix | API, store, cache, queue, backup, and migration isolation pass |
 | M8-T13 | Pending | Run cloud canary and secondary-sink inventory | Source, secret, and tenant canaries absent from every unauthorized sink |
 | M8-T14 | Pending | Publish metadata-cloud release Evidence | SLO, DR, security, supply-chain, and exact artifact evidence retained |

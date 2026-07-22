@@ -17,7 +17,7 @@
   "artifacts": [
     {
       "path": "packages/cloud-client/src/public/published-runs.ts",
-      "digest": "sha256:7474000245d971d4b99cb97df598c9ab07b56b20f55713373e100b4b5814504b"
+      "digest": "sha256:ce773c952fa63abbfc13d2068cf4795a2c1a6f61c4ce6337f177634f2a4808a4"
     },
     {
       "path": "packages/cloud-client/src/public/publication-intent.ts",
@@ -33,7 +33,7 @@
     },
     {
       "path": "packages/cloud-client/schemas/publication-outbox-event.schema.json",
-      "digest": "sha256:689850bb6b8ec612d0e9b30df517282a031f73d1f9a73708c098b6bc6438a098"
+      "digest": "sha256:bc2366d05a248aadbf846aa82cfbbf6a6c22fbbd72c892efa4b2ab70ee2c7ef1"
     },
     {
       "path": "packages/cloud-client/schemas/publication-ingestion-receipt.schema.json",
@@ -41,11 +41,11 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:17228880445fe956575de3e80275853cc11135ca69786eea156cdec151be340d"
+      "digest": "sha256:8c41c140b1eb1abd395749558104b5dc9ae89354a2265ac607831acaadb2d300"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",
-      "digest": "sha256:3fb6385ba0e805bf7145c87b36eeef46f9b8570879f56f029b9f9bdd5f1cb1ec"
+      "digest": "sha256:5b2ae7bb2ebbc1e09f961824515f86da4a1b77308203928a8d1f64ee54d6cb11"
     }
   ]
 }

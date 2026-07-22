@@ -657,3 +657,198 @@ test("outbox retries retain one event identity and reject stale fences", async (
   assert.equal(await worker.deliverOne("worker:one", 1_000), "idle");
   assert.equal(new Set(deliveredEventIds).size, 1, "retry delivers one stable event identity");
 });
+
+test("published-run lists are bounded, opaque, stable, and scope-bound", async () => {
+  const keyPair = generateKeyPairSync("ed25519");
+  let cursorNow = new Date("2026-07-22T21:03:00Z");
+  const store = new InMemoryPublicationIngestionStore(undefined, () => cursorNow);
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(keyPair.publicKey),
+  );
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  for (let index = 1; index <= 3; index += 1) {
+    const document = payload();
+    document.runId = `run:local-${index}`;
+    document.idempotencyKey = `idempotency:${index}`;
+    const fixture = await publicationRequest({
+      document,
+      keyPair,
+      nonce: `nonce:${index}`,
+      intentId: `intent:${index}`,
+    });
+    await service.ingest(
+      fixture.request,
+      authorization,
+      new Date(`2026-07-22T21:0${index}:00Z`),
+    );
+  }
+
+  const first = store.listPublishedRuns(authorization, { limit: 2 });
+  assert.equal(first.items.length, 2);
+  assert.match(first.nextCursor, /^cursor_v1_[A-Za-z0-9_-]{43}$/);
+  assert.deepEqual(first.items.map((item) => item.publishedAt), [
+    "2026-07-22T21:01:00.000Z",
+    "2026-07-22T21:02:00.000Z",
+  ]);
+  const second = store.listPublishedRuns(authorization, {
+    limit: 2,
+    cursor: first.nextCursor,
+  });
+  assert.equal(second.items.length, 1);
+  assert.equal(second.nextCursor, undefined);
+  first.items[0].projection.outcome = "satisfied";
+  assert.equal(
+    store.resolvePublishedRun(authorization, first.items[0].publishedRunId).projection.outcome,
+    "violated",
+  );
+  assert.throws(
+    () => store.listPublishedRuns(
+      { tenantId: "tenant:other", projectId: "project:one" },
+      { limit: 2, cursor: first.nextCursor },
+    ),
+    /VFY_PUBLISHED_RUN_CURSOR_INVALID/,
+  );
+  assert.throws(
+    () => store.listPublishedRuns(authorization, {
+      limit: 2,
+      cursor: `${first.nextCursor.slice(0, -1)}${first.nextCursor.endsWith("A") ? "B" : "A"}`,
+    }),
+    /VFY_PUBLISHED_RUN_CURSOR_INVALID/,
+  );
+  assert.throws(
+    () => store.listPublishedRuns(authorization, { limit: 101 }),
+    /VFY_PUBLISHED_RUN_LIST_INVALID/,
+  );
+  assert.equal(
+    store.listPublishedRuns(
+      { tenantId: "tenant:one", projectId: "project:other" },
+      { limit: 10 },
+    ).items.length,
+    0,
+  );
+  cursorNow = new Date("2026-07-22T21:08:00Z");
+  assert.throws(
+    () => store.listPublishedRuns(authorization, { limit: 2, cursor: first.nextCursor }),
+    /VFY_PUBLISHED_RUN_CURSOR_INVALID/,
+  );
+});
+
+test("deletion atomically replaces protected projections with minimal tombstones", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore();
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  const receipt = await service.ingest(
+    fixture.request,
+    authorization,
+    new Date("2026-07-22T21:01:00Z"),
+  );
+  const staleAcceptedClaim = store.claimOutbox(
+    "worker:accepted",
+    new Date("2026-07-22T21:01:01Z"),
+    30_000,
+  );
+  const deletion = {
+    deletedAt: "2026-07-22T21:02:00Z",
+    authority: "retention:metadata-30d",
+    reasonClass: "RETENTION_EXPIRED",
+    affectedEdgeIds: ["edge:two", "edge:one"],
+  };
+  const tombstone = store.deletePublishedRun(
+    authorization,
+    receipt.publishedRunId,
+    deletion,
+  );
+  assert.ok(tombstone);
+  assert.deepEqual(tombstone.affectedEdgeIds, ["edge:one", "edge:two"]);
+  assert.equal(JSON.stringify(tombstone).includes("sha256:"), false);
+  assert.equal(store.readPublishedRun(authorization, receipt.publishedRunId), undefined);
+  assert.equal(store.publishedRunCount, 0);
+  assert.equal(store.tombstoneCount, 1);
+  assert.equal(store.outboxCount, 1, "the accepted event is replaced by one deletion event");
+  assert.equal(
+    store.resolvePublishedRun(authorization, receipt.publishedRunId).state,
+    "deleted_reference",
+  );
+  assert.equal(
+    store.listPublishedRuns(authorization, { limit: 10 }).items[0].state,
+    "deleted_reference",
+  );
+  assert.throws(
+    () => store.assertPublishedRunRestorable(authorization, receipt.publishedRunId),
+    /VFY_PUBLISHED_RUN_RESTORE_BLOCKED/,
+  );
+  assert.equal(
+    store.resolvePublishedRun(
+      { tenantId: "tenant:other", projectId: "project:one" },
+      receipt.publishedRunId,
+    ),
+    undefined,
+  );
+  assert.equal(
+    store.deletePublishedRun(
+      { tenantId: "tenant:other", projectId: "project:one" },
+      receipt.publishedRunId,
+      deletion,
+    ),
+    undefined,
+  );
+  assert.throws(
+    () => store.acknowledgeOutbox(
+      staleAcceptedClaim,
+      new Date("2026-07-22T21:02:01Z"),
+    ),
+    /VFY_PUBLICATION_OUTBOX_STALE_FENCE/,
+  );
+  assert.deepEqual(
+    store.deletePublishedRun(authorization, receipt.publishedRunId, deletion),
+    tombstone,
+  );
+  assert.throws(
+    () => store.deletePublishedRun(authorization, receipt.publishedRunId, {
+      ...deletion,
+      reasonClass: "TENANT_REQUEST",
+    }),
+    /VFY_PUBLISHED_RUN_DELETION_CONFLICT/,
+  );
+
+  const delivered = [];
+  const worker = new PublicationOutboxWorker(store, (event) => delivered.push(event));
+  assert.equal(await worker.deliverOne("worker:deletion", 1_000), "delivered");
+  assert.equal(delivered[0].eventType, "PublishedRunDeleted");
+  assert.equal(JSON.stringify(delivered[0]).includes("payloadDigest"), false);
+});
+
+test("a deletion fault exposes either the active unit or no deletion", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore((point) => {
+    if (point === "before-deletion-commit") throw new Error("fault:deletion");
+  });
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  const receipt = await service.ingest(
+    fixture.request,
+    authorization,
+    new Date("2026-07-22T21:01:00Z"),
+  );
+  assert.throws(
+    () => store.deletePublishedRun(authorization, receipt.publishedRunId, {
+      deletedAt: "2026-07-22T21:02:00Z",
+      authority: "tenant-admin:one",
+      reasonClass: "TENANT_REQUEST",
+      affectedEdgeIds: [],
+    }),
+    /fault:deletion/,
+  );
+  assert.equal(store.resolvePublishedRun(authorization, receipt.publishedRunId).state, "active");
+  assert.equal(store.publishedRunCount, 1);
+  assert.equal(store.tombstoneCount, 0);
+  assert.equal(store.outboxCount, 1);
+});

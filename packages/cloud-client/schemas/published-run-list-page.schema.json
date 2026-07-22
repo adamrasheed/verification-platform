@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/published-run-list-page/v1",
+  "title": "PublishedRunListPageV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "items"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "items": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/resolution" }
+    },
+    "nextCursor": { "type": "string", "pattern": "^cursor_v1_[A-Za-z0-9_-]{43}$" }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "common": {
+      "type": "object",
+      "required": ["state", "publishedAt", "publishedRunId"],
+      "properties": {
+        "state": { "enum": ["active", "deleted_reference"] },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "publishedRunId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "resolution": {
+      "oneOf": [
+        {
+          "allOf": [
+            { "$ref": "#/$defs/common" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "publishedAt", "publishedRunId", "projection"],
+              "properties": {
+                "state": { "const": "active" },
+                "publishedAt": { "type": "string", "format": "date-time" },
+                "publishedRunId": { "$ref": "#/$defs/id" },
+                "projection": {
+                  "$ref": "https://verification.internal/schemas/cloud-client/metadata-publication/v1"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/common" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["state", "publishedAt", "publishedRunId", "tombstone"],
+              "properties": {
+                "state": { "const": "deleted_reference" },
+                "publishedAt": { "type": "string", "format": "date-time" },
+                "publishedRunId": { "$ref": "#/$defs/id" },
+                "tombstone": {
+                  "$ref": "https://verification.internal/schemas/cloud-client/published-run-tombstone/v1"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

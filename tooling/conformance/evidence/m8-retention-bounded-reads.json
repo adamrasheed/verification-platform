@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-retention-bounded-reads",
+  "taskId": "M8-T10-T11",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.3-11.4", "EDD §§23,26-27,33"],
+  "testIds": [
+    "cloud-client:bounded-published-run-list",
+    "cloud-client:opaque-scope-bound-cursor",
+    "cloud-client:cursor-expiry",
+    "cloud-client:atomic-published-run-deletion",
+    "cloud-client:digest-free-tombstone",
+    "cloud-client:deleted-reference-read",
+    "cloud-client:restore-tombstone-gate",
+    "cloud-client:deletion-outbox-replacement",
+    "m8-retention-bounded-reads-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/published-runs.ts",
+      "digest": "sha256:ce773c952fa63abbfc13d2068cf4795a2c1a6f61c4ce6337f177634f2a4808a4"
+    },
+    {
+      "path": "packages/cloud-client/src/public/types.ts",
+      "digest": "sha256:c5bb3e7ac16e156edc15faf241a6d545ef60ec63c0f5cb2f324d74a4265fec37"
+    },
+    {
+      "path": "packages/cloud-client/schemas/published-run-tombstone.schema.json",
+      "digest": "sha256:7f7dcebe2fdb7defcd3824fd18d3b3e7cecc3f072d0667ef44fd42336517ff85"
+    },
+    {
+      "path": "packages/cloud-client/schemas/published-run-list-page.schema.json",
+      "digest": "sha256:a3ab5fe62c06c4740e29db99cb245f91a6da1ad2e87323cb93bb419e4cb6bb0a"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-outbox-event.schema.json",
+      "digest": "sha256:bc2366d05a248aadbf846aa82cfbbf6a6c22fbbd72c892efa4b2ab70ee2c7ef1"
+    },
+    {
+      "path": "packages/cloud-client/test/cloud-client.test.mjs",
+      "digest": "sha256:8c41c140b1eb1abd395749558104b5dc9ae89354a2265ac607831acaadb2d300"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:5b2ae7bb2ebbc1e09f961824515f86da4a1b77308203928a8d1f64ee54d6cb11"
+    }
+  ]
+}
