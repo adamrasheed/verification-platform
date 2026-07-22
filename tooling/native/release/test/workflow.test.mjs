@@ -6,6 +6,10 @@ const workflow = await readFile(".github/workflows/native-host-release.yml", "ut
 
 test("native signing workflow is manual, protected, least-privilege, and action-pinned", () => {
   assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /target:\n[\s\S]*type: choice/);
+  assert.match(workflow, /inputs\.target == 'all' \|\| inputs\.target == 'macos'/);
+  assert.match(workflow, /inputs\.target == 'all' \|\| inputs\.target == 'windows'/);
+  assert.match(workflow, /timeout-minutes: 90/);
   assert.match(workflow, /permissions:\n  contents: read/);
   assert.equal(workflow.match(/environment: native-host-release/g)?.length, 2);
   for (const action of [
