@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/cloud-secondary-sink-inventory/v1",
+  "title": "CloudSecondarySinkInventoryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sinks"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sinks": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sink", "owner", "tenantScoped", "allowedDataClasses",
+          "deletionControl", "canaryScanRequired"
+        ],
+        "properties": {
+          "sink": {
+            "enum": [
+              "applicationLog", "auditLog", "metric", "trace", "deadLetter",
+              "cache", "searchIndex", "export", "backup", "migration"
+            ]
+          },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "tenantScoped": { "type": "boolean" },
+          "allowedDataClasses": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": { "enum": ["MINIMAL_METADATA", "TOMBSTONE"] }
+          },
+          "deletionControl": {
+            "enum": ["purge", "tombstone_filter", "scheduled_expiry"]
+          },
+          "canaryScanRequired": { "const": true }
+        }
+      }
+    }
+  }
+}

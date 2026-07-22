@@ -9,15 +9,20 @@ import {
 import test from "node:test";
 import { encodeCanonicalProtocolDocument } from "@verify-internal/protocol";
 import {
+  CLOUD_SECONDARY_SINKS,
+  TENANT_ISOLATION_SURFACES,
   InMemoryPublicationIngestionStore,
   InMemoryPublicationMappingStore,
   PublicationIngestionService,
   PublicationIdentifierService,
   PublicationOutboxWorker,
+  assertCloudCanariesAbsent,
+  assertCloudSecondarySinkInventory,
   assertMetadataPublicationPayload,
   issuePublicationIntent,
   policySigningBytes,
   prepareDisclosure,
+  runTenantIsolationMatrix,
   verifyDisclosureBytes,
   verifySignedPolicyDistribution,
 } from "../dist/public/index.js";
@@ -851,4 +856,81 @@ test("a deletion fault exposes either the active unit or no deletion", async () 
   assert.equal(store.publishedRunCount, 1);
   assert.equal(store.tombstoneCount, 0);
   assert.equal(store.outboxCount, 1);
+});
+
+test("the cloud isolation harness requires every surface and rejects one confused deputy", async () => {
+  const adapters = TENANT_ISOLATION_SURFACES.map((surface) => ({
+    surface,
+    resolve: (callerTenantId, resourceTenantId) => (
+      callerTenantId === resourceTenantId ? "authorized" : "not_authorized"
+    ),
+  }));
+  const result = await runTenantIsolationMatrix(adapters);
+  assert.deepEqual(result.surfaces.map((entry) => entry.surface), TENANT_ISOLATION_SURFACES);
+  await assert.rejects(
+    runTenantIsolationMatrix(adapters.slice(0, -1)),
+    /VFY_TENANT_MATRIX_INCOMPLETE/,
+  );
+  await assert.rejects(
+    runTenantIsolationMatrix(adapters.map((adapter) => (
+      adapter.surface === "queue"
+        ? { ...adapter, resolve: () => "authorized" }
+        : adapter
+    ))),
+    /VFY_TENANT_ISOLATION_FAILED: queue/,
+  );
+});
+
+function secondarySinkInventory() {
+  return {
+    schemaVersion: 1,
+    sinks: CLOUD_SECONDARY_SINKS.map((sink) => ({
+      sink,
+      owner: `owner:${sink}`,
+      tenantScoped: !["metric", "trace"].includes(sink),
+      allowedDataClasses: sink === "backup"
+        ? ["MINIMAL_METADATA", "TOMBSTONE"]
+        : ["MINIMAL_METADATA"],
+      deletionControl: sink === "backup" ? "scheduled_expiry" : "purge",
+      canaryScanRequired: true,
+    })),
+  };
+}
+
+test("the exact secondary-sink inventory scans source, secret, and tenant canaries", () => {
+  const inventory = secondarySinkInventory();
+  assert.doesNotThrow(() => assertCloudSecondarySinkInventory(inventory));
+  const snapshots = inventory.sinks.map((entry) => ({
+    sink: entry.sink,
+    ...(entry.tenantScoped ? { tenantId: "tenant:one" } : {}),
+    encodedBytes: new TextEncoder().encode(
+      entry.tenantScoped ? '{"tenantMarker":"TENANT_ONE_CANARY"}' : '{"count":1}',
+    ),
+  }));
+  const canaries = [
+    { kind: "source", value: "SOURCE_PATH_CANARY_/private/source.ts" },
+    { kind: "secret", value: "SECRET_CANARY_DO_NOT_PERSIST" },
+    { kind: "tenant", value: "TENANT_ONE_CANARY", tenantId: "tenant:one" },
+  ];
+  assert.doesNotThrow(() => assertCloudCanariesAbsent(inventory, snapshots, canaries));
+
+  const secretLeak = structuredClone(snapshots);
+  secretLeak[0].encodedBytes = new TextEncoder().encode("SECRET_CANARY_DO_NOT_PERSIST");
+  assert.throws(
+    () => assertCloudCanariesAbsent(inventory, secretLeak, canaries),
+    /VFY_CLOUD_CANARY_LEAK: applicationLog/,
+  );
+  const crossTenantLeak = structuredClone(snapshots);
+  crossTenantLeak[0].tenantId = "tenant:two";
+  assert.throws(
+    () => assertCloudCanariesAbsent(inventory, crossTenantLeak, canaries),
+    /VFY_CLOUD_CANARY_LEAK: applicationLog/,
+  );
+  assert.throws(
+    () => assertCloudSecondarySinkInventory({
+      ...inventory,
+      sinks: inventory.sinks.slice(1),
+    }),
+    /VFY_CLOUD_SINK_INVENTORY_INCOMPLETE/,
+  );
 });
