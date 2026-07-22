@@ -5410,7 +5410,19 @@ var VerificationEngine = class {
 
 // ../../packages/adapter-core/src/public/protocol-bridge.ts
 function diagnosticCode(code) {
-  const normalized = code.toUpperCase().replace(/[^A-Z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  let normalized = "";
+  let separatorPending = false;
+  for (const character of code.toUpperCase().slice(0, 256)) {
+    const codePoint = character.charCodeAt(0);
+    const allowed = codePoint >= 65 && codePoint <= 90 || codePoint >= 48 && codePoint <= 57;
+    if (allowed) {
+      if (separatorPending && normalized.length > 0) normalized += "_";
+      normalized += character;
+      separatorPending = false;
+    } else if (normalized.length > 0) {
+      separatorPending = true;
+    }
+  }
   return `VFY_ENGINE_${normalized || "DIAGNOSTIC"}`;
 }
 function diagnosticsFor(result) {

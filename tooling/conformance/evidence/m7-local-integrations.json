@@ -20,7 +20,7 @@
     },
     {
       "path": "packages/adapter-core/src/public/protocol-bridge.ts",
-      "digest": "sha256:594d1ada38fbd84cdd8b54fa840178579f31f5213880cd55015622ee6c64011b"
+      "digest": "sha256:fefef6cbac92bdef0f9c815051adc02ae84e62a2b64c2723dfd4ee1ef661fbed"
     },
     {
       "path": "packages/adapter-core/test/dispatcher.test.mjs",
@@ -64,7 +64,7 @@
     },
     {
       "path": "apps/github-action/dist/index.js",
-      "digest": "sha256:2ee172ad1f57669413c9c03d213545f832e45fac8fdb76562705a46d1541b7a0"
+      "digest": "sha256:41abe2498e0697fa63698fb7156ad9c90162962b26b3c1b00796a30f161ca2fd"
     },
     {
       "path": "docs/architecture/ADAPTER_COMPATIBILITY.md",
