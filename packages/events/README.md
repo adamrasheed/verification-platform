@@ -20,8 +20,10 @@ in-memory implementation for contract and domain-service tests.
 
 ## Commit invariants
 
-One commit makes its revision documents, events, and exact reference edges
-visible together. Event sequences are consecutive within an invocation.
+One commit makes its revision documents, events, exact reference edges, current
+revision changes, and publication mappings visible together. Publication
+mappings require a visible exact local revision and matching tenant/object
+bindings. Event sequences are consecutive within an invocation.
 Repeating the same idempotency identity with the same request returns the
 original receipt; reusing it for different content is rejected. Expected
 sequence and current-revision predicates are checked before any state changes.

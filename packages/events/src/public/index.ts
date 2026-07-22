@@ -19,5 +19,6 @@ export type {
   EngineUnitOfWorkCommit,
   EngineUnitOfWorkConflictCode,
   EngineUnitOfWorkReceipt,
+  PublicationMapping,
   ReferenceEdge,
 } from "./unit-of-work.js";

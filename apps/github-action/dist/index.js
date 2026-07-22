@@ -2973,6 +2973,18 @@ function documentRef(document2) {
 function sameRef(left, right) {
   return left === null ? right === null : right !== null && revisionKey(left) === revisionKey(right);
 }
+function publicationLocalKey(mapping) {
+  return json({
+    tenantId: mapping.tenantId,
+    objectType: mapping.objectType,
+    localSubject: mapping.localSubject
+  });
+}
+function assertPublicationMapping(mapping) {
+  if (!mapping.tenantId || !mapping.localKeyId || !["applicationModel", "promise", "proof", "evidence"].includes(mapping.objectType) || mapping.localSubject.kind !== mapping.objectType || mapping.publishedObject.objectType !== mapping.objectType || mapping.publishedObject.tenantBinding !== mapping.tenantId || !/^pub_v1_[A-Za-z0-9_-]{43}$/.test(mapping.publishedObject.publicationId) || !Number.isFinite(Date.parse(mapping.createdAt)) || !mapping.createdAt.endsWith("Z")) {
+    throw new EngineUnitOfWorkConflict("PUBLICATION_MAPPING_CONFLICT", "publication mapping is malformed or crosses a tenant/object boundary");
+  }
+}
 var SqliteEngineUnitOfWork = class {
   #database;
   #fault;
@@ -3003,6 +3015,13 @@ var SqliteEngineUnitOfWork = class {
       CREATE TABLE IF NOT EXISTS current_revisions (
         slot TEXT PRIMARY KEY,
         ref_json TEXT NOT NULL
+      ) STRICT;
+      CREATE TABLE IF NOT EXISTS publication_mappings (
+        local_key TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        publication_id TEXT NOT NULL,
+        mapping_json TEXT NOT NULL,
+        UNIQUE(tenant_id, publication_id)
       ) STRICT;
       CREATE TABLE IF NOT EXISTS accepted_commits (
         idempotency_key TEXT PRIMARY KEY,
@@ -3102,6 +3121,32 @@ var SqliteEngineUnitOfWork = class {
         upsertCurrent.run(mutation.slot, json(mutation.nextCurrent));
       }
       this.#fault?.("after-current-revisions");
+      const readPublicationByLocal = this.#database.prepare("SELECT mapping_json FROM publication_mappings WHERE local_key = ?");
+      const readPublicationByCloud = this.#database.prepare("SELECT mapping_json FROM publication_mappings WHERE tenant_id = ? AND publication_id = ?");
+      const insertPublication = this.#database.prepare(`INSERT INTO publication_mappings(
+          local_key, tenant_id, publication_id, mapping_json
+        ) VALUES (?, ?, ?, ?)`);
+      for (const mapping of unit.publicationMappings ?? []) {
+        assertPublicationMapping(mapping);
+        if (revisionExists.get(revisionKey(mapping.localSubject)) === void 0) {
+          throw new EngineUnitOfWorkConflict("MISSING_REVISION", "publication mapping references an unavailable local revision");
+        }
+        const localKey = publicationLocalKey(mapping);
+        const mappingJson = json(mapping);
+        const existingLocal = readPublicationByLocal.get(localKey);
+        const existingCloud = readPublicationByCloud.get(mapping.tenantId, mapping.publishedObject.publicationId);
+        if (existingLocal !== void 0 && existingLocal.mapping_json !== mappingJson || existingCloud !== void 0 && existingCloud.mapping_json !== mappingJson) {
+          throw new EngineUnitOfWorkConflict("PUBLICATION_MAPPING_CONFLICT", "publication mapping conflicts with a retained local or cloud identity");
+        }
+        if (existingLocal === void 0 && existingCloud === void 0) {
+          try {
+            insertPublication.run(localKey, mapping.tenantId, mapping.publishedObject.publicationId, mappingJson);
+          } catch {
+            throw new EngineUnitOfWorkConflict("PUBLICATION_MAPPING_CONFLICT", "publication mapping lost an atomic uniqueness race");
+          }
+        }
+      }
+      this.#fault?.("after-publication-mappings");
       const receipt = {
         idempotencyKey: unit.idempotencyKey,
         invocationId: unit.invocationId,
@@ -3109,7 +3154,8 @@ var SqliteEngineUnitOfWork = class {
         lastSequence: unit.expectedNextSequence + unit.events.length - 1,
         revisionCount: unit.revisions.length,
         eventCount: unit.events.length,
-        referenceEdgeCount: unit.referenceEdges.length
+        referenceEdgeCount: unit.referenceEdges.length,
+        ...unit.publicationMappings === void 0 ? {} : { publicationMappingCount: unit.publicationMappings.length }
       };
       this.#database.prepare("INSERT INTO accepted_commits(idempotency_key, request_json, receipt_json) VALUES (?, ?, ?)").run(unit.idempotencyKey, requestJson, json(receipt));
       this.#fault?.("before-commit");
@@ -3154,6 +3200,15 @@ var SqliteEngineUnitOfWork = class {
       relation: row.relation,
       target: parseKey(row.target_key)
     }));
+  }
+  readPublicationMapping(tenantId, objectType, localSubject) {
+    const localKey = json({ tenantId, objectType, localSubject });
+    const row = this.#database.prepare("SELECT mapping_json FROM publication_mappings WHERE local_key = ?").get(localKey);
+    return row === void 0 ? void 0 : JSON.parse(row.mapping_json);
+  }
+  readPublicationMappingByCloudId(tenantId, publicationId) {
+    const row = this.#database.prepare("SELECT mapping_json FROM publication_mappings WHERE tenant_id = ? AND publication_id = ?").get(tenantId, publicationId);
+    return row === void 0 ? void 0 : JSON.parse(row.mapping_json);
   }
 };
 

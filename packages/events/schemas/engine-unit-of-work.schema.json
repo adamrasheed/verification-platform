@@ -101,6 +101,43 @@
           }
         }
       }
+    },
+    "publicationMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tenantId",
+          "objectType",
+          "localSubject",
+          "publishedObject",
+          "localKeyId",
+          "createdAt"
+        ],
+        "properties": {
+          "tenantId": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "objectType": { "enum": ["applicationModel", "promise", "proof", "evidence"] },
+          "localSubject": {
+            "$ref": "event-envelope.schema.json#/$defs/revisionRef"
+          },
+          "publishedObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["objectType", "publicationId", "tenantBinding"],
+            "properties": {
+              "objectType": { "enum": ["applicationModel", "promise", "proof", "evidence"] },
+              "publicationId": {
+                "type": "string",
+                "pattern": "^pub_v1_[A-Za-z0-9_-]{43}$"
+              },
+              "tenantBinding": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          },
+          "localKeyId": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      }
     }
   }
 }

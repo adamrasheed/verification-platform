@@ -10,7 +10,7 @@
   "artifacts": [
     {
       "path": "packages/execution/src/public/sqlite-unit-of-work.ts",
-      "digest": "sha256:bbb8303369cf721cf1f06b96a0e4a9223d80a598b8a0440b5ec26ea24a0e50d5"
+      "digest": "sha256:ff95451f69ea5bf1f53d76780c3ed01bd805f15aa4454697836e463455b9a9f3"
     }
   ]
 }

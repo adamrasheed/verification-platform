@@ -102,6 +102,7 @@ test("non-monotonic, duplicate, and skipped sequences reveal no partial state", 
       events: [],
       referenceEdges: [],
       currentRevisions: {},
+      publicationMappings: [],
     });
   }
 });
@@ -159,6 +160,7 @@ test("a missing event subject rejects the whole commit", async () => {
     events: [],
     referenceEdges: [],
     currentRevisions: {},
+    publicationMappings: [],
   });
 });
 
@@ -178,4 +180,56 @@ test("a failed current-revision predicate preserves all previously visible state
     "CURRENT_REVISION_CONFLICT",
   );
   assert.deepEqual(store.snapshot(), before);
+});
+
+test("publication mappings commit atomically with their exact local revision", async () => {
+  const store = new InMemoryEngineUnitOfWork();
+  const commit = copy(validCommit);
+  commit.publicationMappings = [{
+    tenantId: "tenant:one",
+    objectType: "applicationModel",
+    localSubject: commit.revisions[1],
+    publishedObject: {
+      objectType: "applicationModel",
+      publicationId: `pub_v1_${"A".repeat(43)}`,
+      tenantBinding: "tenant:one",
+    },
+    localKeyId: "local-key:one",
+    createdAt: "2026-07-22T20:00:00Z",
+  }];
+  const receipt = await store.commit(commit);
+  assert.equal(receipt.publicationMappingCount, 1);
+  assert.deepEqual(store.snapshot().publicationMappings, commit.publicationMappings);
+});
+
+test("cross-tenant and missing-revision publication mappings reveal no partial state", async () => {
+  for (const mutation of ["cross-tenant", "missing-revision"]) {
+    const store = new InMemoryEngineUnitOfWork();
+    const commit = copy(validCommit);
+    const subject = copy(commit.revisions[1]);
+    if (mutation === "missing-revision") subject.revision = `sha256:${"9".repeat(64)}`;
+    commit.publicationMappings = [{
+      tenantId: "tenant:one",
+      objectType: "applicationModel",
+      localSubject: subject,
+      publishedObject: {
+        objectType: "applicationModel",
+        publicationId: `pub_v1_${"B".repeat(43)}`,
+        tenantBinding: mutation === "cross-tenant" ? "tenant:other" : "tenant:one",
+      },
+      localKeyId: "local-key:one",
+      createdAt: "2026-07-22T20:00:00Z",
+    }];
+    await expectConflict(
+      store.commit(commit),
+      mutation === "cross-tenant" ? "PUBLICATION_MAPPING_CONFLICT" : "MISSING_REVISION",
+    );
+    assert.deepEqual(store.snapshot(), {
+      revisions: [],
+      events: [],
+      referenceEdges: [],
+      currentRevisions: {},
+      publicationMappings: [],
+    });
+  }
 });

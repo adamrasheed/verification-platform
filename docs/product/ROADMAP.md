@@ -160,9 +160,9 @@ production dependency in M7.
 | Task | Status | Work | Acceptance/test requirement |
 |---|---|---|---|
 | M8-T01 | **Complete** | Add `cloud-client` publication, disclosure, and policy schemas | Closed schemas reject unknown fields and tenant-mismatched references |
-| M8-T02 | **Foundation complete** — durable Engine mapping integration remains | Resolve and implement publication-identifier lifecycle | ADR-0012; keyed tenant/object separation, rotation stability, and collision failure |
+| M8-T02 | **Complete** | Resolve and implement publication-identifier lifecycle and durable Engine mapping | ADR-0012; keyed tenant/object separation, restart persistence, atomic rollback, and collision failure |
 | M8-T03 | **Complete** | Implement disclosure manifest and exact-byte comparison | Canonical bytes, field inventory, destination, retention, expiry, and approved digest remain bound |
-| M8-T04 | Pending D-002 and cloud action/tenant decisions | Scaffold closed `cloud-api` identity and tenant boundaries | Cross-tenant resources remain indistinguishable and deny-default |
+| M8-T04 | **Contract foundation complete** — closed service deployment remains pending D-002 | Define cloud identity, exact action, tenant, and resource boundaries | Canonical ten-action catalog; cross-tenant/IDOR resources remain indistinguishable and deny-default |
 | M8-T05 | Pending | Implement short-lived publication intents | Exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
 | M8-T06 | Pending | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes conflict atomically |
 | M8-T07 | Pending | Persist immutable run projections | No verdict recalculation or raw local revision disclosure |

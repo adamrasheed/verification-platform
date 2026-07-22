@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-durable-mapping-auth",
+  "taskId": "M8-T02-T04",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.2-11.4", "EDD §§22,24,27,33", "ADR-0012"],
+  "testIds": [
+    "events:publication-mapping-atomicity",
+    "execution:publication-mapping-restart",
+    "execution:publication-mapping-collision-rollback",
+    "auth:exact-cloud-action-catalog",
+    "auth:cross-tenant-idor-matrix",
+    "auth:no-ambient-operator-workload-authority",
+    "m8-durable-mapping-auth-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/events/src/public/unit-of-work.ts",
+      "digest": "sha256:552102da7607783fdb3ff4d545ec85c21da2ba29d83c74444890cc1ad7b030b2"
+    },
+    {
+      "path": "packages/events/src/testing/in-memory-engine-unit-of-work.ts",
+      "digest": "sha256:02487a727887c55117fd9c073596a97b129e8be97b6bcf8b03fda9dc7df12cef"
+    },
+    {
+      "path": "packages/events/schemas/engine-unit-of-work.schema.json",
+      "digest": "sha256:17237ab9e9a9c70a48d1ebb230ba6dcf3599eb1f3a4995e58f7b44b8768bac02"
+    },
+    {
+      "path": "packages/events/test/events.test.mjs",
+      "digest": "sha256:7426f38320cac7d089f0a37df65cefba3f18b43905d5ca2cd8e9b7c2cbedc907"
+    },
+    {
+      "path": "packages/execution/src/public/sqlite-unit-of-work.ts",
+      "digest": "sha256:ff95451f69ea5bf1f53d76780c3ed01bd805f15aa4454697836e463455b9a9f3"
+    },
+    {
+      "path": "packages/execution/test/execution.test.mjs",
+      "digest": "sha256:02dfe65617f9d7c9d7f6f4f03fd33fa3b088b614254ccfc1ded3a9bff3dbceda"
+    },
+    {
+      "path": "packages/auth/src/public/cloud-authorization.ts",
+      "digest": "sha256:dd865c801e5c9fca04217d82991abb8ffe80f5e604beaaaef7dfa594f69a9217"
+    },
+    {
+      "path": "packages/auth/schemas/cloud-authorization.schema.json",
+      "digest": "sha256:bf669832967d3439529707a111897a72085a273aeec857b2af080dbea069cd3c"
+    },
+    {
+      "path": "packages/auth/test/cloud-authorization.test.mjs",
+      "digest": "sha256:34d25ee175b08d5937b63451da7bff1079b3806a90fb49f84c9b1a78fef9c4b8"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:c479962e6286d825a218e9ccb9ef5023b31cc3c8a61a250d3e810cb42f851d75"
+    }
+  ]
+}

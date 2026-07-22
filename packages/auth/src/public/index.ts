@@ -1,5 +1,19 @@
 import path from "node:path";
 
+export {
+  CLOUD_ACTION_CATALOG,
+  authorizeCloudAction,
+} from "./cloud-authorization.js";
+export type {
+  CloudAction,
+  CloudAuthorizationDecision,
+  CloudAuthorizationGrant,
+  CloudAuthorizationRequest,
+  CloudPrincipal,
+  CloudResourceRef,
+  CloudResourceType,
+} from "./cloud-authorization.js";
+
 export type LocalPermission =
   | "workspace.read"
   | "history.read"

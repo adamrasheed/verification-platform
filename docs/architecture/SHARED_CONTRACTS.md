@@ -203,6 +203,22 @@ Remote parity compares a published projection with the pure projection derived
 from the same local result. It does not compare privacy-reduced remote output to
 the full CLI document.
 
+## Cloud authorization
+
+The initial cloud action catalog is exactly `project:read`, `dispatch:create`,
+`dispatch:cancel`, `run:publish`, `run:readPublished`, `policy:read`,
+`policy:admin`, `membership:admin`, `deletion:request`, and `usage:read`.
+Authorization evaluates an authenticated audience-bound principal, one action,
+one tenant, and one exact server-resolved resource. Role and membership names
+are expanded server-side into expiring policy-revision grants and never enter
+the enforcement decision. User, workload, and operator identities receive no
+ambient tenant authority.
+
+Wrong-tenant IDs, wrong parent resources, missing resources, absent membership,
+and IDOR attempts return the same `NOT_AUTHORIZED` decision. Authentication,
+audience, validity, revocation, and malformed-request failures remain distinct
+because they are resolved before any resource-existence lookup.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.
