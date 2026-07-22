@@ -43,7 +43,7 @@ async function walk(directory) {
     }
     if (!entry.isFile() || !/\.[cm]?[jt]s$/.test(entry.name)) continue;
     const text = await readFile(target, "utf8");
-    const relative = path.relative(root, target);
+    const relative = path.relative(root, target).split(path.sep).join("/");
     for (const specifier of forbiddenImports) {
       const quoted = [`"${specifier}"`, `'${specifier}'`];
       if (

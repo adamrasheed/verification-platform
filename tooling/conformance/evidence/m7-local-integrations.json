@@ -72,7 +72,7 @@
     },
     {
       "path": "tooling/conformance/check-offline.mjs",
-      "digest": "sha256:651a09fcb688b2d47d12f91afccd40c2716872881c81bf9fab7acfc7a76c356b"
+      "digest": "sha256:a724c4511556a8b34bda6d1c77dc4a878dea6b76b0094192a5af1d3c0f8726cd"
     }
   ]
 }
