@@ -219,6 +219,22 @@ and IDOR attempts return the same `NOT_AUTHORIZED` decision. Authentication,
 audience, validity, revocation, and malformed-request failures remain distinct
 because they are resolved before any resource-existence lookup.
 
+## Publication intent and ingestion
+
+A metadata upload requires a signed `verify-cloud-publication` intent valid for
+at most five minutes. The intent binds the exact tenant, project, purpose,
+disclosure-manifest and payload digests, idempotency key, retention class,
+policy ID and revision, nonce, and count/byte limits. It expires no later than
+the disclosure manifest or authorizing policy.
+
+Ingestion accepts only identity-encoded `application/json`, checks the encoded
+byte limit before parsing, rejects excessive JSON depth, and reruns the closed
+metadata schema and disclosure byte comparison. The tenant-scoped idempotency
+key and nonce are admitted atomically: an exact request retry returns the
+original receipt, while changed request bytes or nonce reuse fail without
+partial admission. A production store must implement the same atomic operation;
+the in-memory store is a conformance backend only.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.

@@ -163,8 +163,8 @@ production dependency in M7.
 | M8-T02 | **Complete** | Resolve and implement publication-identifier lifecycle and durable Engine mapping | ADR-0012; keyed tenant/object separation, restart persistence, atomic rollback, and collision failure |
 | M8-T03 | **Complete** | Implement disclosure manifest and exact-byte comparison | Canonical bytes, field inventory, destination, retention, expiry, and approved digest remain bound |
 | M8-T04 | **Contract foundation complete** — closed service deployment remains pending D-002 | Define cloud identity, exact action, tenant, and resource boundaries | Canonical ten-action catalog; cross-tenant/IDOR resources remain indistinguishable and deny-default |
-| M8-T05 | Pending | Implement short-lived publication intents | Exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
-| M8-T06 | Pending | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes conflict atomically |
+| M8-T05 | **Contract foundation complete** — service deployment remains pending D-002 | Implement short-lived publication intents | Five-minute signed audience; exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
+| M8-T06 | **Contract foundation complete** — durable cloud store remains pending D-002 | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes and nonce replay conflict atomically |
 | M8-T07 | Pending | Persist immutable run projections | No verdict recalculation or raw local revision disclosure |
 | M8-T08 | **Contract foundation complete** | Distribute signed tenant policies | Exact canonical bytes, tenant, signature, issue, and expiry validated |
 | M8-T09 | Pending | Implement transactional outbox/projection workers | Source fact and outbox commit together; retries are idempotent |
