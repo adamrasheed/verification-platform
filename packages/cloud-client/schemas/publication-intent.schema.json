@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/publication-intent/v1",
+  "title": "SignedPublicationIntentV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["intent", "signature"],
+  "properties": {
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion", "intentId", "audience", "tenantId", "projectId",
+        "purpose", "manifestDigest", "payloadDigest", "idempotencyKey", "retentionClass",
+        "limits", "policy", "nonce", "issuedAt", "expiresAt"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "intentId": { "$ref": "#/$defs/id" },
+        "audience": { "const": "verify-cloud-publication" },
+        "tenantId": { "$ref": "#/$defs/id" },
+        "projectId": { "$ref": "#/$defs/id" },
+        "purpose": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "manifestDigest": { "$ref": "#/$defs/digest" },
+        "payloadDigest": { "$ref": "#/$defs/digest" },
+        "idempotencyKey": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "retentionClass": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxEncodedPayloadBytes", "maxPromiseCount", "maxProofCount", "maxEvidenceCount"
+          ],
+          "properties": {
+            "maxEncodedPayloadBytes": { "type": "integer", "minimum": 0, "maximum": 1048576 },
+            "maxPromiseCount": { "type": "integer", "minimum": 0, "maximum": 10000 },
+            "maxProofCount": { "type": "integer", "minimum": 0, "maximum": 50000 },
+            "maxEvidenceCount": { "type": "integer", "minimum": 0, "maximum": 50000 }
+          }
+        },
+        "policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["policyId", "revisionId"],
+          "properties": {
+            "policyId": { "$ref": "#/$defs/id" },
+            "revisionId": { "$ref": "#/$defs/id" }
+          }
+        },
+        "nonce": { "$ref": "#/$defs/id" },
+        "issuedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "keyId", "value"],
+      "properties": {
+        "algorithm": { "const": "Ed25519" },
+        "keyId": { "$ref": "#/$defs/id" },
+        "value": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" }
+      }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

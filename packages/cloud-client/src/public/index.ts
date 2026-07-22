@@ -22,9 +22,19 @@ export {
   verifySignedPolicyDistribution,
 } from "./policy.js";
 export {
+  InMemoryPublicationIngestionStore,
+  PublicationIngestionService,
+  assertPublicationIntent,
+  assertSignedPublicationIntent,
+  issuePublicationIntent,
+  publicationIntentSigningBytes,
+  verifyPublicationIntent,
+} from "./publication-intent.js";
+export {
   DISCLOSURE_MANIFEST_SCHEMA_MAJOR,
   METADATA_PUBLICATION_SCHEMA_MAJOR,
   POLICY_DISTRIBUTION_SCHEMA_MAJOR,
+  PUBLICATION_INTENT_SCHEMA_MAJOR,
 } from "./types.js";
 export type {
   DisclosureField,
@@ -36,7 +46,17 @@ export type {
   PolicyPublicationRule,
   PolicySignatureVerifier,
   PreparedDisclosure,
+  PublicationAuthorizationContext,
+  PublicationIngestionReceipt,
+  PublicationIngestionRequest,
+  PublicationIngestionStore,
+  PublicationIntent,
+  PublicationIntentOptions,
+  PublicationIntentSignatureVerifier,
+  PublicationIntentSigningOperation,
+  PublicationLimits,
   RetentionPolicyRef,
+  SignedPublicationIntent,
   SignedPolicyDistribution,
 } from "./types.js";
 export {

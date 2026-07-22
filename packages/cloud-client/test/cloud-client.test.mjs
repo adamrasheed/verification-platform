@@ -1,15 +1,20 @@
 import assert from "node:assert/strict";
 import {
+  createHash,
   createHmac,
   generateKeyPairSync,
   sign,
   verify,
 } from "node:crypto";
 import test from "node:test";
+import { encodeCanonicalProtocolDocument } from "@verify-internal/protocol";
 import {
+  InMemoryPublicationIngestionStore,
   InMemoryPublicationMappingStore,
+  PublicationIngestionService,
   PublicationIdentifierService,
   assertMetadataPublicationPayload,
+  issuePublicationIntent,
   policySigningBytes,
   prepareDisclosure,
   verifyDisclosureBytes,
@@ -296,4 +301,250 @@ test("signed policies are exact-byte, tenant-bound, and validity-bound", async (
     ),
     /VFY_POLICY_EXPIRED/,
   );
+});
+
+function publicationPolicy() {
+  return {
+    schemaVersion: 1,
+    tenantId: "tenant:one",
+    policyId: "policy:publication",
+    revisionId: "revision:1",
+    issuedAt: "2026-07-22T20:00:00Z",
+    expiresAt: "2026-07-23T20:00:00Z",
+    actions: ["run:publish"],
+    publicationRules: [{
+      purpose: "verification.metadata",
+      payloadSchemaMajor: 1,
+      retentionClasses: ["metadata-30d"],
+    }],
+  };
+}
+
+const publicationLimits = {
+  maxEncodedPayloadBytes: 1_048_576,
+  maxPromiseCount: 10_000,
+  maxProofCount: 50_000,
+  maxEvidenceCount: 50_000,
+};
+
+async function publicationRequest({
+  document = payload(),
+  nonce = "nonce:one",
+  intentId = "intent:one",
+  issuedAt = "2026-07-22T21:00:00Z",
+  expiresAt = "2026-07-22T21:05:00Z",
+  limits = publicationLimits,
+  keyPair = generateKeyPairSync("ed25519"),
+  manifestMutation,
+} = {}) {
+  const prepared = prepareDisclosure(document, {
+    payloadSchemaMinor: 0,
+    retentionPolicy: { id: "retention:metadata", revision: "revision:1" },
+    expiresAt: "2026-07-22T22:00:00Z",
+  });
+  if (manifestMutation) manifestMutation(prepared);
+  const signedIntent = await issuePublicationIntent(
+    prepared.manifest,
+    prepared.manifestDigest,
+    publicationPolicy(),
+    {
+      intentId,
+      nonce,
+      idempotencyKey: document.idempotencyKey,
+      retentionClass: document.retentionClass,
+      issuedAt,
+      expiresAt,
+      limits,
+    },
+    {
+      keyId: "publication-key:one",
+      sign: (bytes) => new Uint8Array(sign(null, bytes, keyPair.privateKey)),
+    },
+  );
+  return {
+    prepared,
+    keyPair,
+    request: {
+      signedIntent,
+      manifest: prepared.manifest,
+      manifestDigest: prepared.manifestDigest,
+      payloadBytes: prepared.payloadBytes,
+      idempotencyKey: document.idempotencyKey,
+      contentType: "application/json",
+      contentEncoding: "identity",
+    },
+  };
+}
+
+function publicationVerifier(publicKey) {
+  return (_keyId, bytes, signature) => verify(null, bytes, publicKey, signature);
+}
+
+test("a short-lived publication intent binds the exact authorized upload", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore();
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  const now = new Date("2026-07-22T21:01:00Z");
+  const first = await service.ingest(fixture.request, authorization, now);
+  const retry = await service.ingest(structuredClone(fixture.request), authorization, now);
+  assert.deepEqual(retry, first);
+  assert.equal(first.intentId, "intent:one");
+  assert.equal(store.size, 1, "an exact retry does not create another publication");
+
+  const countLimited = await publicationRequest({
+    keyPair: fixture.keyPair,
+    nonce: "nonce:limited",
+    intentId: "intent:limited",
+    limits: { ...publicationLimits, maxPromiseCount: 0 },
+  });
+  await assert.rejects(
+    service.ingest(countLimited.request, authorization, now),
+    /VFY_PUBLICATION_LIMIT_EXCEEDED/,
+  );
+
+  await assert.rejects(
+    service.ingest(fixture.request, { ...authorization, tenantId: "tenant:other" }, now),
+    /VFY_PUBLICATION_NOT_AUTHORIZED/,
+  );
+  await assert.rejects(
+    service.ingest(fixture.request, authorization, new Date("2026-07-22T21:05:00Z")),
+    /VFY_PUBLICATION_INTENT_EXPIRED/,
+  );
+});
+
+test("intent issuance rejects digest, policy, and lifetime drift", async () => {
+  const prepared = prepareDisclosure(payload(), {
+    payloadSchemaMinor: 0,
+    retentionPolicy: { id: "retention:metadata", revision: "revision:1" },
+    expiresAt: "2026-07-22T22:00:00Z",
+  });
+  const signing = {
+    keyId: "publication-key:one",
+    sign: () => new Uint8Array(64),
+  };
+  const options = {
+    intentId: "intent:one",
+    nonce: "nonce:one",
+    idempotencyKey: "idempotency:one",
+    retentionClass: "metadata-30d",
+    issuedAt: "2026-07-22T21:00:00Z",
+    expiresAt: "2026-07-22T21:05:00Z",
+    limits: publicationLimits,
+  };
+  await assert.rejects(
+    issuePublicationIntent(
+      prepared.manifest,
+      digest("0"),
+      publicationPolicy(),
+      options,
+      signing,
+    ),
+    /VFY_PUBLICATION_INTENT_MISMATCH/,
+  );
+  await assert.rejects(
+    issuePublicationIntent(
+      prepared.manifest,
+      prepared.manifestDigest,
+      { ...publicationPolicy(), actions: [] },
+      options,
+      signing,
+    ),
+    /VFY_PUBLICATION_POLICY_DENIED/,
+  );
+  await assert.rejects(
+    issuePublicationIntent(
+      prepared.manifest,
+      prepared.manifestDigest,
+      publicationPolicy(),
+      { ...options, expiresAt: "2026-07-22T21:05:00.001Z" },
+      signing,
+    ),
+    /VFY_PUBLICATION_INTENT_MALFORMED/,
+  );
+});
+
+test("idempotency and nonce replay conflicts are atomic", async () => {
+  const keyPair = generateKeyPairSync("ed25519");
+  const first = await publicationRequest({ keyPair });
+  const changedDocument = payload();
+  changedDocument.applicationAlias = "Changed but still allowlisted";
+  const changed = await publicationRequest({
+    document: changedDocument,
+    keyPair,
+    nonce: "nonce:two",
+    intentId: "intent:two",
+  });
+  const replayDocument = payload();
+  replayDocument.idempotencyKey = "idempotency:two";
+  const replay = await publicationRequest({
+    document: replayDocument,
+    keyPair,
+    nonce: "nonce:one",
+    intentId: "intent:three",
+  });
+  const store = new InMemoryPublicationIngestionStore();
+  const service = new PublicationIngestionService(store, publicationVerifier(keyPair.publicKey));
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  const now = new Date("2026-07-22T21:01:00Z");
+  await service.ingest(first.request, authorization, now);
+  await assert.rejects(
+    service.ingest(changed.request, authorization, now),
+    /VFY_PUBLICATION_IDEMPOTENCY_CONFLICT/,
+  );
+  await assert.rejects(
+    service.ingest(replay.request, authorization, now),
+    /VFY_PUBLICATION_REPLAY_DETECTED/,
+  );
+  assert.equal(store.size, 1, "conflicts reveal no partial admission");
+});
+
+test("ingestion rejects hostile transport, deep JSON, and signature drift before admission", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore();
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  const now = new Date("2026-07-22T21:01:00Z");
+  await assert.rejects(
+    service.ingest({ ...fixture.request, contentEncoding: "gzip" }, authorization, now),
+    /VFY_PUBLICATION_CONTENT_TYPE_DENIED/,
+  );
+  const tampered = structuredClone(fixture.request);
+  tampered.signedIntent.signature.value = `A${tampered.signedIntent.signature.value.slice(1)}`;
+  await assert.rejects(
+    service.ingest(tampered, authorization, now),
+    /VFY_PUBLICATION_INTENT_SIGNATURE_INVALID/,
+  );
+  const unknown = structuredClone(fixture.request);
+  unknown.signedIntent.intent.source = "must-never-enter-cloud";
+  await assert.rejects(
+    service.ingest(unknown, authorization, now),
+    /VFY_PUBLICATION_INTENT_MALFORMED/,
+  );
+
+  const deepBytes = new TextEncoder().encode(`${"[".repeat(33)}0${"]".repeat(33)}`);
+  const deep = await publicationRequest({
+    keyPair: fixture.keyPair,
+    nonce: "nonce:deep",
+    intentId: "intent:deep",
+    manifestMutation(prepared) {
+      prepared.payloadBytes = deepBytes;
+      prepared.manifest.payloadDigest = `sha256:${createHash("sha256").update(deepBytes).digest("hex")}`;
+      prepared.manifest.encodedPayloadBytes = deepBytes.byteLength;
+      prepared.manifestDigest = `sha256:${createHash("sha256").update(
+        encodeCanonicalProtocolDocument(prepared.manifest),
+      ).digest("hex")}`;
+    },
+  });
+  await assert.rejects(
+    service.ingest(deep.request, authorization, now),
+    /VFY_CLOUD_PAYLOAD_TOO_DEEP/,
+  );
+  assert.equal(store.size, 0);
 });

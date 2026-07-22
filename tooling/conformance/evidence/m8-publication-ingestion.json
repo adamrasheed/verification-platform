@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-publication-ingestion",
+  "taskId": "M8-T05-T06",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.3-11.4", "EDD §§23-24,27,33"],
+  "testIds": [
+    "cloud-client:intent-exact-binding",
+    "cloud-client:intent-policy-lifetime-drift",
+    "cloud-client:ingestion-exact-retry",
+    "cloud-client:ingestion-idempotency-conflict",
+    "cloud-client:ingestion-nonce-replay",
+    "cloud-client:ingestion-hostile-bounds",
+    "m8-publication-ingestion-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/publication-intent.ts",
+      "digest": "sha256:ad0bfc1fbe80025016b9116a39d00439507f201d405e82a8897f40719343fa15"
+    },
+    {
+      "path": "packages/cloud-client/src/public/types.ts",
+      "digest": "sha256:ccdc9492e6225a5264bffc16c2188cd56b3360710c513d615841692baa502338"
+    },
+    {
+      "path": "packages/cloud-client/src/public/index.ts",
+      "digest": "sha256:caf2f86fa5cb470eda2541d2507304bae7e602fabb2732780d137a7bb526681d"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-intent.schema.json",
+      "digest": "sha256:02268351d119889edbbf3a6ccd24a9a9179a3c35d8a0dd9edcefa06f1ca7532f"
+    },
+    {
+      "path": "packages/cloud-client/test/cloud-client.test.mjs",
+      "digest": "sha256:286323c57d51172e99e6285ece60af309a85a05b5c326b3e49e3f517e06d9e55"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:63fa6dfbc3ade086eaca984a17a981791d53773833cdf6bb451fffce2f7a72dc"
+    }
+  ]
+}

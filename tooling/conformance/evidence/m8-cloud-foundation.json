@@ -46,7 +46,7 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:7d0f91bdae9fde6643a76d95bc32125bbcf19a1ae7cc8968a5ec559db64fd0cc"
+      "digest": "sha256:286323c57d51172e99e6285ece60af309a85a05b5c326b3e49e3f517e06d9e55"
     },
     {
       "path": "docs/architecture/ADR/0012-metadata-publication-identifier-lifecycle.md",
