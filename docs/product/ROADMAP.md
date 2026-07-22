@@ -170,8 +170,8 @@ production dependency in M7.
 | M8-T09 | **Contract foundation complete** — queue adapter remains pending D-002 | Implement transactional outbox/projection workers | Source fact and outbox commit together; stable event identity, fenced lease, and idempotent acknowledgement |
 | M8-T10 | **Contract foundation complete** — production retention/backup propagation remains pending D-002 | Implement retention, deletion, and tombstones | Atomic active deletion, digest-free tombstone, deletion event, and restore-time gate pass |
 | M8-T11 | **Contract foundation complete** — service deployment remains pending D-002 | Implement bounded read APIs and pagination | Stable ordering, opaque expiring cursors, bounded limits, and exact tenant/project scope pass |
-| M8-T12 | Pending | Run cross-tenant negative matrix | API, store, cache, queue, backup, and migration isolation pass |
-| M8-T13 | Pending | Run cloud canary and secondary-sink inventory | Source, secret, and tenant canaries absent from every unauthorized sink |
+| M8-T12 | **Contract harness complete** — concrete adapter matrix remains pending D-002 | Run cross-tenant negative matrix | Exact six-surface harness rejects missing surfaces, IDOR differences, and confused-deputy authorization |
+| M8-T13 | **Contract harness complete** — deployed sink scans remain pending D-002 | Run cloud canary and secondary-sink inventory | Closed ten-sink inventory and bounded source/secret/cross-tenant canary scans pass |
 | M8-T14 | Pending | Publish metadata-cloud release Evidence | SLO, DR, security, supply-chain, and exact artifact evidence retained |
 
 Product-hosted source remains excluded. Provider-specific deployment does not

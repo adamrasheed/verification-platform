@@ -41,11 +41,11 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:8c41c140b1eb1abd395749558104b5dc9ae89354a2265ac607831acaadb2d300"
+      "digest": "sha256:e85bd074cf6c93657f2d83c42570d68647718d1343a3224f8839ecdc4bd3d2c1"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",
-      "digest": "sha256:5b2ae7bb2ebbc1e09f961824515f86da4a1b77308203928a8d1f64ee54d6cb11"
+      "digest": "sha256:209db1cc9cea73c02a0688112178a847525f7fe6ab8c49d532bb141444f2cead"
     }
   ]
 }

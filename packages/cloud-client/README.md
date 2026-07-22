@@ -44,5 +44,18 @@ publishedRunId)`. Continuation cursors are random, opaque, expire after five
 minutes, are retained in a bounded store, and are bound to the exact tenant and
 project; malformed, expired, and cross-scope cursors fail identically.
 
+Cloud isolation conformance requires explicit API, store, cache, queue, backup,
+and migration adapters. The matrix proves same-tenant success while requiring
+cross-tenant and missing-resource requests to converge on `not_authorized`; an
+incomplete surface set cannot pass. This is a harness for real adapters, not a
+claim that provider infrastructure already exists.
+
+The secondary-sink inventory is a closed ten-sink contract covering logs,
+audit, metrics, traces, dead letters, caches, indexes, exports, backups, and
+migrations. Every entry declares ownership, tenant scope, allowed non-sensitive
+data classes, deletion behavior, and mandatory canary scanning. Bounded scans
+reject source and secret markers everywhere and tenant markers in any sink not
+authorized for that tenant.
+
 Schemas and compatibility are owned by Founding Engineering. M8 foundation
 acceptance is covered by `cloud-client:test`; release status is experimental.

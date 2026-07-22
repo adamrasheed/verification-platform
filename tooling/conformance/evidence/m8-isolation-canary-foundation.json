@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-isolation-canary-foundation",
+  "taskId": "M8-T12-T13",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.3-11.4", "EDD §§26-27,33", "SP-CLOUD-002", "SP-TENANT-001"],
+  "testIds": [
+    "cloud-client:exact-six-surface-isolation-matrix",
+    "cloud-client:cross-tenant-missing-resource-indistinguishable",
+    "cloud-client:confused-deputy-rejection",
+    "cloud-client:closed-ten-sink-inventory",
+    "cloud-client:source-secret-tenant-canary-scan",
+    "m8-isolation-canary-foundation-regression:passed"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/isolation-conformance.ts",
+      "digest": "sha256:b92670f6afd4e3492727310576a4152998a169e478daa0a1b8ef017b095364c0"
+    },
+    {
+      "path": "packages/cloud-client/schemas/cloud-secondary-sink-inventory.schema.json",
+      "digest": "sha256:960c89dc85c48f1f965b54359cdd4d7d25abb5d54a7f5eafe05921d821574894"
+    },
+    {
+      "path": "packages/cloud-client/test/cloud-client.test.mjs",
+      "digest": "sha256:e85bd074cf6c93657f2d83c42570d68647718d1343a3224f8839ecdc4bd3d2c1"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:209db1cc9cea73c02a0688112178a847525f7fe6ab8c49d532bb141444f2cead"
+    }
+  ]
+}

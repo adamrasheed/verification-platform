@@ -271,6 +271,27 @@ expiry, replica/index propagation, or legal-hold policy. Those production
 values and adapters remain gated on D-002; callers cannot infer a default from
 the conformance store.
 
+## Cloud isolation and secondary-sink conformance
+
+The cloud isolation matrix has six required surfaces: API, store, cache, queue,
+backup, and migration. Each concrete adapter must authorize an exact same-tenant
+probe and return the identical `not_authorized` result for cross-tenant and
+missing-resource probes. Duplicate, missing, or unknown surfaces invalidate the
+matrix; a synthetic harness result does not substitute for a production adapter
+run.
+
+The mandatory secondary-sink inventory contains exactly application logs,
+audit logs, metrics, traces, dead letters, caches, search indexes, exports,
+backups, and migrations. Each entry binds an owner, tenant-scoping posture,
+allowed `MINIMAL_METADATA`/`TOMBSTONE` classes, deletion control, and mandatory
+canary scan. Scans are byte-bounded and complete across the inventory. Source
+and secret markers are forbidden everywhere; a tenant marker is permitted only
+in a tenant-scoped snapshot for that exact tenant.
+
+Provider infrastructure, backup media, migrations, and observability adapters
+must run these contracts after D-002. Until then, M8-T12/T13 are contract
+foundations and no deployed-isolation or zero-secondary-leakage claim is made.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.

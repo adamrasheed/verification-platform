@@ -81,3 +81,21 @@ export {
   assertPolicyBundle,
   assertSignedPolicyDistribution,
 } from "./validation.js";
+export {
+  CLOUD_SECONDARY_SINKS,
+  TENANT_ISOLATION_SURFACES,
+  assertCloudCanariesAbsent,
+  assertCloudSecondarySinkInventory,
+  runTenantIsolationMatrix,
+} from "./isolation-conformance.js";
+export type {
+  CloudCanary,
+  CloudSecondarySink,
+  CloudSecondarySinkInventory,
+  CloudSecondarySinkInventoryEntry,
+  CloudSinkDataClass,
+  CloudSinkSnapshot,
+  TenantIsolationAdapter,
+  TenantIsolationMatrixResult,
+  TenantIsolationSurface,
+} from "./isolation-conformance.js";
