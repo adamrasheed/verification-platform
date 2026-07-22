@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/published-run-tombstone/v1",
+  "title": "PublishedRunTombstoneV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "objectType", "opaqueId", "deletedAt", "authority",
+    "reasonClass", "affectedEdgeIds"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "objectType": { "const": "publishedRun" },
+    "opaqueId": { "$ref": "#/$defs/id" },
+    "deletedAt": { "type": "string", "format": "date-time" },
+    "authority": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "reasonClass": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{0,63}$" },
+    "affectedEdgeIds": {
+      "type": "array",
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/id" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 }
+  }
+}

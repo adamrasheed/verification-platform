@@ -165,12 +165,107 @@ export interface PublicationIngestionRequest {
 export interface PublicationIngestionReceipt {
   readonly schemaVersion: 1;
   readonly intentId: string;
+  readonly publishedRunId: string;
   readonly tenantId: string;
   readonly projectId: string;
   readonly idempotencyKey: string;
   readonly payloadDigest: `sha256:${string}`;
   readonly acceptedAt: string;
 }
+
+export interface PublishedRunRecord {
+  readonly schemaVersion: 1;
+  readonly publishedRunId: string;
+  readonly sourceIntentId: string;
+  readonly tenantId: string;
+  readonly projectId: string;
+  readonly idempotencyKey: string;
+  readonly payloadDigest: `sha256:${string}`;
+  readonly publishedAt: string;
+  readonly projection: MetadataPublicationPayload;
+}
+
+export interface PublishedRunTombstone {
+  readonly schemaVersion: 1;
+  readonly objectType: "publishedRun";
+  readonly opaqueId: string;
+  readonly deletedAt: string;
+  readonly authority: string;
+  readonly reasonClass: string;
+  readonly affectedEdgeIds: readonly string[];
+}
+
+export interface PublishedRunDeletionOptions {
+  readonly deletedAt: string;
+  readonly authority: string;
+  readonly reasonClass: string;
+  readonly affectedEdgeIds: readonly string[];
+}
+
+export type PublishedRunResolution =
+  | {
+    readonly state: "active";
+    readonly publishedAt: string;
+    readonly publishedRunId: string;
+    readonly projection: MetadataPublicationPayload;
+  }
+  | {
+    readonly state: "deleted_reference";
+    readonly publishedAt: string;
+    readonly publishedRunId: string;
+    readonly tombstone: PublishedRunTombstone;
+  };
+
+export interface PublishedRunListPage {
+  readonly schemaVersion: 1;
+  readonly items: readonly PublishedRunResolution[];
+  readonly nextCursor?: string;
+}
+
+export interface PublishedRunAcceptedOutboxEvent {
+  readonly schemaVersion: 1;
+  readonly eventId: string;
+  readonly eventType: "PublishedRunAccepted";
+  readonly tenantId: string;
+  readonly aggregateType: "publishedRun";
+  readonly aggregateId: string;
+  readonly occurredAt: string;
+  readonly payload: {
+    readonly publishedRunId: string;
+    readonly payloadDigest: `sha256:${string}`;
+  };
+}
+
+export interface PublishedRunDeletedOutboxEvent {
+  readonly schemaVersion: 1;
+  readonly eventId: string;
+  readonly eventType: "PublishedRunDeleted";
+  readonly tenantId: string;
+  readonly aggregateType: "publishedRun";
+  readonly aggregateId: string;
+  readonly occurredAt: string;
+  readonly payload: {
+    readonly publishedRunId: string;
+    readonly authority: string;
+    readonly reasonClass: string;
+  };
+}
+
+export type PublicationOutboxEvent =
+  | PublishedRunAcceptedOutboxEvent
+  | PublishedRunDeletedOutboxEvent;
+
+export interface PublicationOutboxClaim {
+  readonly event: PublicationOutboxEvent;
+  readonly workerId: string;
+  readonly fence: number;
+  readonly attempt: number;
+  readonly leaseExpiresAt: string;
+}
+
+export type PublicationOutboxDelivery = (
+  event: PublicationOutboxEvent,
+) => void | Promise<void>;
 
 export interface PublicationIngestionStore {
   accept(
@@ -179,5 +274,7 @@ export interface PublicationIngestionStore {
     nonce: string,
     requestDigest: `sha256:${string}`,
     receipt: PublicationIngestionReceipt,
+    publishedRun: PublishedRunRecord,
+    outboxEvent: PublicationOutboxEvent,
   ): PublicationIngestionReceipt;
 }

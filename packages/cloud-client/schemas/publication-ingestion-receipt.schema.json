@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/publication-ingestion-receipt/v1",
+  "title": "PublicationIngestionReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "intentId", "publishedRunId", "tenantId", "projectId",
+    "idempotencyKey", "payloadDigest", "acceptedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "intentId": { "$ref": "#/$defs/id" },
+    "publishedRunId": { "$ref": "#/$defs/id" },
+    "tenantId": { "$ref": "#/$defs/id" },
+    "projectId": { "$ref": "#/$defs/id" },
+    "idempotencyKey": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "payloadDigest": { "$ref": "#/$defs/digest" },
+    "acceptedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

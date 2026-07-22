@@ -22,7 +22,6 @@ export {
   verifySignedPolicyDistribution,
 } from "./policy.js";
 export {
-  InMemoryPublicationIngestionStore,
   PublicationIngestionService,
   assertPublicationIntent,
   assertSignedPublicationIntent,
@@ -30,6 +29,14 @@ export {
   publicationIntentSigningBytes,
   verifyPublicationIntent,
 } from "./publication-intent.js";
+export {
+  InMemoryPublicationIngestionStore,
+  PublicationOutboxWorker,
+} from "./published-runs.js";
+export type {
+  PublicationAdmissionFaultInjector,
+  PublicationAdmissionFaultPoint,
+} from "./published-runs.js";
 export {
   DISCLOSURE_MANIFEST_SCHEMA_MAJOR,
   METADATA_PUBLICATION_SCHEMA_MAJOR,
@@ -55,6 +62,16 @@ export type {
   PublicationIntentSignatureVerifier,
   PublicationIntentSigningOperation,
   PublicationLimits,
+  PublicationOutboxClaim,
+  PublicationOutboxDelivery,
+  PublicationOutboxEvent,
+  PublishedRunAcceptedOutboxEvent,
+  PublishedRunDeletedOutboxEvent,
+  PublishedRunDeletionOptions,
+  PublishedRunListPage,
+  PublishedRunRecord,
+  PublishedRunResolution,
+  PublishedRunTombstone,
   RetentionPolicyRef,
   SignedPublicationIntent,
   SignedPolicyDistribution,
