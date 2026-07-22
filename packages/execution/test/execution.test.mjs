@@ -135,6 +135,7 @@ test("fault injection around every SQLite write boundary rolls back the whole un
     "after-events",
     "after-reference-edges",
     "after-current-revisions",
+    "after-publication-mappings",
     "before-commit",
   ];
   for (const point of points) {
@@ -147,6 +148,96 @@ test("fault injection around every SQLite write boundary rolls back the whole un
     assert.deepEqual(store.readInvocation("invocation:one"), []);
     assert.deepEqual(store.readReferenceEdges(), []);
     store.close();
+  }
+});
+
+test("SQLite UoW durably binds publication IDs to one tenant and local revision", async () => {
+  const root = await temporaryDirectory("sqlite-publication-mapping");
+  const databasePath = join(root, "engine.sqlite");
+  const commit = baseCommit();
+  const localSubject = commit.revisions[1];
+  const mapping = {
+    tenantId: "tenant:one",
+    objectType: "applicationModel",
+    localSubject,
+    publishedObject: {
+      objectType: "applicationModel",
+      publicationId: `pub_v1_${"A".repeat(43)}`,
+      tenantBinding: "tenant:one",
+    },
+    localKeyId: "local-key:one",
+    createdAt: "2026-07-22T20:00:00Z",
+  };
+  commit.publicationMappings = [mapping];
+  let store = new SqliteEngineUnitOfWork(databasePath);
+  try {
+    const receipt = await store.commit(commit);
+    assert.equal(receipt.publicationMappingCount, 1);
+    assert.deepEqual(
+      store.readPublicationMapping("tenant:one", "applicationModel", localSubject),
+      mapping,
+    );
+    assert.deepEqual(
+      store.readPublicationMappingByCloudId("tenant:one", mapping.publishedObject.publicationId),
+      mapping,
+    );
+  } finally {
+    store.close();
+  }
+
+  store = new SqliteEngineUnitOfWork(databasePath);
+  try {
+    assert.deepEqual(
+      store.readPublicationMapping("tenant:one", "applicationModel", localSubject),
+      mapping,
+      "mapping survives restart",
+    );
+    const conflict = baseCommit();
+    conflict.idempotencyKey = "commit:publication-conflict";
+    conflict.expectedNextSequence = 2;
+    conflict.revisions = [];
+    conflict.events = [];
+    conflict.referenceEdges = [];
+    conflict.currentRevisionMutations = [];
+    conflict.publicationMappings = [{
+      ...mapping,
+      publishedObject: {
+        ...mapping.publishedObject,
+        publicationId: `pub_v1_${"B".repeat(43)}`,
+      },
+    }];
+    await assert.rejects(
+      store.commit(conflict),
+      (error) => error.code === "PUBLICATION_MAPPING_CONFLICT",
+    );
+    assert.deepEqual(
+      store.readPublicationMapping("tenant:one", "applicationModel", localSubject),
+      mapping,
+    );
+
+    const cloudCollision = baseCommit();
+    cloudCollision.idempotencyKey = "commit:publication-cloud-collision";
+    cloudCollision.expectedNextSequence = 2;
+    cloudCollision.revisions = [{
+      ...cloudCollision.revisions[1],
+      revision: digest("8"),
+      payload: { app: "app:other" },
+    }];
+    cloudCollision.events = [];
+    cloudCollision.referenceEdges = [];
+    cloudCollision.currentRevisionMutations = [];
+    cloudCollision.publicationMappings = [{
+      ...mapping,
+      localSubject: cloudCollision.revisions[0],
+    }];
+    await assert.rejects(
+      store.commit(cloudCollision),
+      (error) => error.code === "PUBLICATION_MAPPING_CONFLICT",
+    );
+    assert.equal(store.readRevision(cloudCollision.revisions[0]), undefined);
+  } finally {
+    store.close();
+    await rm(root, { recursive: true, force: true });
   }
 });
 

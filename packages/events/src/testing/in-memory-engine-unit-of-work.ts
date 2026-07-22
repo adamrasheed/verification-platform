@@ -9,6 +9,7 @@ import {
   type EngineUnitOfWorkCommit,
   type EngineUnitOfWorkReceipt,
   type EventEnvelope,
+  type PublicationMapping,
   type ReferenceEdge,
 } from "../public/index.js";
 
@@ -22,6 +23,7 @@ export interface InMemoryEngineSnapshot {
   readonly events: readonly EventEnvelope[];
   readonly referenceEdges: readonly ReferenceEdge[];
   readonly currentRevisions: Readonly<Record<string, RevisionRef>>;
+  readonly publicationMappings: readonly PublicationMapping[];
 }
 
 function clone<T>(value: T): T {
@@ -82,6 +84,42 @@ function sameRevision(
     revisionKey(left) === revisionKey(right);
 }
 
+function publicationLocalKey(mapping: PublicationMapping): string {
+  return `${mapping.tenantId}\u0000${mapping.objectType}\u0000${revisionKey(mapping.localSubject)}`;
+}
+
+function publicationCloudKey(mapping: PublicationMapping): string {
+  return `${mapping.tenantId}\u0000${mapping.publishedObject.publicationId}`;
+}
+
+function assertPublicationMapping(
+  mapping: PublicationMapping,
+  revisions: ReadonlyMap<string, RevisionDocument>,
+): void {
+  if (
+    !mapping.tenantId
+    || !mapping.localKeyId
+    || !["applicationModel", "promise", "proof", "evidence"].includes(mapping.objectType)
+    || mapping.localSubject.kind !== mapping.objectType
+    || mapping.publishedObject.objectType !== mapping.objectType
+    || mapping.publishedObject.tenantBinding !== mapping.tenantId
+    || !/^pub_v1_[A-Za-z0-9_-]{43}$/.test(mapping.publishedObject.publicationId)
+    || !Number.isFinite(Date.parse(mapping.createdAt))
+    || !mapping.createdAt.endsWith("Z")
+  ) {
+    throw new EngineUnitOfWorkConflict(
+      "PUBLICATION_MAPPING_CONFLICT",
+      "publication mapping is malformed or crosses a tenant/object boundary",
+    );
+  }
+  if (!revisions.has(revisionKey(mapping.localSubject))) {
+    throw new EngineUnitOfWorkConflict(
+      "MISSING_REVISION",
+      "publication mapping references an unavailable local revision",
+    );
+  }
+}
+
 /**
  * A deterministic contract-test backend. Validation occurs against cloned
  * candidate maps, and live state is replaced only after every predicate and
@@ -93,6 +131,8 @@ export class InMemoryEngineUnitOfWork implements EngineUnitOfWork {
   private eventsByInvocation = new Map<string, EventEnvelope[]>();
   private referenceEdges: ReferenceEdge[] = [];
   private currentRevisions = new Map<string, RevisionRef>();
+  private publicationMappingsByLocal = new Map<string, PublicationMapping>();
+  private publicationMappingsByCloud = new Map<string, PublicationMapping>();
   private acceptedCommits = new Map<string, AcceptedCommit>();
 
   async commit(
@@ -224,6 +264,27 @@ export class InMemoryEngineUnitOfWork implements EngineUnitOfWork {
       nextCurrentRevisions.set(mutation.slot, clone(mutation.nextCurrent));
     }
 
+    const nextPublicationMappingsByLocal = new Map(this.publicationMappingsByLocal);
+    const nextPublicationMappingsByCloud = new Map(this.publicationMappingsByCloud);
+    for (const mapping of unit.publicationMappings ?? []) {
+      assertPublicationMapping(mapping, nextRevisions);
+      const localKey = publicationLocalKey(mapping);
+      const cloudKey = publicationCloudKey(mapping);
+      const existingLocal = nextPublicationMappingsByLocal.get(localKey);
+      const existingCloud = nextPublicationMappingsByCloud.get(cloudKey);
+      if (
+        (existingLocal !== undefined && !structurallyEqual(existingLocal, mapping))
+        || (existingCloud !== undefined && !structurallyEqual(existingCloud, mapping))
+      ) {
+        throw new EngineUnitOfWorkConflict(
+          "PUBLICATION_MAPPING_CONFLICT",
+          "publication mapping conflicts with a retained local or cloud identity",
+        );
+      }
+      nextPublicationMappingsByLocal.set(localKey, clone(mapping));
+      nextPublicationMappingsByCloud.set(cloudKey, clone(mapping));
+    }
+
     const receipt: EngineUnitOfWorkReceipt = {
       idempotencyKey: unit.idempotencyKey,
       invocationId: unit.invocationId,
@@ -232,6 +293,9 @@ export class InMemoryEngineUnitOfWork implements EngineUnitOfWork {
       revisionCount: unit.revisions.length,
       eventCount: unit.events.length,
       referenceEdgeCount: unit.referenceEdges.length,
+      ...(unit.publicationMappings === undefined
+        ? {}
+        : { publicationMappingCount: unit.publicationMappings.length }),
     };
 
     this.revisions = nextRevisions;
@@ -239,6 +303,8 @@ export class InMemoryEngineUnitOfWork implements EngineUnitOfWork {
     this.eventsByInvocation.set(unit.invocationId, nextInvocationEvents);
     this.referenceEdges = nextEdges;
     this.currentRevisions = nextCurrentRevisions;
+    this.publicationMappingsByLocal = nextPublicationMappingsByLocal;
+    this.publicationMappingsByCloud = nextPublicationMappingsByCloud;
     this.acceptedCommits.set(unit.idempotencyKey, {
       unit,
       receipt: clone(receipt),
@@ -271,6 +337,7 @@ export class InMemoryEngineUnitOfWork implements EngineUnitOfWork {
           clone(ref),
         ]),
       ),
+      publicationMappings: clone([...this.publicationMappingsByLocal.values()]),
     };
   }
 }

@@ -1,6 +1,8 @@
 import type {
   CanonicalValue,
   OpaqueId,
+  PublishedObjectRef,
+  Rfc3339Utc,
   RevisionDocument,
   RevisionRef,
 } from "@verify-internal/contracts";
@@ -18,6 +20,15 @@ export interface CurrentRevisionMutation {
   readonly nextCurrent: RevisionRef;
 }
 
+export interface PublicationMapping {
+  readonly tenantId: OpaqueId;
+  readonly objectType: "applicationModel" | "promise" | "proof" | "evidence";
+  readonly localSubject: RevisionRef;
+  readonly publishedObject: PublishedObjectRef;
+  readonly localKeyId: OpaqueId;
+  readonly createdAt: Rfc3339Utc;
+}
+
 export interface EngineUnitOfWorkCommit {
   readonly idempotencyKey: OpaqueId;
   readonly invocationId: OpaqueId;
@@ -26,6 +37,7 @@ export interface EngineUnitOfWorkCommit {
   readonly events: readonly EventEnvelope<string, CanonicalValue>[];
   readonly referenceEdges: readonly ReferenceEdge[];
   readonly currentRevisionMutations: readonly CurrentRevisionMutation[];
+  readonly publicationMappings?: readonly PublicationMapping[];
 }
 
 export interface EngineUnitOfWorkReceipt {
@@ -36,6 +48,7 @@ export interface EngineUnitOfWorkReceipt {
   readonly revisionCount: number;
   readonly eventCount: number;
   readonly referenceEdgeCount: number;
+  readonly publicationMappingCount?: number;
 }
 
 export type EngineUnitOfWorkConflictCode =
@@ -46,6 +59,7 @@ export type EngineUnitOfWorkConflictCode =
   | "INVALID_EVENT_SEQUENCE"
   | "INVALID_REFERENCE_EDGE"
   | "MISSING_REVISION"
+  | "PUBLICATION_MAPPING_CONFLICT"
   | "SEQUENCE_CONFLICT";
 
 export class EngineUnitOfWorkConflict extends Error {

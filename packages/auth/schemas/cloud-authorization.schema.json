@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/auth/cloud-authorization/v1",
+  "title": "CloudAuthorizationContractsV1",
+  "oneOf": [
+    { "$ref": "#/$defs/principal" },
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/grant" },
+    { "$ref": "#/$defs/decision" }
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "action": {
+      "enum": [
+        "project:read",
+        "dispatch:create",
+        "dispatch:cancel",
+        "run:publish",
+        "run:readPublished",
+        "policy:read",
+        "policy:admin",
+        "membership:admin",
+        "deletion:request",
+        "usage:read"
+      ]
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tenantId", "resourceType", "resourceId"],
+      "properties": {
+        "tenantId": { "$ref": "#/$defs/opaqueId" },
+        "resourceType": {
+          "enum": ["tenant", "project", "dispatch", "publishedRun", "policy"]
+        },
+        "resourceId": { "$ref": "#/$defs/opaqueId" }
+      }
+    },
+    "principal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind", "id", "authenticated", "audience", "issuedAt", "expiresAt", "revoked"
+      ],
+      "properties": {
+        "kind": { "enum": ["user", "workload", "operator"] },
+        "id": { "$ref": "#/$defs/opaqueId" },
+        "authenticated": { "type": "boolean" },
+        "audience": { "$ref": "#/$defs/opaqueId" },
+        "issuedAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "revoked": { "type": "boolean" }
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "resource"],
+      "properties": {
+        "action": { "$ref": "#/$defs/action" },
+        "resource": { "$ref": "#/$defs/resource" }
+      }
+    },
+    "grant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grantId", "principalId", "action", "resource", "policyRevision", "expiresAt", "revoked"
+      ],
+      "properties": {
+        "grantId": { "$ref": "#/$defs/opaqueId" },
+        "principalId": { "$ref": "#/$defs/opaqueId" },
+        "action": { "$ref": "#/$defs/action" },
+        "resource": { "$ref": "#/$defs/resource" },
+        "policyRevision": { "$ref": "#/$defs/opaqueId" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "revoked": { "type": "boolean" }
+      }
+    },
+    "decision": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "grantId", "policyRevision"],
+          "properties": {
+            "allowed": { "const": true },
+            "grantId": { "$ref": "#/$defs/opaqueId" },
+            "policyRevision": { "$ref": "#/$defs/opaqueId" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "reasonCode"],
+          "properties": {
+            "allowed": { "const": false },
+            "reasonCode": {
+              "enum": [
+                "UNAUTHENTICATED",
+                "INVALID_AUDIENCE",
+                "TOKEN_EXPIRED",
+                "TOKEN_REVOKED",
+                "INVALID_REQUEST",
+                "NOT_AUTHORIZED"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

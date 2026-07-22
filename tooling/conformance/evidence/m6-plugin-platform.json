@@ -30,7 +30,7 @@
     },
     {
       "path": "packages/auth/src/public/index.ts",
-      "digest": "sha256:cc9cabd727141c42b966feb009b35de45aed4a5e5b4eded27d372173df8b55f4"
+      "digest": "sha256:084d88f1ac30fc0e4f7eb5002c295cb319bff500d0deab4e1c57363e60e75c74"
     }
   ]
 }

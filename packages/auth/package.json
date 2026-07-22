@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "files": ["dist", "README.md"],
+  "files": ["dist", "schemas", "README.md"],
   "exports": {
     ".": {
       "types": "./dist/public/index.d.ts",
