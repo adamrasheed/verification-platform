@@ -87,9 +87,15 @@ export interface ProviderPayloadValidator {
     value: CanonicalValue,
   ): {
     readonly path: string;
-    readonly body: CanonicalValue;
+    readonly body?: CanonicalValue;
+    readonly headers?: Readonly<Record<string, string>>;
   };
-  validateResponse(destinationId: string, value: CanonicalValue): CanonicalValue;
+  validateResponse(
+    destinationId: string,
+    pathTemplateId: string,
+    status: number,
+    value: CanonicalValue,
+  ): CanonicalValue;
 }
 
 export interface ProviderEgressBrokerOptions {
@@ -238,7 +244,11 @@ export class ProviderEgressBroker {
         request,
         effectiveGrant,
       );
-      let outbound: { readonly path: string; readonly body: CanonicalValue };
+      let outbound: {
+        readonly path: string;
+        readonly body?: CanonicalValue;
+        readonly headers?: Readonly<Record<string, string>>;
+      };
       try {
         outbound = this.#options.payloads.validateOutbound(
           request.destinationId,
@@ -254,16 +264,28 @@ export class ProviderEgressBroker {
           "provider request failed its outbound schema allowlist",
         );
       }
+      let decodedPath: string;
+      try {
+        decodedPath = decodeURIComponent(outbound.path);
+      } catch {
+        throw new PluginRuntimeError(
+          "VFY_PROVIDER_REQUEST_MALFORMED",
+          "validated provider path is unsafe",
+        );
+      }
       if (
         !outbound.path.startsWith("/")
         || outbound.path.startsWith("//")
-        || outbound.path.includes("\\")
-        || outbound.path.includes("?")
-        || outbound.path.includes("#")
-        || outbound.path.includes("%")
-        || outbound.path.split("/").some((segment) => segment === "." || segment === "..")
+        || /%(?![0-9A-Fa-f]{2})/.test(outbound.path)
+        || decodedPath.includes("\\")
+        || decodedPath.includes("?")
+        || decodedPath.includes("#")
+        || decodedPath.includes("\0")
+        || decodedPath.split("/").some((segment) => segment === "." || segment === "..")
       ) throw new PluginRuntimeError("VFY_PROVIDER_REQUEST_MALFORMED", "validated provider path is unsafe");
-      const body = new TextEncoder().encode(canonicalize(outbound.body));
+      const body = outbound.body === undefined
+        ? new Uint8Array()
+        : new TextEncoder().encode(canonicalize(outbound.body));
       requestBytes = body.byteLength;
       if (body.byteLength > destination.maximumRequestBytes) {
         throw new PluginRuntimeError("VFY_PROVIDER_REQUEST_OVERSIZED", "provider request exceeds byte limit");
@@ -273,10 +295,29 @@ export class ProviderEgressBroker {
         throw new PluginRuntimeError("VFY_PROVIDER_DNS_DENIED", "provider DNS resolved to a denied address");
       }
       let secret: InvocationSecret | undefined;
-      const headers: Record<string, string> = {
-        "accept": "application/json",
-        "content-type": "application/json",
-      };
+      const headers: Record<string, string> = { "accept": "application/json" };
+      if (body.byteLength > 0) headers["content-type"] = "application/json";
+      for (const [rawName, rawValue] of Object.entries(outbound.headers ?? {})) {
+        const name = rawName.toLowerCase();
+        if (
+          !/^[a-z0-9-]{1,64}$/.test(name)
+          || /[\r\n]/.test(rawValue)
+          || rawValue.length > 512
+          || [
+            "authorization",
+            "connection",
+            "content-length",
+            "cookie",
+            "host",
+            "proxy-authorization",
+            "transfer-encoding",
+          ].includes(name)
+        ) throw new PluginRuntimeError(
+          "VFY_PROVIDER_REQUEST_MALFORMED",
+          "provider request headers are unsafe",
+        );
+        headers[name] = rawValue;
+      }
       if (request.secretReferenceId) {
         secret = await this.#options.secrets.resolve(request.secretReferenceId, signal);
         assertSecretScope(
@@ -286,7 +327,22 @@ export class ProviderEgressBroker {
           effectiveGrant,
           this.#options.now(),
         );
-        headers[secret.headerName.toLowerCase()] = secret.value;
+        const secretHeaderName = secret.headerName.toLowerCase();
+        if (
+          secretHeaderName in headers
+          || [
+            "connection",
+            "content-length",
+            "cookie",
+            "host",
+            "proxy-authorization",
+            "transfer-encoding",
+          ].includes(secretHeaderName)
+        ) throw new PluginRuntimeError(
+          "VFY_PROVIDER_SECRET_DENIED",
+          "secret attachment header is reserved",
+        );
+        headers[secretHeaderName] = secret.value;
       } else if (destination.secretAudience) {
         throw new PluginRuntimeError("VFY_PROVIDER_SECRET_DENIED", "provider destination requires a credential");
       }
@@ -320,7 +376,12 @@ export class ProviderEgressBroker {
       }
       let sanitized: CanonicalValue;
       try {
-        sanitized = this.#options.payloads.validateResponse(request.destinationId, parsed);
+        sanitized = this.#options.payloads.validateResponse(
+          request.destinationId,
+          request.pathTemplateId,
+          response.status,
+          parsed,
+        );
       } catch {
         throw new PluginRuntimeError("VFY_PROVIDER_RESPONSE_INVALID", "provider response failed its schema");
       }

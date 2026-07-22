@@ -100,6 +100,7 @@ export function brokerHarness({
   responseBody = { protected: true },
   responseContentType = "application/json",
   secretValue = "CANARY_PROVIDER_SECRET",
+  secretHeaderName = "authorization",
 } = {}) {
   const audits = [];
   const transports = [];
@@ -128,7 +129,7 @@ export function brokerHarness({
           audience: "provider-api",
           scopes: ["policy:read"],
           expiresAt: "2026-07-20T00:00:00Z",
-          headerName: "authorization",
+          headerName: secretHeaderName,
           value: secretValue,
         };
       },
@@ -160,7 +161,7 @@ export function brokerHarness({
           body: { repositoryBinding: value.repositoryBinding },
         };
       },
-      validateResponse(destinationId, value) {
+      validateResponse(destinationId, _pathTemplateId, _status, value) {
         if (destinationId !== "api" || typeof value !== "object" || value === null) {
           throw new TypeError("provider response denied");
         }

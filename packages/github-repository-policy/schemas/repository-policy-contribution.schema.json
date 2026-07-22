@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:verify:schema:provider:github-repository-policy:v1",
+  "title": "GitHub Repository Policy Contribution",
+  "$defs": {
+    "statusCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context"],
+      "properties": {
+        "context": {"type": "string", "minLength": 1, "maxLength": 256},
+        "integrationId": {"type": "integer", "minimum": 0}
+      }
+    },
+    "reviews": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dismissStaleReviews",
+        "requireCodeOwnerReviews",
+        "requireLastPushApproval",
+        "requiredApprovingReviewCount",
+        "requiredReviewThreadResolution"
+      ],
+      "properties": {
+        "dismissStaleReviews": {"type": "boolean"},
+        "requireCodeOwnerReviews": {"type": "boolean"},
+        "requireLastPushApproval": {"type": "boolean"},
+        "requiredApprovingReviewCount": {"type": "integer", "minimum": 0, "maximum": 100},
+        "requiredReviewThreadResolution": {"type": "boolean"}
+      }
+    },
+    "protection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "enforceAdmins",
+        "requiredLinearHistory",
+        "allowForcePushes",
+        "allowDeletions",
+        "strictStatusChecks",
+        "requiredStatusChecks",
+        "reviews"
+      ],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "enforceAdmins": {"type": "boolean"},
+        "requiredLinearHistory": {"type": "boolean"},
+        "allowForcePushes": {"type": "boolean"},
+        "allowDeletions": {"type": "boolean"},
+        "strictStatusChecks": {"type": "boolean"},
+        "requiredStatusChecks": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {"$ref": "#/$defs/statusCheck"}
+        },
+        "reviews": {"$ref": "#/$defs/reviews"}
+      }
+    },
+    "statusCheckRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "rulesetId",
+        "sourceType",
+        "strictStatusChecks",
+        "requiredStatusChecks"
+      ],
+      "properties": {
+        "type": {"const": "required_status_checks"},
+        "rulesetId": {"type": "integer", "minimum": 1},
+        "sourceType": {"enum": ["Enterprise", "Organization", "Repository"]},
+        "strictStatusChecks": {"type": "boolean"},
+        "requiredStatusChecks": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {"$ref": "#/$defs/statusCheck"}
+        }
+      }
+    },
+    "pullRequestRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "rulesetId", "sourceType", "reviews"],
+      "properties": {
+        "type": {"const": "pull_request"},
+        "rulesetId": {"type": "integer", "minimum": 1},
+        "sourceType": {"enum": ["Enterprise", "Organization", "Repository"]},
+        "reviews": {"$ref": "#/$defs/reviews"}
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "repositoryBinding",
+    "defaultBranch",
+    "branchProtection",
+    "effectiveRules"
+  ],
+  "properties": {
+    "kind": {"const": "provider.repository-policy"},
+    "schemaVersion": {"const": 1},
+    "repositoryBinding": {"type": "string", "minLength": 1, "maxLength": 256},
+    "defaultBranch": {"type": "string", "minLength": 1, "maxLength": 255},
+    "branchProtection": {"$ref": "#/$defs/protection"},
+    "effectiveRules": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "oneOf": [
+          {"$ref": "#/$defs/statusCheckRule"},
+          {"$ref": "#/$defs/pullRequestRule"}
+        ]
+      }
+    }
+  }
+}

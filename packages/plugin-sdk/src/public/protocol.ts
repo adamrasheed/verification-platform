@@ -47,6 +47,19 @@ export interface PluginResourceLimits {
   readonly maximumPluginProcesses: number;
 }
 
+export type PluginOperationalErrorCode =
+  | "VFY_PROVIDER_AUTHENTICATION_FAILED"
+  | "VFY_PROVIDER_NOT_FOUND"
+  | "VFY_PROVIDER_PERMISSION_DENIED"
+  | "VFY_PROVIDER_RATE_LIMITED"
+  | "VFY_PROVIDER_UNAVAILABLE";
+
+export interface PluginOperationalError {
+  readonly code: PluginOperationalErrorCode;
+  readonly retryability: "never" | "safe" | "policy_required";
+  readonly message: string;
+}
+
 export interface PluginOperationRequest {
   readonly operation: PluginOperation;
   readonly operationId: string;
@@ -75,6 +88,13 @@ const MESSAGE_TYPES = new Set<PluginMessageType>([
   "cancel.request",
   "complete",
   "error",
+]);
+const OPERATIONAL_ERROR_CODES = new Set<PluginOperationalErrorCode>([
+  "VFY_PROVIDER_AUTHENTICATION_FAILED",
+  "VFY_PROVIDER_NOT_FOUND",
+  "VFY_PROVIDER_PERMISSION_DENIED",
+  "VFY_PROVIDER_RATE_LIMITED",
+  "VFY_PROVIDER_UNAVAILABLE",
 ]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -130,4 +150,25 @@ export function encodePluginMessage(message: PluginMessage): string {
     throw new TypeError("VFY_PLUGIN_MESSAGE_OVERSIZED");
   }
   return `${encoded}\n`;
+}
+
+export function assertPluginOperationalError(
+  value: unknown,
+): asserts value is PluginOperationalError {
+  if (!isRecord(value) || Object.keys(value).length !== 3) {
+    throw new TypeError("VFY_PLUGIN_PROTOCOL");
+  }
+  if (
+    typeof value.code !== "string"
+    || !OPERATIONAL_ERROR_CODES.has(value.code as PluginOperationalErrorCode)
+    || (
+      value.retryability !== "never"
+      && value.retryability !== "safe"
+      && value.retryability !== "policy_required"
+    )
+    || typeof value.message !== "string"
+    || value.message.length === 0
+    || value.message.length > 256
+    || /[\r\n]/.test(value.message)
+  ) throw new TypeError("VFY_PLUGIN_PROTOCOL");
 }

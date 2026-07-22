@@ -14,7 +14,7 @@
     },
     {
       "path": ".github/workflows/native-host-release.yml",
-      "digest": "sha256:de91dacb9b8e6ce4d90ae1d8459e85fe9397631a4ea850f6b4233d32a55cf72f"
+      "digest": "sha256:c1d20517f44cf98fba0c69a06102cef1a1c43ced331ae8c263ca95080d21e3b8"
     },
     {
       "path": "packages/plugin-runtime/test/macos-sandbox.test.mjs",

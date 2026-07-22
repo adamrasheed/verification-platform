@@ -17,23 +17,34 @@ export type PluginRuntimeErrorCode =
   | "VFY_PLUGIN_STDERR_OVERSIZED"
   | "VFY_PLUGIN_TRUST_DENIED"
   | "VFY_PROVIDER_CLASSIFICATION_DENIED"
+  | "VFY_PROVIDER_AUTHENTICATION_FAILED"
   | "VFY_PROVIDER_DESTINATION_DENIED"
   | "VFY_PROVIDER_DNS_DENIED"
   | "VFY_PROVIDER_REDIRECT_DENIED"
+  | "VFY_PROVIDER_NOT_FOUND"
+  | "VFY_PROVIDER_PERMISSION_DENIED"
+  | "VFY_PROVIDER_RATE_LIMITED"
   | "VFY_PROVIDER_REQUEST_MALFORMED"
   | "VFY_PROVIDER_REQUEST_OVERSIZED"
   | "VFY_PROVIDER_RESPONSE_INVALID"
   | "VFY_PROVIDER_RESPONSE_OVERSIZED"
   | "VFY_PROVIDER_SECRET_DENIED"
-  | "VFY_PROVIDER_SECRET_LEAK";
+  | "VFY_PROVIDER_SECRET_LEAK"
+  | "VFY_PROVIDER_UNAVAILABLE";
 
 export class PluginRuntimeError extends Error {
   readonly code: PluginRuntimeErrorCode;
+  readonly retryability: "never" | "safe" | "policy_required" | undefined;
 
-  constructor(code: PluginRuntimeErrorCode, message: string) {
+  constructor(
+    code: PluginRuntimeErrorCode,
+    message: string,
+    retryability?: "never" | "safe" | "policy_required",
+  ) {
     super(message);
     this.name = "PluginRuntimeError";
     this.code = code;
+    this.retryability = retryability;
   }
 }
 

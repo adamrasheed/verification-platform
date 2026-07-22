@@ -103,6 +103,16 @@
       "governingClauses": ["Freeze §§9–11", "EDD §§13,25,27"]
     },
     {
+      "id": "github-repository-policy",
+      "path": "packages/github-repository-policy",
+      "kind": "package",
+      "owner": "plugin-platform",
+      "milestone": "M6",
+      "state": "active",
+      "allowedDependencies": ["contracts", "plugin-sdk", "plugin-runtime"],
+      "governingClauses": ["Freeze §§9,11.5", "EDD §14"]
+    },
+    {
       "id": "engine",
       "path": "packages/engine",
       "kind": "package",
