@@ -13,6 +13,7 @@ import {
   CURRENT_PLUGIN_CONTRACT,
   PLUGIN_MANIFEST_MAX_BYTES,
   PLUGIN_STDERR_MAX_BYTES,
+  assertPluginOperationalError,
   assertProviderPluginManifest,
   decodePluginMessage,
   encodePluginMessage,
@@ -488,7 +489,19 @@ export class ProviderPluginRuntime {
             complete = true;
             break;
           case "error":
-            throw new PluginRuntimeError("VFY_PLUGIN_PROTOCOL", "plugin returned an operational error");
+            try {
+              assertPluginOperationalError(message.payload);
+            } catch {
+              throw new PluginRuntimeError(
+                "VFY_PLUGIN_PROTOCOL",
+                "plugin returned a malformed operational error",
+              );
+            }
+            throw new PluginRuntimeError(
+              message.payload.code,
+              message.payload.message,
+              message.payload.retryability,
+            );
           default:
             throw new PluginRuntimeError("VFY_PLUGIN_PROTOCOL", `unexpected plugin message ${message.messageType}`);
         }

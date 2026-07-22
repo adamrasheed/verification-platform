@@ -18,15 +18,15 @@
     },
     {
       "path": "packages/plugin-sdk/src/public/protocol.ts",
-      "digest": "sha256:f57dc1749eb6eabf2b5dccd879b1df3f76d640310432141a058f48aaa8b86c40"
+      "digest": "sha256:44c7267ec1e19f8bb46b0df259c30094af2f1b818d9580b7d926e4b0a437bd16"
     },
     {
       "path": "packages/plugin-runtime/src/public/runtime.ts",
-      "digest": "sha256:0acd9b3314768c212768a0d5324b5d6a94eeb5d738031668e7bbf9d9d9844a69"
+      "digest": "sha256:7828e01a3a4545620cdca86bc9fe13b352c9e5b974c4bec7920e629aa9b447a4"
     },
     {
       "path": "packages/plugin-runtime/src/public/broker.ts",
-      "digest": "sha256:3db069611b1f3077edec70d925bf26af6ccb0d31737397c9676b10559045e7f1"
+      "digest": "sha256:1d1b4c6921d0b73c38bbc64abf99de06e8721769ae1dfc8de12fafec3ceb9ed3"
     },
     {
       "path": "packages/auth/src/public/index.ts",

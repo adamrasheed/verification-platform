@@ -106,6 +106,24 @@
         "secretReferenceId": {"type": "string", "minLength": 1}
       }
     },
+    "operationalError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "retryability", "message"],
+      "properties": {
+        "code": {
+          "enum": [
+            "VFY_PROVIDER_AUTHENTICATION_FAILED",
+            "VFY_PROVIDER_NOT_FOUND",
+            "VFY_PROVIDER_PERMISSION_DENIED",
+            "VFY_PROVIDER_RATE_LIMITED",
+            "VFY_PROVIDER_UNAVAILABLE"
+          ]
+        },
+        "retryability": {"enum": ["never", "safe", "policy_required"]},
+        "message": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
     "manifest": {
       "type": "object",
       "additionalProperties": false,
@@ -265,6 +283,7 @@
   "oneOf": [
     {"$ref": "#/$defs/manifest"},
     {"$ref": "#/$defs/message"},
-    {"$ref": "#/$defs/providerRequest"}
+    {"$ref": "#/$defs/providerRequest"},
+    {"$ref": "#/$defs/operationalError"}
   ]
 }

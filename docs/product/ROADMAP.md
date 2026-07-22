@@ -130,10 +130,10 @@ when its expected artifact and acceptance Evidence are committed.
 | M6-T03 | **Complete** | Implement bounded NDJSON runtime coordinator | Handshake, crash, malformed output, flood, deadline, and cancellation fixtures |
 | M6-T04 | **Complete** | Implement publisher trust, artifact integrity, and revocation | Tampering and revoked key/artifact fail before launch |
 | M6-T05 | **Complete** | Implement Engine-owned typed provider egress broker | DNS, redirect, telemetry, size, schema, secret, response, and audit gates |
-| M6-T06 | **In progress** — Linux and macOS production are complete; Windows AppContainer development passes all canaries; Windows signed production is pending | Implement signed native sandbox hosts | Linux namespaces+seccomp, macOS App Sandbox, Windows AppContainer canaries |
-| M6-T07 | **Linux and macOS complete; Windows development complete; Windows signed production pending** | Pass three synthetic providers with different auth, latency, and error behavior | Same plugins must pass again through each production native host |
+| M6-T06 | **In progress** — Linux and macOS production are complete; Windows AppContainer development passes all canaries; Windows signed production is on hold | Implement signed native sandbox hosts | Linux namespaces+seccomp, macOS App Sandbox, Windows AppContainer canaries |
+| M6-T07 | **Linux and macOS complete; Windows development complete; Windows signed production is on hold** | Pass three synthetic providers with different auth, latency, and error behavior | Same plugins must pass again through each production native host |
 | M6-T08 | **Complete** | Separate plugin developer and user-authorization onboarding | Installation, trust, authorization, and unavailable state are distinct |
-| M6-T09 | **Pending** | Pilot read-only repository-policy provider | No provider release before M6-T06 and T07 pass |
+| M6-T09 | **Implemented, unreleased** — strict read-only GitHub policy observation passes offline and Linux/macOS native conformance; publication remains gated on M6-T06 and T07 | Pilot read-only repository-policy provider | No provider release before M6-T06 and T07 pass |
 
 ## Epic M7 — First Integrations
 

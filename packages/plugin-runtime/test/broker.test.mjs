@@ -143,6 +143,15 @@ test("broker fails closed on explicit-share, size, and secret response canaries"
     ),
     (error) => error.code === "VFY_PROVIDER_SECRET_LEAK",
   );
+  await assert.rejects(
+    brokerHarness({ secretHeaderName: "host" }).broker.execute(
+      leakManifest,
+      grant(),
+      request(),
+      new AbortController().signal,
+    ),
+    (error) => error.code === "VFY_PROVIDER_SECRET_DENIED",
+  );
 });
 
 test("broker invokes the outbound allowlist instead of trusting a declared schema ID", async () => {

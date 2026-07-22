@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  assertPluginOperationalError,
   assertProviderPluginManifest,
   assertProviderRequest,
   decodePluginMessage,
@@ -136,4 +137,30 @@ test("provider request boundary rejects URL and path smuggling", () => {
     () => assertProviderRequest({ ...valid, path: "/v1/secrets" }),
     /VFY_PROVIDER_REQUEST_MALFORMED/,
   );
+});
+
+test("plugin operational errors are provider-neutral, bounded, and allowlisted", () => {
+  assert.doesNotThrow(() => assertPluginOperationalError({
+    code: "VFY_PROVIDER_RATE_LIMITED",
+    retryability: "safe",
+    message: "provider request was rate limited",
+  }));
+  for (const value of [
+    {
+      code: "VFY_GITHUB_RATE_LIMITED",
+      retryability: "safe",
+      message: "provider request was rate limited",
+    },
+    {
+      code: "VFY_PROVIDER_RATE_LIMITED",
+      retryability: "safe",
+      message: "provider request was rate limited",
+      rawProviderMessage: "secret",
+    },
+    {
+      code: "VFY_PROVIDER_RATE_LIMITED",
+      retryability: "safe",
+      message: "provider request was rate limited\nraw header",
+    },
+  ]) assert.throws(() => assertPluginOperationalError(value), /VFY_PLUGIN_PROTOCOL/);
 });

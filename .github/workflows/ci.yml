@@ -65,6 +65,11 @@ jobs:
       - name: Run native sandbox conformance
         run: npm run test --workspace @verify-internal/plugin-runtime
 
+      - name: Run provider through the macOS sandbox
+        env:
+          VERIFY_RUN_GITHUB_PROVIDER_MACOS_NATIVE: "1"
+        run: npm run test --workspace @verify-internal/github-repository-policy
+
   native-linux:
     name: Native Linux sandbox
     runs-on: ubuntu-22.04
@@ -92,6 +97,11 @@ jobs:
         env:
           VERIFY_RUN_LINUX_NATIVE: "1"
         run: npm run test --workspace @verify-internal/plugin-runtime
+
+      - name: Run provider through the Linux sandbox
+        env:
+          VERIFY_RUN_GITHUB_PROVIDER_LINUX_NATIVE: "1"
+        run: npm run test --workspace @verify-internal/github-repository-policy
 
   native-windows:
     name: Native Windows sandbox

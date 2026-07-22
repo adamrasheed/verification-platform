@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m6-github-repository-policy",
+  "taskId": "M6-T09-implementation-unreleased",
+  "owner": "plugin-platform",
+  "governingClauses": ["Freeze §§9,11.5,18", "EDD §§13,14,25,27"],
+  "testIds": [
+    "github-repository-policy:7",
+    "native-linux-provider:1",
+    "native-macos-provider-development:1",
+    "native-macos-provider-production:1"
+  ],
+  "command": "gh run watch 29896887190 --repo adamrasheed/verification-platform --exit-status && gh run watch 29896962096 --repo adamrasheed/verification-platform --exit-status",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/github-repository-policy/src/plugin.ts",
+      "digest": "sha256:21c863bc9947962116c6a22d7d566eefc353ccf793590250bd9095cd9f6ea71f"
+    },
+    {
+      "path": "packages/github-repository-policy/src/public/manifest.ts",
+      "digest": "sha256:b6b22b2a3c52d6564b1ad3c8b3669449166233446424eb3b68e01594003b88d4"
+    },
+    {
+      "path": "packages/github-repository-policy/src/public/payload-validator.ts",
+      "digest": "sha256:074f2b2ab4a766be2753127ce542852b8bb5f5ba66af6390f3bbb182b346e519"
+    },
+    {
+      "path": "packages/github-repository-policy/src/public/policy.ts",
+      "digest": "sha256:b96a56278b7ce5e2ba154f27b174007e08e74e4daa3a2742d187e7e7c05c6733"
+    },
+    {
+      "path": "packages/github-repository-policy/schemas/repository-policy-contribution.schema.json",
+      "digest": "sha256:f603c86e4547b80fc303dfd3a2935b44d1b09ce19721ab006ede831454613bc3"
+    },
+    {
+      "path": "packages/github-repository-policy/test/provider.test.mjs",
+      "digest": "sha256:ec7c5589ef806d3c4c5f4b27fe1ab25c6df42b9bca6ed6bbe7a4ce3ede1827c0"
+    },
+    {
+      "path": "packages/github-repository-policy/test/native-sandbox.test.mjs",
+      "digest": "sha256:6917c1826e671bb88a5e757424d78535917f891c41e184304f15ae8e56c9a3f0"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "digest": "sha256:f51d49b5e38fcc3dc4bfeaf40eaa3efcdf303b7e0517d442d3a9cfd0613463ac"
+    },
+    {
+      "path": ".github/workflows/native-host-release.yml",
+      "digest": "sha256:c1d20517f44cf98fba0c69a06102cef1a1c43ced331ae8c263ca95080d21e3b8"
+    }
+  ]
+}
