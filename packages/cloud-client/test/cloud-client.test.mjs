@@ -13,6 +13,7 @@ import {
   InMemoryPublicationMappingStore,
   PublicationIngestionService,
   PublicationIdentifierService,
+  PublicationOutboxWorker,
   assertMetadataPublicationPayload,
   issuePublicationIntent,
   policySigningBytes,
@@ -22,9 +23,15 @@ import {
 } from "../dist/public/index.js";
 
 const digest = (character) => `sha256:${character.repeat(64)}`;
+const publicationCharacters = {
+  model: "A",
+  promise: "B",
+  proof: "C",
+  evidence: "D",
+};
 const ref = (objectType, id, tenantBinding = "tenant:one") => ({
   objectType,
-  publicationId: `pub:${id}`,
+  publicationId: `pub_v1_${(publicationCharacters[id] ?? "Z").repeat(43)}`,
   tenantBinding,
 });
 
@@ -79,6 +86,12 @@ test("metadata publication is a closed allowlist with tenant-bound references", 
   const inconsistent = payload();
   inconsistent.summary.promiseCount = 2;
   assert.throws(() => assertMetadataPublicationPayload(inconsistent), /VFY_CLOUD_PAYLOAD_MALFORMED/);
+  const localRevisionLeak = payload();
+  localRevisionLeak.applicationModel.publicationId = digest("f");
+  assert.throws(
+    () => assertMetadataPublicationPayload(localRevisionLeak),
+    /VFY_CLOUD_PAYLOAD_MALFORMED/,
+  );
 });
 
 test("disclosure preview binds exact canonical bytes, fields, destination, and retention", () => {
@@ -394,6 +407,30 @@ test("a short-lived publication intent binds the exact authorized upload", async
   assert.deepEqual(retry, first);
   assert.equal(first.intentId, "intent:one");
   assert.equal(store.size, 1, "an exact retry does not create another publication");
+  assert.equal(store.publishedRunCount, 1);
+  assert.equal(store.outboxCount, 1);
+  const retained = store.readPublishedRun(authorization, first.publishedRunId);
+  assert.deepEqual(retained, payload());
+  retained.outcome = "satisfied";
+  assert.equal(
+    store.readPublishedRun(authorization, first.publishedRunId).outcome,
+    "violated",
+    "reads cannot mutate or recalculate the retained projection",
+  );
+  assert.equal(
+    store.readPublishedRun(
+      { tenantId: "tenant:other", projectId: "project:one" },
+      first.publishedRunId,
+    ),
+    undefined,
+  );
+  assert.equal(
+    store.readPublishedRun(
+      { tenantId: "tenant:one", projectId: "project:other" },
+      first.publishedRunId,
+    ),
+    undefined,
+  );
 
   const countLimited = await publicationRequest({
     keyPair: fixture.keyPair,
@@ -547,4 +584,76 @@ test("ingestion rejects hostile transport, deep JSON, and signature drift before
     /VFY_CLOUD_PAYLOAD_TOO_DEEP/,
   );
   assert.equal(store.size, 0);
+});
+
+test("projection, idempotency, nonce, and outbox admission is one atomic unit", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore((point) => {
+    if (point === "before-admission-commit") throw new Error("fault:admission");
+  });
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  await assert.rejects(
+    service.ingest(
+      fixture.request,
+      { tenantId: "tenant:one", projectId: "project:one" },
+      new Date("2026-07-22T21:01:00Z"),
+    ),
+    /fault:admission/,
+  );
+  assert.equal(store.size, 0);
+  assert.equal(store.publishedRunCount, 0);
+  assert.equal(store.outboxCount, 0);
+});
+
+test("outbox retries retain one event identity and reject stale fences", async () => {
+  const fixture = await publicationRequest();
+  const store = new InMemoryPublicationIngestionStore();
+  const service = new PublicationIngestionService(
+    store,
+    publicationVerifier(fixture.keyPair.publicKey),
+  );
+  await service.ingest(
+    fixture.request,
+    { tenantId: "tenant:one", projectId: "project:one" },
+    new Date("2026-07-22T21:01:00Z"),
+  );
+  const firstClaim = store.claimOutbox(
+    "worker:stale",
+    new Date("2026-07-22T21:01:00Z"),
+    1_000,
+  );
+  const replacement = store.claimOutbox(
+    "worker:replacement",
+    new Date("2026-07-22T21:01:02Z"),
+    1_000,
+  );
+  assert.ok(firstClaim);
+  assert.ok(replacement);
+  assert.equal(replacement.fence, firstClaim.fence + 1);
+  await assert.rejects(
+    async () => store.acknowledgeOutbox(firstClaim, new Date("2026-07-22T21:01:02Z")),
+    /VFY_PUBLICATION_OUTBOX_STALE_FENCE/,
+  );
+  store.failOutbox(replacement, "DELIVERY_FAILED", new Date("2026-07-22T21:01:02.500Z"));
+
+  let current = new Date("2026-07-22T21:01:03Z");
+  const deliveredEventIds = [];
+  let deliveries = 0;
+  const worker = new PublicationOutboxWorker(
+    store,
+    (event) => {
+      deliveries += 1;
+      deliveredEventIds.push(event.eventId);
+      if (deliveries === 1) throw new Error("synthetic delivery failure");
+    },
+    () => current,
+  );
+  assert.equal(await worker.deliverOne("worker:one", 1_000), "retry");
+  current = new Date("2026-07-22T21:01:03.500Z");
+  assert.equal(await worker.deliverOne("worker:one", 1_000), "delivered");
+  assert.equal(await worker.deliverOne("worker:one", 1_000), "idle");
+  assert.equal(new Set(deliveredEventIds).size, 1, "retry delivers one stable event identity");
 });

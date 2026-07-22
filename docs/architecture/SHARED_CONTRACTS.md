@@ -235,6 +235,18 @@ original receipt, while changed request bytes or nonce reuse fail without
 partial admission. A production store must implement the same atomic operation;
 the in-memory store is a conformance backend only.
 
+Successful admission creates an immutable published-run record and one
+`PublishedRunAccepted` outbox event in the same transaction as idempotency and
+nonce consumption. The record retains the exact validated allowlisted
+`PublishedVerificationResult`; reads return it as stored and never recalculate
+an outcome. Its published references must use the ADR-0012 `pub_v1_` format, so
+a raw local revision cannot masquerade as a cloud identifier.
+
+Outbox delivery is at-least-once. Each event has one stable identity; claims use
+bounded expiring leases and monotonically increasing fences. Only the current
+unexpired fence may acknowledge or release a delivery, retries reuse the same
+event, and exhausted attempts retain sanitized metadata only.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.

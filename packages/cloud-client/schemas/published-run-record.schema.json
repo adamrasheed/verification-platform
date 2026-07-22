@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/published-run-record/v1",
+  "title": "PublishedRunRecordV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "publishedRunId", "sourceIntentId", "tenantId",
+    "projectId", "idempotencyKey", "payloadDigest", "publishedAt", "projection"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "publishedRunId": { "$ref": "#/$defs/id" },
+    "sourceIntentId": { "$ref": "#/$defs/id" },
+    "tenantId": { "$ref": "#/$defs/id" },
+    "projectId": { "$ref": "#/$defs/id" },
+    "idempotencyKey": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "payloadDigest": { "$ref": "#/$defs/digest" },
+    "publishedAt": { "type": "string", "format": "date-time" },
+    "projection": { "$ref": "metadata-publication.schema.json" }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 512 },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

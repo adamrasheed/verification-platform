@@ -53,7 +53,8 @@ function publishedRef(value: unknown, objectType: string, tenantId: string): boo
   return isRecord(value)
     && exactKeys(value, ["objectType", "publicationId", "tenantBinding"])
     && value.objectType === objectType
-    && boundedString(value.publicationId)
+    && typeof value.publicationId === "string"
+    && /^pub_v1_[A-Za-z0-9_-]{43}$/.test(value.publicationId)
     && value.tenantBinding === tenantId;
 }
 

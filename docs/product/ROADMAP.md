@@ -165,9 +165,9 @@ production dependency in M7.
 | M8-T04 | **Contract foundation complete** — closed service deployment remains pending D-002 | Define cloud identity, exact action, tenant, and resource boundaries | Canonical ten-action catalog; cross-tenant/IDOR resources remain indistinguishable and deny-default |
 | M8-T05 | **Contract foundation complete** — service deployment remains pending D-002 | Implement short-lived publication intents | Five-minute signed audience; exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
 | M8-T06 | **Contract foundation complete** — durable cloud store remains pending D-002 | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes and nonce replay conflict atomically |
-| M8-T07 | Pending | Persist immutable run projections | No verdict recalculation or raw local revision disclosure |
+| M8-T07 | **Contract foundation complete** — PostgreSQL adapter remains pending D-002 | Persist immutable run projections | Exact validated projection retained; no verdict recalculation or raw local revision disclosure |
 | M8-T08 | **Contract foundation complete** | Distribute signed tenant policies | Exact canonical bytes, tenant, signature, issue, and expiry validated |
-| M8-T09 | Pending | Implement transactional outbox/projection workers | Source fact and outbox commit together; retries are idempotent |
+| M8-T09 | **Contract foundation complete** — queue adapter remains pending D-002 | Implement transactional outbox/projection workers | Source fact and outbox commit together; stable event identity, fenced lease, and idempotent acknowledgement |
 | M8-T10 | Pending | Implement retention, deletion, and tombstones | Active, backup, and restore-time deletion gates pass |
 | M8-T11 | Pending | Implement bounded read APIs and pagination | Stable cursor ordering and exact tenant authorization |
 | M8-T12 | Pending | Run cross-tenant negative matrix | API, store, cache, queue, backup, and migration isolation pass |

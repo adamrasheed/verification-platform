@@ -276,45 +276,6 @@ function assertEnvelopeDepth(bytes: Uint8Array): void {
   }
 }
 
-export class InMemoryPublicationIngestionStore implements PublicationIngestionStore {
-  readonly #idempotency = new Map<string, {
-    readonly requestDigest: `sha256:${string}`;
-    readonly receipt: PublicationIngestionReceipt;
-  }>();
-  readonly #nonces = new Map<string, string>();
-
-  accept(
-    tenantId: string,
-    idempotencyKey: string,
-    nonce: string,
-    requestDigest: `sha256:${string}`,
-    receipt: PublicationIngestionReceipt,
-  ): PublicationIngestionReceipt {
-    const idempotencyIdentity = `${tenantId}\u0000${idempotencyKey}`;
-    const nonceIdentity = `${tenantId}\u0000${nonce}`;
-    const existing = this.#idempotency.get(idempotencyIdentity);
-    if (existing !== undefined) {
-      if (existing.requestDigest !== requestDigest) {
-        throw new TypeError("VFY_PUBLICATION_IDEMPOTENCY_CONFLICT: key reused for different bytes");
-      }
-      return structuredClone(existing.receipt);
-    }
-    if (this.#nonces.has(nonceIdentity)) {
-      throw new TypeError("VFY_PUBLICATION_REPLAY_DETECTED: nonce was already consumed");
-    }
-    this.#idempotency.set(idempotencyIdentity, {
-      requestDigest,
-      receipt: structuredClone(receipt),
-    });
-    this.#nonces.set(nonceIdentity, idempotencyIdentity);
-    return structuredClone(receipt);
-  }
-
-  get size(): number {
-    return this.#idempotency.size;
-  }
-}
-
 export class PublicationIngestionService {
   readonly #store: PublicationIngestionStore;
   readonly #verifier: PublicationIntentSignatureVerifier;
@@ -381,19 +342,53 @@ export class PublicationIngestionService {
       contentType: request.contentType,
       contentEncoding: request.contentEncoding,
     }));
+    const publishedRunId = `published-run:${sha256(encodeCanonicalProtocolDocument({
+      tenantId: intent.tenantId,
+      projectId: intent.projectId,
+      intentId: intent.intentId,
+    })).slice("sha256:".length, "sha256:".length + 32)}`;
+    const acceptedAt = now.toISOString();
+    const outboxEventId = `outbox:${sha256(encodeCanonicalProtocolDocument({
+      tenantId: intent.tenantId,
+      publishedRunId,
+      eventType: "PublishedRunAccepted",
+    })).slice("sha256:".length)}`;
+    const receipt: PublicationIngestionReceipt = {
+      schemaVersion: 1,
+      intentId: intent.intentId,
+      publishedRunId,
+      tenantId: intent.tenantId,
+      projectId: intent.projectId,
+      idempotencyKey: intent.idempotencyKey,
+      payloadDigest: intent.payloadDigest,
+      acceptedAt,
+    };
     return this.#store.accept(
       intent.tenantId,
       intent.idempotencyKey,
       intent.nonce,
       requestDigest,
+      receipt,
       {
         schemaVersion: 1,
-        intentId: intent.intentId,
+        publishedRunId,
+        sourceIntentId: intent.intentId,
         tenantId: intent.tenantId,
         projectId: intent.projectId,
         idempotencyKey: intent.idempotencyKey,
         payloadDigest: intent.payloadDigest,
-        acceptedAt: now.toISOString(),
+        publishedAt: acceptedAt,
+        projection: structuredClone(payload),
+      },
+      {
+        schemaVersion: 1,
+        eventId: outboxEventId,
+        eventType: "PublishedRunAccepted",
+        tenantId: intent.tenantId,
+        aggregateType: "publishedRun",
+        aggregateId: publishedRunId,
+        occurredAt: acceptedAt,
+        payload: { publishedRunId, payloadDigest: intent.payloadDigest },
       },
     );
   }

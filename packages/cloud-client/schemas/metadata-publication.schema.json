@@ -118,7 +118,10 @@
       "required": ["objectType", "publicationId", "tenantBinding"],
       "properties": {
         "objectType": { "type": "string" },
-        "publicationId": { "$ref": "#/$defs/opaqueId" },
+        "publicationId": {
+          "type": "string",
+          "pattern": "^pub_v1_[A-Za-z0-9_-]{43}$"
+        },
         "tenantBinding": { "$ref": "#/$defs/opaqueId" }
       },
       "additionalProperties": false
