@@ -10,7 +10,7 @@
   "artifacts": [
     {
       "path": ".github/workflows/native-host-release.yml",
-      "digest": "sha256:1acc60a4f5a08dd6003063932c89f6c5c077c894f57a18ec3182d041b8b64ba4"
+      "digest": "sha256:de91dacb9b8e6ce4d90ae1d8459e85fe9397631a4ea850f6b4233d32a55cf72f"
     },
     {
       "path": "tooling/native/release/lib.mjs",

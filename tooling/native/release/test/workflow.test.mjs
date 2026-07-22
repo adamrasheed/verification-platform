@@ -47,3 +47,12 @@ test("macOS signing exposes the temporary keychain and selects one exact identit
     '--identity "$MACOS_SIGNING_IDENTITY_SHA1"',
   ]) assert.ok(workflow.includes(control), `missing macOS identity control: ${control}`);
 });
+
+test("macOS release reruns conformance through the pinned production host", () => {
+  for (const control of [
+    "VERIFY_RUN_MACOS_PRODUCTION=1",
+    'VERIFY_MACOS_PRODUCTION_APP="$APP"',
+    'VERIFY_MACOS_PRODUCTION_MANIFEST="$RELEASE_ROOT/manifest.json"',
+    '--test-name-pattern="signed macOS production host"',
+  ]) assert.ok(workflow.includes(control), `missing production conformance gate: ${control}`);
+});

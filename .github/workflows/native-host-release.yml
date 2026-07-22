@@ -163,6 +163,16 @@ jobs:
           node tooling/native/release/check-manifest.mjs \
             "$RELEASE_ROOT/manifest.json" \
             "$RELEASE_ROOT"
+          npm run build
+          (
+            cd packages/plugin-runtime
+            VERIFY_RUN_MACOS_PRODUCTION=1 \
+            VERIFY_MACOS_PRODUCTION_APP="$APP" \
+            VERIFY_MACOS_PRODUCTION_MANIFEST="$RELEASE_ROOT/manifest.json" \
+              node --test \
+                --test-name-pattern="signed macOS production host" \
+                test/macos-sandbox.test.mjs
+          )
           rm -f "$SUBMISSION" "$NOTARY_KEY"
 
       - name: Remove imported signing material

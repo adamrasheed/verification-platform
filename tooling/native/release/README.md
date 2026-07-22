@@ -2,7 +2,8 @@
 
 The `Sign native plugin hosts` workflow is the only repository release path for
 the macOS and Windows sandbox hosts. It is manually dispatched with a SemVer
-version and runs in the protected `native-host-release` GitHub environment.
+version and an `all`, `macos`, or `windows` target (default `all`), and runs in
+the protected `native-host-release` GitHub environment.
 Unsigned, unnotarized, untimestamped, or identity-mismatched output fails before
 an artifact is retained.
 
@@ -44,7 +45,8 @@ launcher:
 
 The macOS gate requires an Apple-anchored Developer ID Application chain,
 hardened runtime, trusted timestamp, accepted notarization, and a stapled
-ticket. The Windows gate requires trusted Authenticode signatures, RFC 3161
+ticket. It then reruns the synthetic providers and containment canaries through
+the signed host using the exact manifest pins. The Windows gate requires trusted Authenticode signatures, RFC 3161
 timestamping, exact signer pins, and exact file digests.
 
 Validate a downloaded artifact set with:
