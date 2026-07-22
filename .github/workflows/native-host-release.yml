@@ -7,6 +7,15 @@ on:
         description: SemVer version for the native host artifact set
         required: true
         type: string
+      target:
+        description: Native platform release target
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - macos
+          - windows
 
 permissions:
   contents: read
@@ -18,8 +27,9 @@ concurrency:
 jobs:
   macos:
     name: Sign and notarize macOS host
+    if: ${{ inputs.target == 'all' || inputs.target == 'macos' }}
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 90
     environment: native-host-release
     steps:
       - name: Check out source
@@ -174,6 +184,7 @@ jobs:
 
   windows:
     name: Sign Windows host
+    if: ${{ inputs.target == 'all' || inputs.target == 'windows' }}
     runs-on: windows-2025
     timeout-minutes: 25
     environment: native-host-release
