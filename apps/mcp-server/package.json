@@ -1,0 +1,30 @@
+{
+  "name": "@verify-internal/mcp-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "verify-mcp": "./dist/bin/verify-mcp.js"
+  },
+  "files": [
+    "dist",
+    "resources",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/public/index.d.ts",
+      "default": "./dist/public/index.js"
+    }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@verify-internal/adapter-core": "0.0.0",
+    "@verify-internal/protocol": "0.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  }
+}

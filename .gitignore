@@ -1,5 +1,8 @@
 node_modules/
 dist/
+!apps/github-action/dist/
+!apps/github-action/dist/index.js
+apps/github-action/lib/
 !tooling/release/test-fixtures/good/dist/
 !tooling/release/test-fixtures/good/dist/bin.js
 !tooling/release/test-fixtures/bad-lifecycle/dist/

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m7-local-integrations",
+  "taskId": "M7-T01-T08",
+  "owner": "integrations",
+  "governingClauses": ["Freeze §§4,11.3,12", "EDD §§15-18,27,33-34"],
+  "testIds": [
+    "adapter-core:4",
+    "mcp-server:5",
+    "github-check-projector:3",
+    "github-action:5",
+    "m7-regression:passed"
+  ],
+  "command": "npm run test:m7",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/adapter-core/src/public/dispatcher.ts",
+      "digest": "sha256:096b0113d76edd2c2026ef25bbe851e5bfc89012c5f7261a23df3ba97274dd8d"
+    },
+    {
+      "path": "packages/adapter-core/src/public/protocol-bridge.ts",
+      "digest": "sha256:594d1ada38fbd84cdd8b54fa840178579f31f5213880cd55015622ee6c64011b"
+    },
+    {
+      "path": "packages/adapter-core/test/dispatcher.test.mjs",
+      "digest": "sha256:e5debdad84e994f0b858d16995a6f31fd25f3a9974f9b6076996b1d749d651c0"
+    },
+    {
+      "path": "apps/mcp-server/src/public/adapter.ts",
+      "digest": "sha256:3c6c5ecf1eccce47fdb7301a78afccddb17b36aa8a80178f8a4b7422f1fa6aff"
+    },
+    {
+      "path": "apps/mcp-server/src/public/server.ts",
+      "digest": "sha256:ae3938895f4d9b07c60d66d278b3143e6344b7b395842f4de35fa6ad290c26eb"
+    },
+    {
+      "path": "apps/mcp-server/test/mcp.test.mjs",
+      "digest": "sha256:d64e3158670023cc85a93f0f95fcd443392b38be89756e11d641c928db311f65"
+    },
+    {
+      "path": "packages/github-check-projector/src/public/index.ts",
+      "digest": "sha256:e485791fbeef0c4c627ce0b6289d22c7a2c047525ae478d22ddaef140a527f58"
+    },
+    {
+      "path": "packages/github-check-projector/test/projector.test.mjs",
+      "digest": "sha256:afa5e034c11e98e0fdd2b57f04935f170a6e1e39b6d42d9434dbdc684c3d9e17"
+    },
+    {
+      "path": "apps/github-action/src/public/action.ts",
+      "digest": "sha256:89d7f57b8b9df5a6de27681265f06b79445c727e731fbd378ee36f7702280957"
+    },
+    {
+      "path": "apps/github-action/src/public/check-client.ts",
+      "digest": "sha256:709d91d073be5c68e7606db9058d642876160228de0ca4b7d1fdd63b54b23bc9"
+    },
+    {
+      "path": "apps/github-action/test/action.test.mjs",
+      "digest": "sha256:a054d6f23f4bcd4d0617d86a529c8891ba2fe5715b22cfded0988d564aa0ca42"
+    },
+    {
+      "path": "apps/github-action/action.yml",
+      "digest": "sha256:739a7dcc1c640ad0ef403a8244983e1a262fb323977229e2d0cd49b2fab1b9b3"
+    },
+    {
+      "path": "apps/github-action/dist/index.js",
+      "digest": "sha256:2ee172ad1f57669413c9c03d213545f832e45fac8fdb76562705a46d1541b7a0"
+    },
+    {
+      "path": "docs/architecture/ADAPTER_COMPATIBILITY.md",
+      "digest": "sha256:66d079663c8a6d8fb3e9fb508d40c0d726b0913ab1abb7e04cb5bb262546042c"
+    },
+    {
+      "path": "tooling/conformance/check-offline.mjs",
+      "digest": "sha256:651a09fcb688b2d47d12f91afccd40c2716872881c81bf9fab7acfc7a76c356b"
+    }
+  ]
+}

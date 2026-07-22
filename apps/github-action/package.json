@@ -1,0 +1,17 @@
+{
+  "name": "@verify-internal/github-action",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["action.yml", "dist", "README.md"],
+  "dependencies": {
+    "@verify-internal/adapter-core": "0.0.0",
+    "@verify-internal/github-check-projector": "0.0.0",
+    "@verify-internal/protocol": "0.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && esbuild lib/bin/run.js --bundle --platform=node --format=esm --target=node24 --legal-comments=none --outfile=dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  }
+}

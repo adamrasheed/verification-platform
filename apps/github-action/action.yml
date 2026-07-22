@@ -1,0 +1,29 @@
+name: Verify repository
+description: Run canonical offline Verify and publish a minimal GitHub check
+inputs:
+  github-token:
+    description: Token used only to create the minimal check run
+    required: false
+    default: ${{ github.token }}
+  publish-check:
+    description: Create a GitHub check run (true or false)
+    required: false
+    default: "true"
+  no-cache:
+    description: Bypass the local verification cache (true or false)
+    required: false
+    default: "true"
+outputs:
+  operational-status:
+    description: Canonical operational status
+  outcome:
+    description: Canonical domain outcome, if one exists
+  conclusion:
+    description: GitHub presentation conclusion
+  invocation-id:
+    description: Opaque local invocation identifier
+  check-published:
+    description: Whether the minimal check was published
+runs:
+  using: node24
+  main: dist/index.js

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/protocol/command-envelope/v1",
+  "title": "CommandEnvelopeV1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "command",
+    "invocationId",
+    "engine",
+    "operationalStatus",
+    "startedAt",
+    "durationMs",
+    "result",
+    "diagnostics"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "command": {
+      "enum": [
+        "verify",
+        "dispatchVerification",
+        "publishedVerification",
+        "getRun",
+        "getPublishedRun"
+      ]
+    },
+    "invocationId": { "type": "string", "minLength": 1 },
+    "engine": {
+      "type": "object",
+      "required": ["version", "artifactDigest"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "artifactDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "operationalStatus": {
+      "enum": ["completed", "invalid", "blocked", "cancelled", "internal_error"]
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "result": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "./command-result.schema.json" }
+      ]
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "./structured-error.schema.json" }
+    }
+  },
+  "additionalProperties": false
+}

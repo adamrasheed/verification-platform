@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "dist/github-check-projector.tsbuildinfo",
+    "types": ["node"],
+    "paths": {
+      "@verify-internal/protocol": ["../../packages/protocol/src/public/index.ts"]
+    }
+  },
+  "references": [{ "path": "../protocol" }],
+  "include": ["src/**/*.ts"]
+}
