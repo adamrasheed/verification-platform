@@ -58,4 +58,7 @@ reject source and secret markers everywhere and tenant markers in any sink not
 authorized for that tenant.
 
 Schemas and compatibility are owned by Founding Engineering. M8 foundation
-acceptance is covered by `cloud-client:test`; release status is experimental.
+acceptance is covered by `cloud-client:test`. The digest-bound metadata-cloud
+foundation report retains contract, security, and supply-chain verification,
+but is explicitly not releasable: provider deployment, service SLO, and
+disaster recovery remain blocked on D-002.

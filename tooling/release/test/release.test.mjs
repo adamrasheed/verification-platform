@@ -227,3 +227,26 @@ test("candidate generation is deterministic and promotion uses tested bytes", as
     await rm(temporary, { recursive: true, force: true });
   }
 });
+
+test("metadata-cloud foundation evidence rejects artifact tampering", async () => {
+  const temporary = await mkdtemp(join(tmpdir(), "verify-cloud-evidence-"));
+  try {
+    const canonicalPath = join(
+      root,
+      "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
+    );
+    const report = JSON.parse(await readFile(canonicalPath, "utf8"));
+    report.artifacts[0].digest = `sha256:${"0".repeat(64)}`;
+    const tamperedPath = join(temporary, "tampered.json");
+    await writeFile(tamperedPath, `${JSON.stringify(report, null, 2)}\n`);
+    const result = await run(
+      process.execPath,
+      ["tooling/release/check-metadata-cloud-evidence.mjs", tamperedPath],
+      { cwd: root, env: process.env },
+    );
+    assert.equal(result.code, 1);
+    assert.match(result.stderr, /artifacts: digest mismatch/);
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
+});

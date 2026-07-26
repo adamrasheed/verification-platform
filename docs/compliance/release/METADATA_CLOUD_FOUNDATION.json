@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "metadataCloudReleaseEvidence",
+  "evidenceDate": "2026-07-26",
+  "releaseClass": "contractFoundation",
+  "releaseStatus": "not_releasable",
+  "verification": {
+    "contractConformance": "passed",
+    "security": "passed",
+    "supplyChain": "passed",
+    "serviceSlo": "blocked",
+    "disasterRecovery": "blocked",
+    "providerDeployment": "blocked"
+  },
+  "blockingDecision": {
+    "id": "D-002",
+    "reason": "Cloud provider, region, retention, deletion, backup, legal-hold, and tenant-key policy are unresolved."
+  },
+  "commands": [
+    { "command": "npm test", "outcome": "passed" },
+    { "command": "npm run check:conformance", "outcome": "passed" },
+    { "command": "npm run check:schemas", "outcome": "passed" },
+    { "command": "npm run check:package-content", "outcome": "passed" }
+  ],
+  "artifacts": [
+    { "path": "tooling/conformance/evidence/m8-cloud-foundation.json", "digest": "sha256:7211e435b0c1e97c048d275793e8be523dc4ae1a12de187b191c0cff74614940" },
+    { "path": "tooling/conformance/evidence/m8-durable-mapping-auth.json", "digest": "sha256:10c64747ddc96a33d85e6a071c6b9acea3c7e5b15e360358567681082905ded4" },
+    { "path": "tooling/conformance/evidence/m8-publication-ingestion.json", "digest": "sha256:074c18f81413e545f22067a66bee0effc0fdbb8a75f5237d8431ff08d8a9a0e2" },
+    { "path": "tooling/conformance/evidence/m8-projection-outbox.json", "digest": "sha256:41c66e3e341eea6d664b77864d13eeeb5ca0fb9aaabc04bf490792a21c0af7cc" },
+    { "path": "tooling/conformance/evidence/m8-retention-bounded-reads.json", "digest": "sha256:ce4c439e10c3e247cb9a216a91e84f9a4d56097c9e77734a0a861104fc2c043c" },
+    { "path": "tooling/conformance/evidence/m8-isolation-canary-foundation.json", "digest": "sha256:8cb9a731754cfb414c6929209e5d0b97be02f09581f2247ece086aa8a27f6f33" },
+    { "path": "docs/compliance/release/SECURITY_REPORT.json", "digest": "sha256:4178ac5c79635a60ff5be73754f93e2594eb95d2d7d52789575db056d9297f45" },
+    { "path": "package-lock.json", "digest": "sha256:800b7a4b2bb334db2bef9c1eaec623c15648d1deb00987f4d7bfa89561709123" },
+    { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
+  ]
+}

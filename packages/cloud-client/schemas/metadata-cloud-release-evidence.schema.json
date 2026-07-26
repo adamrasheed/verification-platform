@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/cloud-client/metadata-cloud-release-evidence/v1",
+  "title": "MetadataCloudReleaseEvidenceV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "kind", "evidenceDate", "releaseClass", "releaseStatus",
+    "verification", "blockingDecision", "commands", "artifacts"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "metadataCloudReleaseEvidence" },
+    "evidenceDate": { "type": "string", "format": "date" },
+    "releaseClass": { "const": "contractFoundation" },
+    "releaseStatus": { "const": "not_releasable" },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractConformance", "security", "supplyChain", "serviceSlo",
+        "disasterRecovery", "providerDeployment"
+      ],
+      "properties": {
+        "contractConformance": { "const": "passed" },
+        "security": { "const": "passed" },
+        "supplyChain": { "const": "passed" },
+        "serviceSlo": { "const": "blocked" },
+        "disasterRecovery": { "const": "blocked" },
+        "providerDeployment": { "const": "blocked" }
+      }
+    },
+    "blockingDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reason"],
+      "properties": {
+        "id": { "const": "D-002" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 512 }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "outcome"],
+        "properties": {
+          "command": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "outcome": { "const": "passed" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "digest"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1, "maxLength": 512 },
+          "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}
