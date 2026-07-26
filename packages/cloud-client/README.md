@@ -36,8 +36,9 @@ Authorized deletion atomically removes the active projection and any queued
 acceptance event, installs a minimal digest-free tombstone, and emits one
 `PublishedRunDeleted` event. Exact reads then return `deleted_reference`, and
 restore tooling must pass the tombstone gate before reintroducing a record.
-Concrete active-retention durations, backup expiry, and secondary-store
-propagation remain gated on D-002 rather than being invented by this package.
+ADR-0013 selects concrete active-retention, backup-expiry, and secondary-store
+requirements for the first AWS adapter; this provider-neutral package does not
+silently apply them to its in-memory conformance store.
 
 List reads are bounded to 100 items and ordered by `(publishedAt,
 publishedRunId)`. Continuation cursors are random, opaque, expire after five
@@ -61,4 +62,4 @@ Schemas and compatibility are owned by Founding Engineering. M8 foundation
 acceptance is covered by `cloud-client:test`. The digest-bound metadata-cloud
 foundation report retains contract, security, and supply-chain verification,
 but is explicitly not releasable: provider deployment, service SLO, and
-disaster recovery remain blocked on D-002.
+disaster recovery remain blocked until their deployed M9 Evidence exists.

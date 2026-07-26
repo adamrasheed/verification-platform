@@ -6,10 +6,10 @@
   "additionalProperties": false,
   "required": [
     "schemaVersion", "kind", "evidenceDate", "releaseClass", "releaseStatus",
-    "verification", "blockingDecision", "commands", "artifacts"
+    "verification", "releaseBlockers", "commands", "artifacts"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "const": 2 },
     "kind": { "const": "metadataCloudReleaseEvidence" },
     "evidenceDate": { "type": "string", "format": "date" },
     "releaseClass": { "const": "contractFoundation" },
@@ -30,13 +30,19 @@
         "providerDeployment": { "const": "blocked" }
       }
     },
-    "blockingDecision": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "reason"],
-      "properties": {
-        "id": { "const": "D-002" },
-        "reason": { "type": "string", "minLength": 1, "maxLength": 512 }
+    "releaseBlockers": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["claim", "gate", "reason"],
+        "properties": {
+          "claim": { "enum": ["providerDeployment", "serviceSlo", "disasterRecovery"] },
+          "gate": { "enum": ["M9-T02-T07", "M9-T08"] },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 512 }
+        }
       }
     },
     "commands": {

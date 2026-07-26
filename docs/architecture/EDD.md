@@ -689,6 +689,10 @@ files for permitted Evidence bodies, and a separate cache directory.
 
 Cloud uses ADR-0005: PostgreSQL-compatible storage, object storage only for
 explicitly authorized payloads, transactional outbox, and fenced async work.
+ADR-0013 selects AWS `us-west-2`, ECS Fargate, RDS PostgreSQL, SQS, S3, KMS,
+Secrets Manager, CloudWatch, AWS Budgets, and OpenTofu for the first concrete
+metadata-cloud adapter. This selection implements the logical contracts; it
+does not introduce provider semantics into core.
 
 ```mermaid
 erDiagram

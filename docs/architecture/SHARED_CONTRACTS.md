@@ -266,10 +266,10 @@ the same cursor-invalid condition. Deletion preserves the non-sensitive order
 slot so pagination and traversal expose an explicit deleted reference rather
 than silently omitting history.
 
-The provider-neutral contract does not choose retention duration, backup
-expiry, replica/index propagation, or legal-hold policy. Those production
-values and adapters remain gated on D-002; callers cannot infer a default from
-the conformance store.
+The provider-neutral package does not choose retention duration, backup expiry,
+replica/index propagation, or legal-hold policy. ADR-0013 selects those values
+for the first AWS adapter; callers still cannot infer a production policy from
+the in-memory conformance store.
 
 ## Cloud isolation and secondary-sink conformance
 
@@ -288,9 +288,10 @@ canary scan. Scans are byte-bounded and complete across the inventory. Source
 and secret markers are forbidden everywhere; a tenant marker is permitted only
 in a tenant-scoped snapshot for that exact tenant.
 
-Provider infrastructure, backup media, migrations, and observability adapters
-must run these contracts after D-002. Until then, M8-T12/T13 are contract
-foundations and no deployed-isolation or zero-secondary-leakage claim is made.
+AWS provider infrastructure, backup media, migrations, and observability
+adapters must now run these contracts during M9. Until those runs exist,
+M8-T12/T13 remain contract foundations and no deployed-isolation or
+zero-secondary-leakage claim is made.
 
 ## Metadata-cloud release Evidence
 
@@ -298,10 +299,11 @@ The provider-neutral foundation report is a closed, digest-bound inventory of
 M8 conformance records, the security report, the npm lockfile, and the package
 policy. Contract conformance, security, and supply-chain verification may pass
 at this stage, but the report must remain `not_releasable` with service SLO,
-disaster recovery, and provider deployment explicitly `blocked` by D-002.
+disaster recovery, and provider deployment explicitly `blocked` by their M9
+Evidence gates.
 
-Resolving D-002 does not automatically promote the report. Production release
-Evidence additionally requires measurements from the selected provider and
+ADR-0013 resolves D-002 without promoting the report. Production release
+Evidence additionally requires measurements from AWS `us-west-2` and
 region, concrete tenant-isolation and secondary-sink adapter runs, and actual
 backup, restore, failover, and recovery drills. No foundation artifact may
 encode invented availability, latency, recovery, retention, or deployment

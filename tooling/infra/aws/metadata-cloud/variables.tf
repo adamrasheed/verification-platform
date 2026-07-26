@@ -1,0 +1,117 @@
+variable "deployment_enabled" {
+  description = "Fail-closed gate for every remotely billable resource."
+  type        = bool
+  default     = false
+}
+
+variable "aws_account_id" {
+  description = "Exact AWS account allowlist."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.deployment_enabled || can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "An exact 12-digit aws_account_id is required when deployment is enabled."
+  }
+}
+
+variable "aws_region" {
+  description = "ADR-0013 primary region."
+  type        = string
+  default     = "us-west-2"
+
+  validation {
+    condition     = var.aws_region == "us-west-2"
+    error_message = "ADR-0013 fixes the first deployment to us-west-2."
+  }
+}
+
+variable "environment" {
+  description = "Exact deployment environment."
+  type        = string
+  default     = "development"
+
+  validation {
+    condition     = contains(["development", "staging", "production"], var.environment)
+    error_message = "environment must be development, staging, or production."
+  }
+}
+
+variable "owner" {
+  description = "Accountable owner tag."
+  type        = string
+  default     = "founding-engineering"
+
+  validation {
+    condition     = length(trimspace(var.owner)) > 0
+    error_message = "owner cannot be empty."
+  }
+}
+
+variable "budget_alert_email" {
+  description = "Verified cost-alert destination."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.deployment_enabled || can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", var.budget_alert_email))
+    error_message = "A valid budget_alert_email is required when deployment is enabled."
+  }
+}
+
+variable "monthly_budget_usd" {
+  description = "Hard planning ceiling and alert budget; pricing remains F-003."
+  type        = number
+  default     = 100
+
+  validation {
+    condition     = var.monthly_budget_usd >= 10 && var.monthly_budget_usd <= 5000
+    error_message = "monthly_budget_usd must be between 10 and 5000."
+  }
+}
+
+variable "vpc_cidr" {
+  description = "Private metadata-cloud network."
+  type        = string
+  default     = "10.42.0.0/16"
+}
+
+variable "availability_zones" {
+  description = "Exact two-AZ topology in the primary region."
+  type        = list(string)
+  default     = ["us-west-2a", "us-west-2b"]
+
+  validation {
+    condition     = length(var.availability_zones) == 2 && alltrue([for zone in var.availability_zones : startswith(zone, "us-west-2")])
+    error_message = "Exactly two us-west-2 Availability Zones are required."
+  }
+}
+
+variable "database_instance_class" {
+  description = "Development defaults small; production sizing follows measured load."
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "postgres_engine_version" {
+  description = "Reviewed PostgreSQL engine line."
+  type        = string
+  default     = "17.6"
+}
+
+variable "database_multi_az" {
+  description = "Required for production."
+  type        = bool
+  default     = false
+}
+
+variable "database_backup_retention_days" {
+  description = "ADR-0013 operational database backup/PITR window."
+  type        = number
+  default     = 35
+
+  validation {
+    condition     = var.database_backup_retention_days == 35
+    error_message = "ADR-0013 requires exactly 35 days of database backup retention."
+  }
+}

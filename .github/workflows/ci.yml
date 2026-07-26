@@ -36,6 +36,12 @@ jobs:
           node-version: ${{ matrix.node }}
           package-manager-cache: false
 
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4
+        with:
+          tofu_version: 1.12.5
+          tofu_wrapper: false
+
       - name: Install exact dependencies
         run: npm ci --ignore-scripts
 
