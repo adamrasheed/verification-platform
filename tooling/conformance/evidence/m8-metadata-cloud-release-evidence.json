@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m8-metadata-cloud-release-evidence",
+  "taskId": "M8-T14",
+  "owner": "cloud-boundary",
+  "governingClauses": ["Freeze §§11.3-11.4,18", "EDD §§27,30,33", "SP-CLOUD-002", "SP-SUPPLY-001"],
+  "testIds": [
+    "metadata-cloud:foundation-report-exact-artifacts",
+    "metadata-cloud:non-releasable-d002-gate",
+    "metadata-cloud:slo-dr-unclaimed",
+    "metadata-cloud:security-supply-chain-evidence",
+    "metadata-cloud:artifact-tamper-rejection"
+  ],
+  "command": "npm test",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
+      "digest": "sha256:6de9e9dc903b0dce98c3267bce8eaf115cbb61f03f68b224b6f2a8e8cbfbde0c"
+    },
+    {
+      "path": "tooling/release/check-metadata-cloud-evidence.mjs",
+      "digest": "sha256:754a0312cf693743887068f483e7a4c938c8883ab0d5f6988fcba954c8c1fa2f"
+    },
+    {
+      "path": "tooling/release/test/release.test.mjs",
+      "digest": "sha256:af27bb87f98fe68cfbc1fe7559305bf402c99586d98069bf721289b1790dbad7"
+    },
+    {
+      "path": "packages/cloud-client/schemas/metadata-cloud-release-evidence.schema.json",
+      "digest": "sha256:5d7852eddd689aa0eb11da667dc00da12aa53451f1afb0edb925a5d0e68cf04d"
+    },
+    {
+      "path": "docs/architecture/SHARED_CONTRACTS.md",
+      "digest": "sha256:92d66f77896848ee80047651e58b5450da61dec82f079838c28dd5d94fc57124"
+    }
+  ]
+}

@@ -292,6 +292,21 @@ Provider infrastructure, backup media, migrations, and observability adapters
 must run these contracts after D-002. Until then, M8-T12/T13 are contract
 foundations and no deployed-isolation or zero-secondary-leakage claim is made.
 
+## Metadata-cloud release Evidence
+
+The provider-neutral foundation report is a closed, digest-bound inventory of
+M8 conformance records, the security report, the npm lockfile, and the package
+policy. Contract conformance, security, and supply-chain verification may pass
+at this stage, but the report must remain `not_releasable` with service SLO,
+disaster recovery, and provider deployment explicitly `blocked` by D-002.
+
+Resolving D-002 does not automatically promote the report. Production release
+Evidence additionally requires measurements from the selected provider and
+region, concrete tenant-isolation and secondary-sink adapter runs, and actual
+backup, restore, failover, and recovery drills. No foundation artifact may
+encode invented availability, latency, recovery, retention, or deployment
+claims.
+
 ## Provider request boundary
 
 The initial network-capable Plugin Contract grants no raw socket authority.

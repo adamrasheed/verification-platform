@@ -172,7 +172,7 @@ production dependency in M7.
 | M8-T11 | **Contract foundation complete** — service deployment remains pending D-002 | Implement bounded read APIs and pagination | Stable ordering, opaque expiring cursors, bounded limits, and exact tenant/project scope pass |
 | M8-T12 | **Contract harness complete** — concrete adapter matrix remains pending D-002 | Run cross-tenant negative matrix | Exact six-surface harness rejects missing surfaces, IDOR differences, and confused-deputy authorization |
 | M8-T13 | **Contract harness complete** — deployed sink scans remain pending D-002 | Run cloud canary and secondary-sink inventory | Closed ten-sink inventory and bounded source/secret/cross-tenant canary scans pass |
-| M8-T14 | Pending | Publish metadata-cloud release Evidence | SLO, DR, security, supply-chain, and exact artifact evidence retained |
+| M8-T14 | **Foundation Evidence complete** — production release Evidence remains pending D-002 | Publish metadata-cloud release Evidence | Exact contract, security, and supply-chain artifacts retained; SLO, DR, and provider deployment explicitly blocked and unclaimed |
 
 Product-hosted source remains excluded. Provider-specific deployment does not
 begin until D-002 and the remaining hosted entry decisions are recorded.

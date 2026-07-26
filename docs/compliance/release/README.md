@@ -31,3 +31,16 @@ node tooling/conformance/benchmark.mjs \
 The performance generator creates and removes its 100,000-file reference
 repository in the operating-system temporary directory; generation time is not
 included in the warm-discovery measurement.
+
+## Metadata-cloud contract foundation
+
+`METADATA_CLOUD_FOUNDATION.json` retains the exact M8 contract, security, and
+supply-chain artifacts that can be verified before a cloud provider exists. It
+is intentionally classified as `contractFoundation` and `not_releasable`.
+Service SLO, disaster-recovery, and provider-deployment fields must remain
+`blocked` while D-002 is unresolved; this record is not production Evidence.
+
+Run `npm run check:cloud-release-evidence` to verify the closed inventory and
+every retained SHA-256 digest. A future production report may replace blocked
+claims only after D-002 is accepted and real deployed-adapter, load, backup,
+restore, and recovery drills generate their own Evidence.
