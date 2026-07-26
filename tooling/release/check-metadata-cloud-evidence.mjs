@@ -19,9 +19,9 @@ const exactKeys = (value, keys, label) => {
 
 exactKeys(report, [
   "schemaVersion", "kind", "evidenceDate", "releaseClass", "releaseStatus",
-  "verification", "blockingDecision", "commands", "artifacts",
+  "verification", "releaseBlockers", "commands", "artifacts",
 ], "report");
-if (report.schemaVersion !== 1
+if (report.schemaVersion !== 2
   || report.kind !== "metadataCloudReleaseEvidence"
   || report.releaseClass !== "contractFoundation"
   || report.releaseStatus !== "not_releasable") {
@@ -37,9 +37,23 @@ for (const field of ["contractConformance", "security", "supplyChain"]) {
 for (const field of ["serviceSlo", "disasterRecovery", "providerDeployment"]) {
   if (report.verification?.[field] !== "blocked") errors.push(`verification: ${field} must remain blocked`);
 }
-exactKeys(report.blockingDecision ?? {}, ["id", "reason"], "blockingDecision");
-if (report.blockingDecision?.id !== "D-002" || !report.blockingDecision?.reason) {
-  errors.push("blockingDecision: unresolved D-002 must be explicit");
+const expectedBlockers = [
+  ["providerDeployment", "M9-T02-T07"],
+  ["serviceSlo", "M9-T08"],
+  ["disasterRecovery", "M9-T08"],
+];
+if (!Array.isArray(report.releaseBlockers)
+  || report.releaseBlockers.length !== expectedBlockers.length
+  || report.releaseBlockers.some((entry, index) => {
+    exactKeys(entry, ["claim", "gate", "reason"], `releaseBlocker ${index}`);
+    return entry.claim !== expectedBlockers[index][0]
+      || entry.gate !== expectedBlockers[index][1]
+      || !entry.reason;
+  })) {
+  errors.push("releaseBlockers: exact deployed M9 Evidence gates are required");
+}
+if (JSON.stringify(report).includes("D-002")) {
+  errors.push("report: resolved D-002 cannot remain a release blocker");
 }
 const expectedCommands = [
   "npm test",
@@ -89,4 +103,4 @@ if (errors.length > 0) {
   console.error(errors.join("\n"));
   process.exit(1);
 }
-console.log("metadata-cloud foundation Evidence valid: not releasable pending D-002");
+console.log("metadata-cloud foundation Evidence valid: not releasable pending deployed M9 Evidence");

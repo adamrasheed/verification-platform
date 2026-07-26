@@ -162,20 +162,37 @@ production dependency in M7.
 | M8-T01 | **Complete** | Add `cloud-client` publication, disclosure, and policy schemas | Closed schemas reject unknown fields and tenant-mismatched references |
 | M8-T02 | **Complete** | Resolve and implement publication-identifier lifecycle and durable Engine mapping | ADR-0012; keyed tenant/object separation, restart persistence, atomic rollback, and collision failure |
 | M8-T03 | **Complete** | Implement disclosure manifest and exact-byte comparison | Canonical bytes, field inventory, destination, retention, expiry, and approved digest remain bound |
-| M8-T04 | **Contract foundation complete** — closed service deployment remains pending D-002 | Define cloud identity, exact action, tenant, and resource boundaries | Canonical ten-action catalog; cross-tenant/IDOR resources remain indistinguishable and deny-default |
-| M8-T05 | **Contract foundation complete** — service deployment remains pending D-002 | Implement short-lived publication intents | Five-minute signed audience; exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
-| M8-T06 | **Contract foundation complete** — durable cloud store remains pending D-002 | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes and nonce replay conflict atomically |
-| M8-T07 | **Contract foundation complete** — PostgreSQL adapter remains pending D-002 | Persist immutable run projections | Exact validated projection retained; no verdict recalculation or raw local revision disclosure |
+| M8-T04 | **Contract foundation complete** — AWS service deployment is tracked in M9 | Define cloud identity, exact action, tenant, and resource boundaries | Canonical ten-action catalog; cross-tenant/IDOR resources remain indistinguishable and deny-default |
+| M8-T05 | **Contract foundation complete** — AWS service deployment is tracked in M9 | Implement short-lived publication intents | Five-minute signed audience; exact tenant, project, purpose, manifest, limits, policy, nonce, and expiry bound |
+| M8-T06 | **Contract foundation complete** — RDS adapter is tracked in M9 | Implement allowlist ingestion and idempotency | Hostile input bounded; same key/different bytes and nonce replay conflict atomically |
+| M8-T07 | **Contract foundation complete** — RDS adapter is tracked in M9 | Persist immutable run projections | Exact validated projection retained; no verdict recalculation or raw local revision disclosure |
 | M8-T08 | **Contract foundation complete** | Distribute signed tenant policies | Exact canonical bytes, tenant, signature, issue, and expiry validated |
-| M8-T09 | **Contract foundation complete** — queue adapter remains pending D-002 | Implement transactional outbox/projection workers | Source fact and outbox commit together; stable event identity, fenced lease, and idempotent acknowledgement |
-| M8-T10 | **Contract foundation complete** — production retention/backup propagation remains pending D-002 | Implement retention, deletion, and tombstones | Atomic active deletion, digest-free tombstone, deletion event, and restore-time gate pass |
-| M8-T11 | **Contract foundation complete** — service deployment remains pending D-002 | Implement bounded read APIs and pagination | Stable ordering, opaque expiring cursors, bounded limits, and exact tenant/project scope pass |
-| M8-T12 | **Contract harness complete** — concrete adapter matrix remains pending D-002 | Run cross-tenant negative matrix | Exact six-surface harness rejects missing surfaces, IDOR differences, and confused-deputy authorization |
-| M8-T13 | **Contract harness complete** — deployed sink scans remain pending D-002 | Run cloud canary and secondary-sink inventory | Closed ten-sink inventory and bounded source/secret/cross-tenant canary scans pass |
-| M8-T14 | **Foundation Evidence complete** — production release Evidence remains pending D-002 | Publish metadata-cloud release Evidence | Exact contract, security, and supply-chain artifacts retained; SLO, DR, and provider deployment explicitly blocked and unclaimed |
+| M8-T09 | **Contract foundation complete** — SQS adapter is tracked in M9 | Implement transactional outbox/projection workers | Source fact and outbox commit together; stable event identity, fenced lease, and idempotent acknowledgement |
+| M8-T10 | **Contract foundation complete** — AWS propagation/drills are tracked in M9 | Implement retention, deletion, and tombstones | Atomic active deletion, digest-free tombstone, deletion event, and restore-time gate pass |
+| M8-T11 | **Contract foundation complete** — AWS service deployment is tracked in M9 | Implement bounded read APIs and pagination | Stable ordering, opaque expiring cursors, bounded limits, and exact tenant/project scope pass |
+| M8-T12 | **Contract harness complete** — deployed AWS adapter matrix is tracked in M9 | Run cross-tenant negative matrix | Exact six-surface harness rejects missing surfaces, IDOR differences, and confused-deputy authorization |
+| M8-T13 | **Contract harness complete** — deployed AWS sink scans are tracked in M9 | Run cloud canary and secondary-sink inventory | Closed ten-sink inventory and bounded source/secret/cross-tenant canary scans pass |
+| M8-T14 | **Foundation Evidence complete** — production release Evidence is gated on M9 | Publish metadata-cloud release Evidence | Exact contract, security, and supply-chain artifacts retained; SLO, DR, and provider deployment explicitly blocked and unclaimed |
 
-Product-hosted source remains excluded. Provider-specific deployment does not
-begin until D-002 and the remaining hosted entry decisions are recorded.
+Product-hosted source remains excluded. ADR-0013 resolves D-002 for the first
+AWS metadata-cloud adapter; production claims remain gated on deployed
+conformance and recovery Evidence.
+
+## Epic M9 — AWS Metadata Cloud Deployment
+
+**Milestone:** metadata-only hosted beta in AWS `us-west-2` with
+customer-controlled verification workloads.
+
+| Task | Status | Work | Acceptance/test requirement |
+|---|---|---|---|
+| M9-T01 | **Complete** | Accept D-002 and build the guarded AWS/OpenTofu foundation | ADR-0013 accepted; provider locks, account/region guards, private storage, encryption, retention, backup, DLQ, budget, and default-disabled creation pass |
+| M9-T02 | **In progress** — encrypted state bootstrap is coded; exact account binding, OIDC identity, and apply await AWS authentication | Bootstrap encrypted remote state and deployment identity | Exact account allowlist, OIDC role, state encryption/versioning/locking, break-glass recovery, and audit Evidence pass |
+| M9-T03 | Pending | Deploy development network and managed data services | Two-AZ private topology, RDS, SQS/DLQ, S3, KMS, secrets, and bounded logs pass adapter health checks |
+| M9-T04 | Pending | Implement PostgreSQL projection, outbox, retention, and tombstone adapters | Existing M8 atomicity, pagination, deletion, and restore gates pass against RDS |
+| M9-T05 | Pending | Implement SQS relay/worker and secondary-sink controls | Fenced at-least-once delivery, bounded retries, DLQ sanitization, deletion inventory, and canary scans pass |
+| M9-T06 | Pending | Deploy the tenant-authorized control API | Closed `/v1` schemas, exact actions/resources, idempotency, workload identity, and cross-tenant matrix pass |
+| M9-T07 | Pending | Connect customer-controlled workload dispatch | GitHub Action/customer runner receives tenant-bound offers and publishes only allowlisted projections |
+| M9-T08 | Pending | Run production-readiness drills and publish release Evidence | Load/SLO, backup/restore, tombstone replay, recovery, security, supply-chain, and cost-abuse Evidence pass before release status changes |
 
 ## Critical Path Checkpoints
 

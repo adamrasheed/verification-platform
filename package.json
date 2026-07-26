@@ -26,6 +26,7 @@
     "check:native-release-tools": "node tooling/native/release/test-native-release-tools.mjs",
     "check:release-pack": "node tooling/release/audit-pack.mjs apps/cli",
     "check:cloud-release-evidence": "node tooling/release/check-metadata-cloud-evidence.mjs",
+    "check:cloud-infra": "node tooling/infra/check-aws-foundation.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:packages": "npm run test --workspaces --if-present",
     "test:contracts": "npm run test --workspace @verify-internal/contracts",
@@ -38,7 +39,8 @@
     "test:m6": "npm run test:m5 && npm run check:native-release-tools && npm run test --workspace @verify-internal/plugin-sdk && npm run test --workspace @verify-internal/plugin-runtime && npm run test --workspace @verify-internal/github-repository-policy",
     "test:m7": "npm run test:m6 && npm run test --workspace @verify-internal/adapter-core && npm run test --workspace @verify-internal/mcp-server && npm run test --workspace @verify-internal/github-check-projector && npm run test --workspace @verify-internal/github-action",
     "test:m8-foundation": "npm run test:m7 && npm run test --workspace @verify-internal/cloud-client && npm run check:cloud-release-evidence",
-    "test": "npm run build && npm run test:m8-foundation"
+    "test:m9-foundation": "npm run test:m8-foundation && npm run check:cloud-infra",
+    "test": "npm run build && npm run test:m9-foundation"
   },
   "devDependencies": {
     "@types/node": "26.1.1",

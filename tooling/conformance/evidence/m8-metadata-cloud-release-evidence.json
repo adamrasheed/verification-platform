@@ -6,7 +6,7 @@
   "governingClauses": ["Freeze §§11.3-11.4,18", "EDD §§27,30,33", "SP-CLOUD-002", "SP-SUPPLY-001"],
   "testIds": [
     "metadata-cloud:foundation-report-exact-artifacts",
-    "metadata-cloud:non-releasable-d002-gate",
+    "metadata-cloud:non-releasable-deployed-evidence-gate",
     "metadata-cloud:slo-dr-unclaimed",
     "metadata-cloud:security-supply-chain-evidence",
     "metadata-cloud:artifact-tamper-rejection"
@@ -16,11 +16,11 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:6de9e9dc903b0dce98c3267bce8eaf115cbb61f03f68b224b6f2a8e8cbfbde0c"
+      "digest": "sha256:8ad73189bfb766985c02f4b471dfa5370912ceaccf518f84c8d6d875ca1b006d"
     },
     {
       "path": "tooling/release/check-metadata-cloud-evidence.mjs",
-      "digest": "sha256:754a0312cf693743887068f483e7a4c938c8883ab0d5f6988fcba954c8c1fa2f"
+      "digest": "sha256:47604b20fd0b939c7926d797ac459911c0b86fe0dba2f06f9a13312fbd7dab56"
     },
     {
       "path": "tooling/release/test/release.test.mjs",
@@ -28,11 +28,11 @@
     },
     {
       "path": "packages/cloud-client/schemas/metadata-cloud-release-evidence.schema.json",
-      "digest": "sha256:5d7852eddd689aa0eb11da667dc00da12aa53451f1afb0edb925a5d0e68cf04d"
+      "digest": "sha256:c9bcb4e9dadde38db6d2e11cb559e4113e4d995cecb831b2dc4a98b715a67e69"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",
-      "digest": "sha256:92d66f77896848ee80047651e58b5450da61dec82f079838c28dd5d94fc57124"
+      "digest": "sha256:943165ef2e3dd350bd0564b62c8e8bd84542d95350922ed26f3648bd1b20e5c7"
     }
   ]
 }

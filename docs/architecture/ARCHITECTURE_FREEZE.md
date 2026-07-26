@@ -1280,7 +1280,8 @@ resolved before public beta:
    loopback, link-local, and cloud metadata endpoints.
 5. Local store locations, retention limits, purge behavior, and optional
    encryption threat model.
-6. Cloud retention, deletion, backup, region, and legal-hold policy.
+6. Cloud retention, deletion, backup, region, and legal-hold policy. The first
+   metadata-cloud selection is resolved by ADR-0013.
 7. Workload identity issuance and enterprise SSO lifecycle.
 8. Evidence attestation format and independent verification model.
 

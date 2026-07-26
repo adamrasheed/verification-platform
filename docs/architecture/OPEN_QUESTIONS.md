@@ -26,7 +26,6 @@ changes use ADRs. Business decisions remain founder-owned.
 
 | ID | Decision | Frozen constraint | Reconsideration trigger |
 |---|---|---|---|
-| D-002 | Cloud vendor, primary region, and managed service products | Logical cloud contracts, tenant isolation, encryption, and deletion semantics do not change | Before hosted implementation |
 | D-003 | Evidence attestation wire format | Evidence remains immutable and provenance-bearing; a digest is not independent truth | Before third-party attestation exchange |
 | D-004 | Per-record local encryption | Local permissions and platform storage encryption are the Phase 1 baseline | Enterprise local threat model requires stronger protection |
 
@@ -36,6 +35,7 @@ changes use ADRs. Business decisions remain founder-owned.
 |---|---|---|---|
 | D-001 | Dynamic plugins require a signed native sandbox host: Linux namespaces+seccomp, macOS App Sandbox, or Windows AppContainer. A missing host is `unavailable`; deprecated Seatbelt and Node permissions are not treated as malicious-code isolation. Publisher trust uses digest-pinned Ed25519 manifests and revocation. Provider secrets are attached only inside the Engine egress broker. | [ADR-0011](ADR/0011-plugin-security-enforcement.md) | 2026-07-19 |
 | D-005 | Metadata publication identifiers use locally held HMAC-SHA-256 keys, tenant/object domain separation, durable mappings across rotation, and no cloud key escrow. | [ADR-0012](ADR/0012-metadata-publication-identifier-lifecycle.md) | 2026-07-22 |
+| D-002 | Use AWS `us-west-2` with ECS Fargate, RDS PostgreSQL, SQS, S3, KMS, Secrets Manager, CloudWatch, AWS Budgets, and OpenTofu; adopt bounded metadata retention, 35-day backup expiry, deletion/tombstone replay, environment keys, and no initial legal hold or custom residency. | [ADR-0013](ADR/0013-aws-metadata-cloud-foundation.md) | 2026-07-26 |
 
 ## Resolution rules
 
