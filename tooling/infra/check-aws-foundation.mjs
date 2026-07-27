@@ -49,11 +49,12 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/data.tf",
   "tooling/infra/aws/metadata-cloud/compute.tf",
   "tooling/infra/aws/metadata-cloud/budget.tf",
+  ".github/workflows/aws-oidc-smoke.yml",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
 await Promise.all(requiredFiles.map((file) => read(file)));
 
-const bootstrap = ["versions.tf", "variables.tf", "main.tf", "outputs.tf"]
+const bootstrap = ["versions.tf", "variables.tf", "main.tf", "identity.tf", "budget.tf", "outputs.tf"]
   .map((file) => readFile(path.join(bootstrapRoot, file), "utf8"));
 const metadata = [
   "versions.tf", "variables.tf", "locals.tf", "network.tf", "security.tf",
@@ -86,6 +87,21 @@ requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
 requireText(metadataText, "deadLetterTargetArn", "SQS dead-letter queue");
 requireText(metadataText, 'resource "aws_budgets_budget" "monthly"', "cost budget");
 requireText(metadataText, 'Tier = "private-isolated"', "isolated subnet");
+requireText(metadataText, 'backend "s3" {}', "encrypted remote-state backend");
+requireText(bootstrapText, 'url            = "https://token.actions.githubusercontent.com"', "GitHub OIDC provider");
+requireText(bootstrapText, '"token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"', "OIDC audience restriction");
+requireText(bootstrapText, '"token.actions.githubusercontent.com:sub" = local.github_oidc_subject', "OIDC subject restriction");
+requireText(bootstrapText, 'default     = "adamrasheed/verification-platform"', "exact GitHub repository");
+requireText(bootstrapText, 'name         = "verification-platform-account-monthly"', "bootstrap account budget");
+requireText(bootstrapText, "depends_on = [aws_budgets_budget.account]", "budget-before-state dependency");
+assert.doesNotMatch(bootstrapText, /repo:\*|environment:\*|StringLike[^]*token\.actions\.githubusercontent\.com:sub/);
+
+const oidcWorkflow = await read(".github/workflows/aws-oidc-smoke.yml");
+requireText(oidcWorkflow, "id-token: write", "OIDC workflow token permission");
+requireText(oidcWorkflow, "environment: development", "protected GitHub environment");
+requireText(oidcWorkflow, "allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}", "OIDC account allowlist");
+requireText(oidcWorkflow, "aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c", "pinned AWS credential action");
+assert.doesNotMatch(oidcWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request/);
 
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");

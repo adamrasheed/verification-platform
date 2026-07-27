@@ -1,0 +1,50 @@
+name: AWS OIDC smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-oidc-smoke-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  identity:
+    name: Repository-scoped state identity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment: development
+    steps:
+      - name: Exchange GitHub OIDC for AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_STATE_ROLE_ARN }}
+          role-session-name: verification-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Verify bounded state identity
+        env:
+          EXPECTED_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+          EXPECTED_STATE_BUCKET: ${{ vars.AWS_STATE_BUCKET }}
+        run: |
+          set -euo pipefail
+          identity="$(aws sts get-caller-identity --output json)"
+          test "$(jq -r .Account <<<"${identity}")" = "${EXPECTED_ACCOUNT_ID}"
+          case "$(jq -r .Arn <<<"${identity}")" in
+            "arn:aws:sts::${EXPECTED_ACCOUNT_ID}:assumed-role/verification-platform-github-state-development/"*) ;;
+            *) exit 1 ;;
+          esac
+          aws s3api list-objects-v2 \
+            --bucket "${EXPECTED_STATE_BUCKET}" \
+            --prefix metadata-cloud/development.tfstate \
+            --max-keys 1 >/dev/null
+          if aws s3api head-object \
+            --bucket "${EXPECTED_STATE_BUCKET}" \
+            --key bootstrap/bootstrap.tfstate >/dev/null 2>&1; then
+            echo "State role unexpectedly read bootstrap state" >&2
+            exit 1
+          fi
