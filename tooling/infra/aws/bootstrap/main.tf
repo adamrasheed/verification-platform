@@ -18,6 +18,8 @@ resource "aws_kms_key" "state" {
   lifecycle {
     prevent_destroy = true
   }
+
+  depends_on = [aws_budgets_budget.account]
 }
 
 resource "aws_kms_alias" "state" {

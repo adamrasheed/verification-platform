@@ -47,3 +47,47 @@ variable "owner" {
     error_message = "owner cannot be empty."
   }
 }
+
+variable "github_repository" {
+  description = "Exact GitHub repository allowed to obtain the deployment identity."
+  type        = string
+  default     = "adamrasheed/verification-platform"
+
+  validation {
+    condition     = var.github_repository == "adamrasheed/verification-platform"
+    error_message = "The first deployment identity is fixed to adamrasheed/verification-platform."
+  }
+}
+
+variable "github_environment" {
+  description = "Protected GitHub environment encoded into the OIDC subject."
+  type        = string
+  default     = "development"
+
+  validation {
+    condition     = var.github_environment == "development"
+    error_message = "The bootstrap identity is limited to the development environment."
+  }
+}
+
+variable "budget_alert_email" {
+  description = "Verified destination for account-level cost alerts."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.deployment_enabled || can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", var.budget_alert_email))
+    error_message = "A valid budget_alert_email is required when deployment is enabled."
+  }
+}
+
+variable "monthly_budget_usd" {
+  description = "Account-level bootstrap cost ceiling in US dollars."
+  type        = number
+  default     = 100
+
+  validation {
+    condition     = var.monthly_budget_usd == 100
+    error_message = "The approved bootstrap budget is fixed at 100 USD per month."
+  }
+}

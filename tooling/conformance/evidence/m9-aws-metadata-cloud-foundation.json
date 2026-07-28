@@ -22,7 +22,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:164a88d4141ba7e09872dcd52edeab6b48c667af0345212f528e2d9c8bd1d454"
+      "digest": "sha256:73454f987759ddfc75e39e36183f5b2ee10eef99d3c4c2010e5dffc73c153da4"
     },
     {
       "path": "tooling/infra/aws/bootstrap/.terraform.lock.hcl",
@@ -30,7 +30,15 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/main.tf",
-      "digest": "sha256:c4b49f86945c52070ebc6f1716a3d4444316136ae84b17e2dcf829b37c4e98a5"
+      "digest": "sha256:2c06c7eead632e933a7486a26f0222e02f2608e9ed03ba8cc02b218be70d7d18"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/identity.tf",
+      "digest": "sha256:5c2a93fa0df1be5344d171c217f17eb2b3dc30d66d4f0d59c01ec7b60660d7d7"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/budget.tf",
+      "digest": "sha256:13cc2a5473d0da2c99932f317b84fea7b3e5e296d2d3d0aac48042063b8346c2"
     },
     {
       "path": "tooling/infra/aws/bootstrap/versions.tf",
@@ -38,7 +46,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/tests/foundation.tftest.hcl",
-      "digest": "sha256:fe05c8ecf68da8b5f2bbbbc34b1ab7be67c3b9e1ceec640bbf30d484a98ec39d"
+      "digest": "sha256:e66d7284d6f7342e620407e1ad40657de71ed392beb9aeed335a03968010964a"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/.terraform.lock.hcl",
@@ -79,6 +87,10 @@
     {
       "path": ".github/workflows/ci.yml",
       "digest": "sha256:93715c8457e30079bd7ec286271ef57d07206cfa460f39b878ee08c6952465a2"
+    },
+    {
+      "path": ".github/workflows/aws-oidc-smoke.yml",
+      "digest": "sha256:693d95f4f9ee6242e979c94a6b98944b6b58a4f8792a885ddb29d87071f25987"
     }
   ]
 }
