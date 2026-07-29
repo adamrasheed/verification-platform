@@ -91,7 +91,7 @@ requireText(metadataText, 'backend "s3" {}', "encrypted remote-state backend");
 requireText(bootstrapText, 'url            = "https://token.actions.githubusercontent.com"', "GitHub OIDC provider");
 requireText(bootstrapText, '"token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"', "OIDC audience restriction");
 requireText(bootstrapText, '"token.actions.githubusercontent.com:sub" = local.github_oidc_subject', "OIDC subject restriction");
-requireText(bootstrapText, 'default     = "adamrasheed/verification-platform"', "exact GitHub repository");
+requireText(bootstrapText, 'default     = "repo:adamrasheed@10425543/verification-platform@1305420403"', "immutable GitHub repository identity");
 requireText(bootstrapText, 'name         = "verification-platform-account-monthly"', "bootstrap account budget");
 requireText(bootstrapText, "depends_on = [aws_budgets_budget.account]", "budget-before-state dependency");
 assert.doesNotMatch(bootstrapText, /repo:\*|environment:\*|StringLike[^]*token\.actions\.githubusercontent\.com:sub/);

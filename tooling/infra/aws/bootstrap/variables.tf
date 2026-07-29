@@ -48,14 +48,14 @@ variable "owner" {
   }
 }
 
-variable "github_repository" {
-  description = "Exact GitHub repository allowed to obtain the deployment identity."
+variable "github_oidc_subject_prefix" {
+  description = "Immutable GitHub owner/repository ID prefix allowed to obtain the deployment identity."
   type        = string
-  default     = "adamrasheed/verification-platform"
+  default     = "repo:adamrasheed@10425543/verification-platform@1305420403"
 
   validation {
-    condition     = var.github_repository == "adamrasheed/verification-platform"
-    error_message = "The first deployment identity is fixed to adamrasheed/verification-platform."
+    condition     = var.github_oidc_subject_prefix == "repo:adamrasheed@10425543/verification-platform@1305420403"
+    error_message = "The deployment identity is fixed to the immutable owner and repository IDs."
   }
 }
 

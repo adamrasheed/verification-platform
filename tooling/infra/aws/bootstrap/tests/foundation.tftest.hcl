@@ -47,8 +47,8 @@ run "explicit_bootstrap_is_bounded" {
   }
 
   assert {
-    condition     = jsondecode(aws_iam_role.github_state[0].assume_role_policy).Statement[0].Condition.StringEquals["token.actions.githubusercontent.com:sub"] == "repo:adamrasheed/verification-platform:environment:development"
-    error_message = "The GitHub role must trust only the exact repository development environment."
+    condition     = jsondecode(aws_iam_role.github_state[0].assume_role_policy).Statement[0].Condition.StringEquals["token.actions.githubusercontent.com:sub"] == "repo:adamrasheed@10425543/verification-platform@1305420403:environment:development"
+    error_message = "The GitHub role must trust only the immutable repository development environment."
   }
 
   assert {

@@ -2,8 +2,8 @@
 
 This root creates the versioned, KMS-encrypted S3 backend and repository-scoped
 GitHub Actions OIDC state role required by ADR-0013. Creation defaults off and
-the bucket/key are protected from destroy. The role trusts only the exact
-`adamrasheed/verification-platform` `development` environment subject and can
+the bucket/key are protected from destroy. The role trusts only the immutable
+GitHub owner/repository IDs for the `development` environment subject and can
 access only that environment's state object and KMS key. An account-level
 monthly budget with forecasted 50%, actual 80%, and actual 100% alerts is
 created before the persistent state key.

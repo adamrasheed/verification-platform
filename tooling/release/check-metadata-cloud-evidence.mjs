@@ -38,7 +38,7 @@ for (const field of ["serviceSlo", "disasterRecovery", "providerDeployment"]) {
   if (report.verification?.[field] !== "blocked") errors.push(`verification: ${field} must remain blocked`);
 }
 const expectedBlockers = [
-  ["providerDeployment", "M9-T02-T07"],
+  ["providerDeployment", "M9-T03-T07"],
   ["serviceSlo", "M9-T08"],
   ["disasterRecovery", "M9-T08"],
 ];

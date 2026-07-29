@@ -1,5 +1,5 @@
 locals {
-  github_oidc_subject = "repo:${var.github_repository}:environment:${var.github_environment}"
+  github_oidc_subject = "${var.github_oidc_subject_prefix}:environment:${var.github_environment}"
 }
 
 resource "aws_iam_openid_connect_provider" "github" {

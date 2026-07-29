@@ -186,8 +186,8 @@ customer-controlled verification workloads.
 | Task | Status | Work | Acceptance/test requirement |
 |---|---|---|---|
 | M9-T01 | **Complete** | Accept D-002 and build the guarded AWS/OpenTofu foundation | ADR-0013 accepted; provider locks, account/region guards, private storage, encryption, retention, backup, DLQ, budget, and default-disabled creation pass |
-| M9-T02 | **In progress** — encrypted state bootstrap is coded; exact account binding, OIDC identity, and apply await AWS authentication | Bootstrap encrypted remote state and deployment identity | Exact account allowlist, OIDC role, state encryption/versioning/locking, break-glass recovery, and audit Evidence pass |
-| M9-T03 | Pending | Deploy development network and managed data services | Two-AZ private topology, RDS, SQS/DLQ, S3, KMS, secrets, and bounded logs pass adapter health checks |
+| M9-T02 | **Complete** — account `661590454564`, encrypted remote state, `$100` budget, immutable GitHub OIDC subject, main-only environment, denied bootstrap-state read, and run `30399741151` pass | Bootstrap encrypted remote state and deployment identity | Exact account allowlist, OIDC role, state encryption/versioning/locking, break-glass recovery, and audit Evidence pass |
+| M9-T03 | **In progress** — foundation plan is coded; deployment role permissions and development apply remain | Deploy development network and managed data services | Two-AZ private topology, RDS, SQS/DLQ, S3, KMS, secrets, and bounded logs pass adapter health checks |
 | M9-T04 | Pending | Implement PostgreSQL projection, outbox, retention, and tombstone adapters | Existing M8 atomicity, pagination, deletion, and restore gates pass against RDS |
 | M9-T05 | Pending | Implement SQS relay/worker and secondary-sink controls | Fenced at-least-once delivery, bounded retries, DLQ sanitization, deletion inventory, and canary scans pass |
 | M9-T06 | Pending | Deploy the tenant-authorized control API | Closed `/v1` schemas, exact actions/resources, idempotency, workload identity, and cross-tenant matrix pass |
