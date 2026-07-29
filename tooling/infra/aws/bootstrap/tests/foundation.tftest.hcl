@@ -16,7 +16,7 @@ run "creation_is_disabled_by_default" {
   }
 
   assert {
-    condition     = length(aws_iam_openid_connect_provider.github) == 0 && length(aws_iam_role.github_state) == 0
+    condition     = length(aws_iam_openid_connect_provider.github) == 0 && length(aws_iam_role.github_state) == 0 && length(aws_iam_role.github_deploy) == 0
     error_message = "Default bootstrap planning must create no deployment identity."
   }
 }
@@ -54,5 +54,15 @@ run "explicit_bootstrap_is_bounded" {
   assert {
     condition     = jsondecode(aws_iam_role.github_state[0].assume_role_policy).Statement[0].Condition.StringEquals["token.actions.githubusercontent.com:aud"] == "sts.amazonaws.com"
     error_message = "The GitHub role must require the AWS STS audience."
+  }
+
+  assert {
+    condition     = aws_iam_role.github_deploy[0].assume_role_policy == aws_iam_role.github_state[0].assume_role_policy
+    error_message = "State and deployment roles must share the exact immutable OIDC trust boundary."
+  }
+
+  assert {
+    condition     = !strcontains(aws_iam_role_policy.github_deploy[0].policy, "iam:*") && !strcontains(aws_iam_role_policy.github_deploy[0].policy, "AdministratorAccess")
+    error_message = "The deployment role must not receive IAM administration or administrator access."
   }
 }

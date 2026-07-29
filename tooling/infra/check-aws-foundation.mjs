@@ -50,6 +50,7 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/compute.tf",
   "tooling/infra/aws/metadata-cloud/budget.tf",
   ".github/workflows/aws-oidc-smoke.yml",
+  ".github/workflows/aws-metadata-cloud.yml",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
 await Promise.all(requiredFiles.map((file) => read(file)));
@@ -61,6 +62,7 @@ const metadata = [
   "data.tf", "compute.tf", "budget.tf", "outputs.tf",
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
+const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
 const metadataText = (await Promise.all(metadata)).join("\n");
 const allInfra = `${bootstrapText}\n${metadataText}`;
 
@@ -81,6 +83,8 @@ requireText(metadataText, 'default     = 35', "backup retention");
 requireText(metadataText, 'condition     = var.environment != "production" || var.database_multi_az', "production Multi-AZ gate");
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
+requireText(metadataText, 'name              = "/aws/rds/instance/${local.name}-postgres/postgresql"', "managed RDS logs");
+assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 4, "all four log groups need 30-day retention");
 requireText(metadataText, "block_public_acls       = true", "S3 public access block");
 requireText(metadataText, "noncurrent_days = 35", "metadata backup expiry");
 requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
@@ -95,6 +99,9 @@ requireText(bootstrapText, 'default     = "repo:adamrasheed@10425543/verificatio
 requireText(bootstrapText, 'name         = "verification-platform-account-monthly"', "bootstrap account budget");
 requireText(bootstrapText, "depends_on = [aws_budgets_budget.account]", "budget-before-state dependency");
 assert.doesNotMatch(bootstrapText, /repo:\*|environment:\*|StringLike[^]*token\.actions\.githubusercontent\.com:sub/);
+requireText(bootstrapText, 'resource "aws_iam_role" "github_deploy"', "separate deployment identity");
+requireText(bootstrapText, '"aws:RequestedRegion" = var.aws_region', "regional deployment boundary");
+assert.doesNotMatch(bootstrapIdentity, /AdministratorAccess|"iam:\*"|"ec2:\*"|"rds:\*"|"s3:\*"/);
 
 const oidcWorkflow = await read(".github/workflows/aws-oidc-smoke.yml");
 requireText(oidcWorkflow, "id-token: write", "OIDC workflow token permission");
@@ -102,6 +109,14 @@ requireText(oidcWorkflow, "environment: development", "protected GitHub environm
 requireText(oidcWorkflow, "allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}", "OIDC account allowlist");
 requireText(oidcWorkflow, "aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c", "pinned AWS credential action");
 assert.doesNotMatch(oidcWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request/);
+
+const deployWorkflow = await read(".github/workflows/aws-metadata-cloud.yml");
+requireText(deployWorkflow, "id-token: write", "deployment workflow token permission");
+requireText(deployWorkflow, "environment: development", "deployment environment boundary");
+requireText(deployWorkflow, "role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}", "separate deployment role");
+requireText(deployWorkflow, "tofu apply -input=false -auto-approve development.tfplan", "immutable apply plan");
+requireText(deployWorkflow, "Verify zero drift after apply", "post-apply drift check");
+assert.doesNotMatch(deployWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");

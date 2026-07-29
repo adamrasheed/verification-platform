@@ -14,6 +14,22 @@ resource "aws_cloudwatch_log_group" "worker" {
   kms_key_id        = aws_kms_key.environment[0].arn
 }
 
+resource "aws_cloudwatch_log_group" "database_postgresql" {
+  count = var.deployment_enabled ? 1 : 0
+
+  name              = "/aws/rds/instance/${local.name}-postgres/postgresql"
+  retention_in_days = 30
+  kms_key_id        = aws_kms_key.environment[0].arn
+}
+
+resource "aws_cloudwatch_log_group" "database_upgrade" {
+  count = var.deployment_enabled ? 1 : 0
+
+  name              = "/aws/rds/instance/${local.name}-postgres/upgrade"
+  retention_in_days = 30
+  kms_key_id        = aws_kms_key.environment[0].arn
+}
+
 resource "aws_ecs_cluster" "metadata" {
   count = var.deployment_enabled ? 1 : 0
 

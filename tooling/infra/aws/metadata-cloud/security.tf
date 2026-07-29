@@ -29,7 +29,10 @@ data "aws_iam_policy_document" "environment_key" {
     condition {
       test     = "ArnLike"
       variable = "kms:EncryptionContext:aws:logs:arn"
-      values   = ["arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.environment}/*"]
+      values = [
+        "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.environment}/*",
+        "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/aws/rds/instance/${local.name}-postgres/*",
+      ]
     }
   }
 }

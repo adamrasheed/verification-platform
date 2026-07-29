@@ -61,6 +61,11 @@ run "development_foundation_is_private_and_bounded" {
     condition     = aws_sqs_queue.metadata[0].redrive_policy != null && aws_kms_key.environment[0].enable_key_rotation
     error_message = "Queue redrive and environment key rotation are mandatory."
   }
+
+  assert {
+    condition     = aws_cloudwatch_log_group.database_postgresql[0].retention_in_days == 30 && aws_cloudwatch_log_group.database_upgrade[0].retention_in_days == 30
+    error_message = "RDS export logs must be explicitly managed with bounded retention."
+  }
 }
 
 run "production_rejects_single_az" {

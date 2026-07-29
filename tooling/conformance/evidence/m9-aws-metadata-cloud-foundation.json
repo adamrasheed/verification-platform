@@ -8,7 +8,9 @@
     "aws-foundation:d002-exact-provider-region-services",
     "aws-foundation:default-zero-resource-plan",
     "aws-foundation:locked-tofu-provider-supply-chain",
+    "aws-foundation:separate-least-privilege-deployment-identity",
     "aws-foundation:private-encrypted-data-plane",
+    "aws-foundation:encrypted-bounded-rds-export-logs",
     "aws-foundation:production-multi-az-deletion-protection",
     "aws-foundation:bounded-retention-backup-dlq",
     "aws-foundation:mandatory-budget-account-allowlist"
@@ -22,7 +24,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:481552418a194b20a919a12c4c5256aff09edba2b3ba708cf72eeab4026b891e"
+      "digest": "sha256:e740b027315378d964e095b14993125552ad2300f88bcff6eb00e39ec61487a2"
     },
     {
       "path": "tooling/infra/aws/bootstrap/.terraform.lock.hcl",
@@ -34,7 +36,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:14ea8712cc53b83bf20609c7fb8e95bd429b0efb0deb8513f564237e9010fb84"
+      "digest": "sha256:71859f9c61a8306cfd6080073aa21b72cb1a1f57487f72f75d6a51077e260a2f"
     },
     {
       "path": "tooling/infra/aws/bootstrap/budget.tf",
@@ -46,7 +48,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/tests/foundation.tftest.hcl",
-      "digest": "sha256:cb3ca75edb466187a354cb103047266ecd46af43c713b26aa21359c2b1deb56a"
+      "digest": "sha256:94cd35f7beca8736b43d42a1127342e72ec762904cd42402ad9f338d36c5be75"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/.terraform.lock.hcl",
@@ -66,15 +68,15 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:a62d5fbfbdd10bcc54af704a7567e1e497b61aff6c08e6f44295466e49e39e14"
+      "digest": "sha256:330d8e399e519091ad92ef69889f75cfb19dcfe23a52c297edd6c80263db4344"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:816ddfc8bf61cb3fda8d62d56b1092baea6da9e92c60ac622e6dd836899f332c"
+      "digest": "sha256:d334a0d816cfcba77abbae6cee6137c6b62033740312faacbeb64d69c0d3936c"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
-      "digest": "sha256:de39d33909e9a2f6d09104d7766482d871eb3dcfa927d24dfd76b1f2fbd45ebd"
+      "digest": "sha256:584e5018d082847c640c786b50b528f282ace10ab45373cd3b07c0d0ac7317a0"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/budget.tf",
@@ -82,7 +84,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:a7aeb8855eb44d1ff2c6d31ea9e61123a4839109c9ff9af1366ee64715abc5fd"
+      "digest": "sha256:0f4278de29de28d16c83335a9a31efb99d2df018a0e2c2d5b4c81ca684aad3b2"
     },
     {
       "path": ".github/workflows/ci.yml",
@@ -91,6 +93,10 @@
     {
       "path": ".github/workflows/aws-oidc-smoke.yml",
       "digest": "sha256:693d95f4f9ee6242e979c94a6b98944b6b58a4f8792a885ddb29d87071f25987"
+    },
+    {
+      "path": ".github/workflows/aws-metadata-cloud.yml",
+      "digest": "sha256:329c73e0a49c4f826c42ef5d0e734485eaabb7fdbc7ec827ae0b57b6b6b0d24b"
     }
   ]
 }
