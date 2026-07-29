@@ -13,7 +13,7 @@
     "providerDeployment": "blocked"
   },
   "releaseBlockers": [
-    { "claim": "providerDeployment", "gate": "M9-T02-T07", "reason": "AWS infrastructure and concrete adapters are not deployed." },
+    { "claim": "providerDeployment", "gate": "M9-T03-T07", "reason": "AWS state and deployment identity pass, but the development data plane and concrete adapters are not deployed." },
     { "claim": "serviceSlo", "gate": "M9-T08", "reason": "No deployed load or availability measurements exist." },
     { "claim": "disasterRecovery", "gate": "M9-T08", "reason": "No deployed backup, restore, failover, or tombstone-replay drill exists." }
   ],

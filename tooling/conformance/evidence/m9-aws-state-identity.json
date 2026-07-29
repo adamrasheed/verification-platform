@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-state-identity",
+  "taskId": "M9-T02",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11,18", "EDD §§19-21,26,29-31", "ADR-0013", "SP-CLOUD-002", "ORB-COST-001"],
+  "testIds": [
+    "aws-state:exact-account-region-binding",
+    "aws-state:budget-before-persistent-key",
+    "aws-state:kms-encrypted-versioned-locked-backend",
+    "aws-state:immutable-github-oidc-subject",
+    "aws-state:sts-audience-and-main-environment",
+    "aws-state:development-state-list-allowed",
+    "aws-state:bootstrap-state-read-denied",
+    "aws-state:post-migration-zero-diff"
+  ],
+  "command": "gh run watch 30399741151 --exit-status",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_STATE_IDENTITY.json",
+      "digest": "sha256:c97bc638dc11ec1c58095b49c212dd8cbc9dc0a5a897717e4bcadf6691fb07e5"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/identity.tf",
+      "digest": "sha256:14ea8712cc53b83bf20609c7fb8e95bd429b0efb0deb8513f564237e9010fb84"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/main.tf",
+      "digest": "sha256:2c06c7eead632e933a7486a26f0222e02f2608e9ed03ba8cc02b218be70d7d18"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/budget.tf",
+      "digest": "sha256:13cc2a5473d0da2c99932f317b84fea7b3e5e296d2d3d0aac48042063b8346c2"
+    },
+    {
+      "path": ".github/workflows/aws-oidc-smoke.yml",
+      "digest": "sha256:693d95f4f9ee6242e979c94a6b98944b6b58a4f8792a885ddb29d87071f25987"
+    }
+  ]
+}

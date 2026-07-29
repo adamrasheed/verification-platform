@@ -40,7 +40,7 @@
         "required": ["claim", "gate", "reason"],
         "properties": {
           "claim": { "enum": ["providerDeployment", "serviceSlo", "disasterRecovery"] },
-          "gate": { "enum": ["M9-T02-T07", "M9-T08"] },
+          "gate": { "enum": ["M9-T03-T07", "M9-T08"] },
           "reason": { "type": "string", "minLength": 1, "maxLength": 512 }
         }
       }

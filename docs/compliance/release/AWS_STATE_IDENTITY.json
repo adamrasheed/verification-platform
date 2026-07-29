@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsStateIdentityEvidence",
+  "evidenceDate": "2026-07-28",
+  "taskId": "M9-T02",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "deploymentEnabledByDefault": false
+  },
+  "costControl": {
+    "monthlyBudgetUsd": 100,
+    "forecastedAlertPercent": 50,
+    "actualAlertPercents": [80, 100],
+    "createdBeforePersistentStateKey": true
+  },
+  "stateBackend": {
+    "bucket": "verification-platform-661590454564-opentofu-state",
+    "bootstrapStateKey": "bootstrap/bootstrap.tfstate",
+    "developmentStateKey": "metadata-cloud/development.tfstate",
+    "kmsKeyArn": "arn:aws:kms:us-west-2:661590454564:key/98eb8dbd-306f-4624-abee-44d13bf6ef10",
+    "versioning": "enabled",
+    "nativeLockfile": true,
+    "publicAccessBlocked": true,
+    "insecureTransportDenied": true,
+    "kmsRotation": "enabled",
+    "noncurrentVersionExpiryDays": 90,
+    "postMigrationPlan": "no_changes"
+  },
+  "workloadIdentity": {
+    "provider": "https://token.actions.githubusercontent.com",
+    "audience": "sts.amazonaws.com",
+    "subject": "repo:adamrasheed@10425543/verification-platform@1305420403:environment:development",
+    "roleArn": "arn:aws:iam::661590454564:role/verification-platform-github-state-development",
+    "credentialType": "short_lived_oidc",
+    "longLivedAwsCredentials": false,
+    "githubEnvironment": "development",
+    "deploymentBranchPolicy": "main_only"
+  },
+  "authorizationChecks": {
+    "expectedAccountAndRole": "passed",
+    "developmentStateListing": "passed",
+    "bootstrapStateRead": "denied_as_required"
+  },
+  "githubRun": {
+    "workflow": "AWS OIDC smoke",
+    "runId": 30399741151,
+    "jobId": 90411382829,
+    "headSha": "999aa265ff83d2f66d1b51fadee4d302f78449a2",
+    "event": "workflow_dispatch",
+    "createdAt": "2026-07-28T21:13:12Z",
+    "completedAt": "2026-07-28T21:13:27Z",
+    "conclusion": "success",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/30399741151"
+  },
+  "breakGlassRecovery": {
+    "authority": "founder short-lived AWS login",
+    "bootstrapStateRetainedInVersionedEncryptedBackend": true,
+    "sourceControlContainsStateOrCredentials": false
+  }
+}
