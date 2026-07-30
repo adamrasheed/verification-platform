@@ -1,0 +1,88 @@
+name: AWS metadata cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Plan is read-only; apply deploys the reviewed development foundation
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-metadata-cloud-development
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: ${{ inputs.operation }} development foundation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: development
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4
+        with:
+          tofu_version: 1.12.5
+          tofu_wrapper: false
+
+      - name: Exchange GitHub OIDC for bounded AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: metadata-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Initialize encrypted remote state
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu init -input=false \
+            -backend-config="bucket=${{ vars.AWS_STATE_BUCKET }}" \
+            -backend-config="key=metadata-cloud/development.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -backend-config="encrypt=true" \
+            -backend-config="kms_key_id=${{ vars.AWS_STATE_KMS_KEY_ARN }}" \
+            -backend-config="use_lockfile=true"
+
+      - name: Validate foundation
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu validate -no-color
+
+      - name: Build immutable plan
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -out=development.tfplan \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100'
+
+      - name: Apply immutable plan
+        if: inputs.operation == 'apply'
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu apply -input=false -auto-approve development.tfplan
+
+      - name: Verify zero drift after apply
+        if: inputs.operation == 'apply'
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -detailed-exitcode \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100'

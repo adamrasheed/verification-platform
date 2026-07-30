@@ -30,6 +30,11 @@ output "github_state_role_arn" {
   value       = try(aws_iam_role.github_state[0].arn, null)
 }
 
+output "github_deploy_role_arn" {
+  description = "Short-lived identity for the bounded development metadata-cloud deployment."
+  value       = try(aws_iam_role.github_deploy[0].arn, null)
+}
+
 output "github_oidc_subject" {
   description = "Exact GitHub Actions subject accepted by the state role."
   value       = var.deployment_enabled ? local.github_oidc_subject : null

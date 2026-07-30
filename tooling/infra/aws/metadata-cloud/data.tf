@@ -50,6 +50,11 @@ resource "aws_db_instance" "metadata" {
   copy_tags_to_snapshot           = true
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
+  depends_on = [
+    aws_cloudwatch_log_group.database_postgresql,
+    aws_cloudwatch_log_group.database_upgrade,
+  ]
+
   deletion_protection       = var.environment == "production"
   skip_final_snapshot       = var.environment != "production"
   final_snapshot_identifier = var.environment == "production" ? "${local.name}-final" : null
