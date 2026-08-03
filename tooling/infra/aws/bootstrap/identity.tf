@@ -138,6 +138,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Action = [
           "budgets:DescribeBudget",
           "ec2:DescribeAvailabilityZones",
+          "ec2:DescribePrefixLists",
           "ec2:DescribeRouteTables",
           "ec2:DescribeSecurityGroupRules",
           "ec2:DescribeSecurityGroups",
@@ -150,6 +151,7 @@ resource "aws_iam_role_policy" "github_deploy" {
           "kms:GetKeyPolicy",
           "kms:GetKeyRotationStatus",
           "kms:ListAliases",
+          "kms:ListResourceTags",
           "logs:DescribeLogGroups",
           "rds:DescribeDBInstances",
           "rds:DescribeDBParameterGroups",
@@ -263,6 +265,7 @@ resource "aws_iam_role_policy" "github_deploy" {
           "s3:GetReplicationConfiguration",
           "s3:ListBucket",
           "s3:PutBucketLifecycleConfiguration",
+          "s3:PutLifecycleConfiguration",
           "s3:PutBucketPolicy",
           "s3:PutBucketPublicAccessBlock",
           "s3:PutBucketTagging",
@@ -279,7 +282,7 @@ resource "aws_iam_role_policy" "github_deploy" {
       {
         Sid      = "ManageDevelopmentBudget"
         Effect   = "Allow"
-        Action   = ["budgets:CreateBudget", "budgets:DeleteBudget", "budgets:DescribeBudget", "budgets:ModifyBudget", "budgets:ViewBudget"]
+        Action   = ["budgets:CreateBudget", "budgets:DeleteBudget", "budgets:DescribeBudget", "budgets:ModifyBudget", "budgets:TagResource", "budgets:UntagResource", "budgets:ViewBudget"]
         Resource = "arn:aws:budgets::${var.aws_account_id}:budget/verification-${var.github_environment}-monthly"
       },
       {
