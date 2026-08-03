@@ -101,6 +101,12 @@ requireText(bootstrapText, "depends_on = [aws_budgets_budget.account]", "budget-
 assert.doesNotMatch(bootstrapText, /repo:\*|environment:\*|StringLike[^]*token\.actions\.githubusercontent\.com:sub/);
 requireText(bootstrapText, 'resource "aws_iam_role" "github_deploy"', "separate deployment identity");
 requireText(bootstrapText, '"aws:RequestedRegion" = var.aws_region', "regional deployment boundary");
+for (const action of [
+  "budgets:TagResource",
+  "ec2:DescribePrefixLists",
+  "kms:ListResourceTags",
+  "s3:PutLifecycleConfiguration",
+]) requireText(bootstrapIdentity, `"${action}"`, "provider apply permission");
 assert.doesNotMatch(bootstrapIdentity, /AdministratorAccess|"iam:\*"|"ec2:\*"|"rds:\*"|"s3:\*"/);
 
 const oidcWorkflow = await read(".github/workflows/aws-oidc-smoke.yml");

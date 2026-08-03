@@ -23,7 +23,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:71859f9c61a8306cfd6080073aa21b72cb1a1f57487f72f75d6a51077e260a2f"
+      "digest": "sha256:9fce9753bd2a74a8bef1b9d142920609c239fa7e681de8202aeac2e5820d2907"
     },
     {
       "path": "tooling/infra/aws/bootstrap/main.tf",
