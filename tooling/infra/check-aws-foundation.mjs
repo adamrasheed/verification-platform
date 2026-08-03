@@ -80,6 +80,7 @@ requireText(allInfra, 'secret_key          = var.deployment_enabled ? null : "di
 requireText(metadataText, "publicly_accessible    = false", "private RDS");
 requireText(metadataText, "backup_retention_period         = var.database_backup_retention_days", "RDS backups");
 requireText(metadataText, 'default     = 35', "backup retention");
+requireText(metadataText, 'apply_method = "pending-reboot"', "static RDS parameter reconciliation");
 requireText(metadataText, 'condition     = var.environment != "production" || var.database_multi_az', "production Multi-AZ gate");
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
