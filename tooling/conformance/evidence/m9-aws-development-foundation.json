@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-development-foundation",
+  "taskId": "M9-T03",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11,18,20.1(6)", "EDD §§19-21,26,29-31", "ADR-0013", "SP-CLOUD-002", "SP-RETENTION-001", "ORB-COST-001"],
+  "testIds": [
+    "aws-development:exact-account-region-binding",
+    "aws-development:private-two-az-no-internet-route",
+    "aws-development:exact-postgresql-security-path",
+    "aws-development:encrypted-rds-managed-credential-backups",
+    "aws-development:bounded-encrypted-storage",
+    "aws-development:encrypted-queue-redrive-dead-letter",
+    "aws-development:encrypted-bounded-logs-and-ecs",
+    "aws-development:monthly-budget-thresholds",
+    "aws-development:oidc-immutable-apply-zero-drift"
+  ],
+  "command": "node tooling/infra/audit-aws-development.mjs && gh run watch 30844264124 --exit-status",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json",
+      "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc"
+    },
+    {
+      "path": "tooling/infra/audit-aws-development.mjs",
+      "digest": "sha256:b811b759bed40d02c2f5e4a397fd6cee032ce10d30d9bf79f5fbbe31cafb14d0"
+    },
+    {
+      "path": "tooling/infra/check-aws-development-evidence.mjs",
+      "digest": "sha256:5ceaf8b0048b176cf70136a17d82e3458abff8db931e2a703cde9d940046edf6"
+    },
+    {
+      "path": ".github/workflows/aws-metadata-cloud.yml",
+      "digest": "sha256:329c73e0a49c4f826c42ef5d0e734485eaabb7fdbc7ec827ae0b57b6b6b0d24b"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/versions.tf",
+      "digest": "sha256:e21d7b3210f6cccdc264a11649bd12f3b3dc7d77a1486ecba853fa9768138327"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/network.tf",
+      "digest": "sha256:e155c78b7e90688822ef87a32bd8573ac0a37b7350e6206126c5411e027a5d25"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/security.tf",
+      "digest": "sha256:330d8e399e519091ad92ef69889f75cfb19dcfe23a52c297edd6c80263db4344"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/data.tf",
+      "digest": "sha256:439fed4638c9cfe3033e7d393aa27dc4579e2df703a75dc751b17d24372391e7"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/compute.tf",
+      "digest": "sha256:584e5018d082847c640c786b50b528f282ace10ab45373cd3b07c0d0ac7317a0"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/budget.tf",
+      "digest": "sha256:78bf59705456e3e8b75b205e254ad5fe4bd342ad366901286e574fb29911861f"
+    },
+    {
+      "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
+      "digest": "sha256:016ad84a1ef8d5b77ff47d40db780dbbe5089aa7494532dc0f0f69557fd13c28"
+    },
+    {
+      "path": "docs/product/ROADMAP.md",
+      "digest": "sha256:d8b6ef1204f22879fd01f02607eb3a9e3561414cff53abd5f6cc6d9f46b64402"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:ae3a89ed5d09a2dc4bbbc4b786541ab16b07fa24f0443ccb4e2e00480a7cfe98"
+    }
+  ]
+}

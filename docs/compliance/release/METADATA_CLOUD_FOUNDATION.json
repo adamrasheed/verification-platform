@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "metadataCloudReleaseEvidence",
-  "evidenceDate": "2026-07-26",
+  "evidenceDate": "2026-08-03",
   "releaseClass": "contractFoundation",
   "releaseStatus": "not_releasable",
   "verification": {
@@ -13,7 +13,7 @@
     "providerDeployment": "blocked"
   },
   "releaseBlockers": [
-    { "claim": "providerDeployment", "gate": "M9-T03-T07", "reason": "AWS state and deployment identity pass, but the development data plane and concrete adapters are not deployed." },
+    { "claim": "providerDeployment", "gate": "M9-T04-T07", "reason": "The AWS development data plane is deployed and zero-drift under M9-T03, but the concrete adapters, API, and customer workload dispatch in M9-T04 through M9-T07 are not deployed." },
     { "claim": "serviceSlo", "gate": "M9-T08", "reason": "No deployed load or availability measurements exist." },
     { "claim": "disasterRecovery", "gate": "M9-T08", "reason": "No deployed backup, restore, failover, or tombstone-replay drill exists." }
   ],
@@ -24,13 +24,14 @@
     { "command": "npm run check:package-content", "outcome": "passed" }
   ],
   "artifacts": [
-    { "path": "tooling/conformance/evidence/m8-cloud-foundation.json", "digest": "sha256:7211e435b0c1e97c048d275793e8be523dc4ae1a12de187b191c0cff74614940" },
+    { "path": "tooling/conformance/evidence/m8-cloud-foundation.json", "digest": "sha256:f93268579d0ab0bb3b41b6f6f893398e756e71c566289fc5ec877a6a080c3c11" },
     { "path": "tooling/conformance/evidence/m8-durable-mapping-auth.json", "digest": "sha256:a578bc42ebb3ae7e80e87c64db2aeb6b71666e73a61095ea987dd2ac7914cda3" },
-    { "path": "tooling/conformance/evidence/m8-publication-ingestion.json", "digest": "sha256:77cadd34a9084a6f5d072eb933d65156c78feded7e8d8a12aea989f3b1b84030" },
-    { "path": "tooling/conformance/evidence/m8-projection-outbox.json", "digest": "sha256:9e289e86c6897b4a6ff997778f602c85ebe02889bc080552e09542fb105b5735" },
-    { "path": "tooling/conformance/evidence/m8-retention-bounded-reads.json", "digest": "sha256:18e930aaa47379f11e9545b12c70bbaaa4d0ce501b310d161e18ef78845680b7" },
-    { "path": "tooling/conformance/evidence/m8-isolation-canary-foundation.json", "digest": "sha256:781108588f910a97e96e6c2f77161ba17432238236677c14e02b010bc268200f" },
+    { "path": "tooling/conformance/evidence/m8-publication-ingestion.json", "digest": "sha256:e32d3f1979fdc22dc3eacd7e5f248596f3ff662162f807f412a85ce410a5480f" },
+    { "path": "tooling/conformance/evidence/m8-projection-outbox.json", "digest": "sha256:119e733ac39c215ce15167c98e75e102c704b078cc67a59d01a5515211d97944" },
+    { "path": "tooling/conformance/evidence/m8-retention-bounded-reads.json", "digest": "sha256:007723651dcfd4edd9fd370ee2694e1559229653bed53fafba56c9475befef37" },
+    { "path": "tooling/conformance/evidence/m8-isolation-canary-foundation.json", "digest": "sha256:e0a92c074b8eb19510ec60b11f6acce5c46ef91d8a1e7df4094e6ce5c263e1b6" },
     { "path": "docs/compliance/release/SECURITY_REPORT.json", "digest": "sha256:4178ac5c79635a60ff5be73754f93e2594eb95d2d7d52789575db056d9297f45" },
+    { "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json", "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc" },
     { "path": "package-lock.json", "digest": "sha256:800b7a4b2bb334db2bef9c1eaec623c15648d1deb00987f4d7bfa89561709123" },
     { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
   ]

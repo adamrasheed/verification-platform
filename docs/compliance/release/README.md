@@ -37,8 +37,10 @@ included in the warm-discovery measurement.
 `METADATA_CLOUD_FOUNDATION.json` retains the exact M8 contract, security, and
 supply-chain artifacts that can be verified before a cloud provider exists. It
 is intentionally classified as `contractFoundation` and `not_releasable`.
-Service SLO, disaster-recovery, and provider-deployment fields must remain
-`blocked` until their exact deployed M9 Evidence exists; this record is not
+M9-T03 now supplies exact Evidence for the deployed AWS development foundation.
+Service SLO and disaster-recovery fields remain `blocked` until M9-T08, while
+provider deployment remains `blocked` on the concrete adapters, API, and
+customer workload dispatch in M9-T04 through M9-T07. This record is not
 production Evidence.
 
 Run `npm run check:cloud-release-evidence` to verify the closed inventory and

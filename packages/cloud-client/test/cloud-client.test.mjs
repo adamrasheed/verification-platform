@@ -558,7 +558,8 @@ test("ingestion rejects hostile transport, deep JSON, and signature drift before
     /VFY_PUBLICATION_CONTENT_TYPE_DENIED/,
   );
   const tampered = structuredClone(fixture.request);
-  tampered.signedIntent.signature.value = `A${tampered.signedIntent.signature.value.slice(1)}`;
+  const firstSignatureCharacter = tampered.signedIntent.signature.value[0];
+  tampered.signedIntent.signature.value = `${firstSignatureCharacter === "A" ? "B" : "A"}${tampered.signedIntent.signature.value.slice(1)}`;
   await assert.rejects(
     service.ingest(tampered, authorization, now),
     /VFY_PUBLICATION_INTENT_SIGNATURE_INVALID/,

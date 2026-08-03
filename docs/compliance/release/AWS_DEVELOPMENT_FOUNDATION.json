@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsDevelopmentFoundationEvidence",
+  "evidenceDate": "2026-08-03",
+  "taskId": "M9-T03",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "fed38e0bf34bd8b606f196d1cf8b19a2b707f8b0",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0"
+  },
+  "deployment": {
+    "workflow": "AWS metadata cloud",
+    "operation": "apply",
+    "runId": 30844264124,
+    "jobId": 91788568912,
+    "event": "workflow_dispatch",
+    "createdAt": "2026-08-03T19:05:58Z",
+    "completedAt": "2026-08-03T19:06:42Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "postApplyZeroDrift": "passed",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/30844264124"
+  },
+  "liveAudit": {
+    "command": "node tooling/infra/audit-aws-development.mjs",
+    "observedAt": "2026-08-03T19:05:42.131Z",
+    "secretValuesRead": false,
+    "outcome": "passed"
+  },
+  "controls": {
+    "network": {
+      "vpcId": "vpc-04b83996f28b7360d",
+      "privateSubnetIds": ["subnet-024a897f8f16cbb95", "subnet-0f7ad423a388c828d"],
+      "availabilityZones": ["us-west-2a", "us-west-2b"],
+      "publicIpMapping": false,
+      "internetOrNatRoutes": false,
+      "s3GatewayEndpointId": "vpce-00727caf7e1aaabab",
+      "s3GatewayEndpointState": "available"
+    },
+    "securityGroups": {
+      "databaseSecurityGroupId": "sg-0140b89e9ae85a1f8",
+      "workloadSecurityGroupId": "sg-047c566f70e32592c",
+      "allowedPath": "workload-to-database tcp/5432",
+      "unexpectedRules": 0
+    },
+    "encryption": {
+      "kmsKeyArn": "arn:aws:kms:us-west-2:661590454564:key/393ed375-acb3-4dd7-889f-26a6d3b897fe",
+      "kmsKeyState": "Enabled",
+      "kmsRotation": "enabled"
+    },
+    "database": {
+      "identifier": "verification-development-postgres",
+      "status": "available",
+      "engine": "postgres",
+      "engineVersion": "17.6",
+      "instanceClass": "db.t4g.micro",
+      "publiclyAccessible": false,
+      "storageEncrypted": true,
+      "backupRetentionDays": 35,
+      "multiAz": false,
+      "managedCredentialStatus": "active",
+      "managedCredentialEncryptedWithEnvironmentKey": true,
+      "logExports": ["postgresql", "upgrade"]
+    },
+    "storage": {
+      "metadataBucket": "verification-development-661590454564-metadata",
+      "metadataVersioning": "enabled",
+      "metadataExpiryDays": 30,
+      "metadataNoncurrentExpiryDays": 35,
+      "quarantineBucket": "verification-development-661590454564-quarantine",
+      "quarantineExpiryDays": 1,
+      "publicAccessBlocked": true,
+      "bucketOwnerEnforced": true,
+      "insecureTransportDenied": true,
+      "kmsEncrypted": true
+    },
+    "queues": {
+      "metadataRetentionSeconds": 345600,
+      "deadLetterRetentionSeconds": 1209600,
+      "maxReceiveCount": 5,
+      "redriveSourceBound": true,
+      "kmsEncrypted": true
+    },
+    "compute": {
+      "clusterArn": "arn:aws:ecs:us-west-2:661590454564:cluster/verification-development-metadata",
+      "status": "ACTIVE",
+      "containerInsights": "enabled",
+      "executeCommandLogsEncrypted": true
+    },
+    "logs": {
+      "retentionDays": 30,
+      "kmsEncrypted": true,
+      "groups": [
+        "/verification/development/api",
+        "/verification/development/worker",
+        "/aws/rds/instance/verification-development-postgres/postgresql",
+        "/aws/rds/instance/verification-development-postgres/upgrade"
+      ]
+    },
+    "cost": {
+      "monthlyBudgetUsd": 100,
+      "forecastedAlertPercent": 50,
+      "actualAlertPercents": [80, 100]
+    }
+  }
+}

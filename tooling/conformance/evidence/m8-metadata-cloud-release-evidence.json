@@ -16,11 +16,11 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:faeb2f83b6eebaf64585260821bc170ac040a1515c29ed1c678e22f5229797ef"
+      "digest": "sha256:016ad84a1ef8d5b77ff47d40db780dbbe5089aa7494532dc0f0f69557fd13c28"
     },
     {
       "path": "tooling/release/check-metadata-cloud-evidence.mjs",
-      "digest": "sha256:b4cf6cca924615829d2f58502456c6243abddccbc39c929710bda8043845ff6e"
+      "digest": "sha256:65831a94bcdd7656ed46c281ef18e71d2cd2d6f04b89d8272ffc4802d1e77202"
     },
     {
       "path": "tooling/release/test/release.test.mjs",
@@ -28,7 +28,7 @@
     },
     {
       "path": "packages/cloud-client/schemas/metadata-cloud-release-evidence.schema.json",
-      "digest": "sha256:8161e9649ffa2cdac9d51f8428b43ddeb875904a231bb9b81b7a28d8f93a15aa"
+      "digest": "sha256:74dfc7e8e3d9595545382dde57223c4e928a7e17e78259bf569481a9bbe1964a"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",
