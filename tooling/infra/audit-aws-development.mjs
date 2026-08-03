@@ -4,9 +4,9 @@ import { promisify } from "node:util";
 import process from "node:process";
 
 const execute = promisify(execFile);
-const accountId = process.env.AWS_ACCOUNT_ID ?? "661590454564";
-const region = process.env.AWS_REGION ?? "us-west-2";
-const environment = process.env.VERIFICATION_ENVIRONMENT ?? "development";
+const accountId = "661590454564";
+const region = "us-west-2";
+const environment = "development";
 const name = `verification-${environment}`;
 const keyAlias = `alias/${name}-metadata`;
 

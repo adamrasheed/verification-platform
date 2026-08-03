@@ -24,7 +24,7 @@
     },
     {
       "path": "tooling/infra/audit-aws-development.mjs",
-      "digest": "sha256:b811b759bed40d02c2f5e4a397fd6cee032ce10d30d9bf79f5fbbe31cafb14d0"
+      "digest": "sha256:d945feca0c47e81085fd532bdfbe69e7d17f0db89cd6b180f033f6d7ecd966a9"
     },
     {
       "path": "tooling/infra/check-aws-development-evidence.mjs",
