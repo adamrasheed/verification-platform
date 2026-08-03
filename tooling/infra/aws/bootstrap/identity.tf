@@ -282,8 +282,19 @@ resource "aws_iam_role_policy" "github_deploy" {
       {
         Sid      = "ManageDevelopmentBudget"
         Effect   = "Allow"
-        Action   = ["budgets:CreateBudget", "budgets:DeleteBudget", "budgets:DescribeBudget", "budgets:ModifyBudget", "budgets:TagResource", "budgets:UntagResource", "budgets:ViewBudget"]
+        Action   = ["budgets:CreateBudget", "budgets:DeleteBudget", "budgets:DescribeBudget", "budgets:ListTagsForResource", "budgets:ModifyBudget", "budgets:TagResource", "budgets:UntagResource", "budgets:ViewBudget"]
         Resource = "arn:aws:budgets::${var.aws_account_id}:budget/verification-${var.github_environment}-monthly"
+      },
+      {
+        Sid      = "CreateRdsManagedCredential"
+        Effect   = "Allow"
+        Action   = ["secretsmanager:CreateSecret", "secretsmanager:TagResource"]
+        Resource = "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:rds!db-*"
+        Condition = {
+          StringEquals = {
+            "aws:RequestedRegion" = var.aws_region
+          }
+        }
       },
       {
         Sid    = "ReadDevelopmentQueues"

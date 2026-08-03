@@ -102,11 +102,19 @@ assert.doesNotMatch(bootstrapText, /repo:\*|environment:\*|StringLike[^]*token\.
 requireText(bootstrapText, 'resource "aws_iam_role" "github_deploy"', "separate deployment identity");
 requireText(bootstrapText, '"aws:RequestedRegion" = var.aws_region', "regional deployment boundary");
 for (const action of [
+  "budgets:ListTagsForResource",
   "budgets:TagResource",
   "ec2:DescribePrefixLists",
   "kms:ListResourceTags",
   "s3:PutLifecycleConfiguration",
+  "secretsmanager:CreateSecret",
+  "secretsmanager:TagResource",
 ]) requireText(bootstrapIdentity, `"${action}"`, "provider apply permission");
+requireText(
+  bootstrapIdentity,
+  'arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:rds!db-*',
+  "RDS-managed credential boundary",
+);
 assert.doesNotMatch(bootstrapIdentity, /AdministratorAccess|"iam:\*"|"ec2:\*"|"rds:\*"|"s3:\*"/);
 
 const oidcWorkflow = await read(".github/workflows/aws-oidc-smoke.yml");
