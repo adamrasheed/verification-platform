@@ -69,6 +69,16 @@ resource "aws_security_group" "workload" {
   vpc_id      = aws_vpc.metadata[0].id
 }
 
+resource "aws_security_group" "migration_endpoints" {
+  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+
+  name        = "${local.name}-migration-endpoints"
+  description = "Ephemeral TLS endpoints for the bounded database migration"
+  vpc_id      = aws_vpc.metadata[0].id
+
+  tags = { CostControl = "ephemeral-migration" }
+}
+
 resource "aws_vpc_security_group_ingress_rule" "database_from_workload" {
   count = var.deployment_enabled ? 1 : 0
 
@@ -89,4 +99,26 @@ resource "aws_vpc_security_group_egress_rule" "workload_to_database" {
   to_port                      = 5432
   ip_protocol                  = "tcp"
   description                  = "Exact PostgreSQL path to database"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "migration_endpoints_from_workload" {
+  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+
+  security_group_id            = aws_security_group.migration_endpoints[0].id
+  referenced_security_group_id = aws_security_group.workload[0].id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "TLS only from the ephemeral migration task"
+}
+
+resource "aws_vpc_security_group_egress_rule" "migration_to_endpoints" {
+  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+
+  security_group_id            = aws_security_group.workload[0].id
+  referenced_security_group_id = aws_security_group.migration_endpoints[0].id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "TLS only to ephemeral AWS service endpoints"
 }

@@ -48,9 +48,13 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/security.tf",
   "tooling/infra/aws/metadata-cloud/data.tf",
   "tooling/infra/aws/metadata-cloud/compute.tf",
+  "tooling/infra/aws/metadata-cloud/migration.tf",
   "tooling/infra/aws/metadata-cloud/budget.tf",
   ".github/workflows/aws-oidc-smoke.yml",
   ".github/workflows/aws-metadata-cloud.yml",
+  ".github/workflows/aws-postgres-migration.yml",
+  "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
+  "tooling/infra/run-live-postgres-migration.mjs",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
 await Promise.all(requiredFiles.map((file) => read(file)));
@@ -59,7 +63,7 @@ const bootstrap = ["versions.tf", "variables.tf", "main.tf", "identity.tf", "bud
   .map((file) => readFile(path.join(bootstrapRoot, file), "utf8"));
 const metadata = [
   "versions.tf", "variables.tf", "locals.tf", "network.tf", "security.tf",
-  "data.tf", "compute.tf", "budget.tf", "outputs.tf",
+  "data.tf", "compute.tf", "migration.tf", "budget.tf", "outputs.tf",
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
@@ -85,13 +89,23 @@ requireText(metadataText, 'condition     = var.environment != "production" || va
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
 requireText(metadataText, 'name              = "/aws/rds/instance/${local.name}-postgres/postgresql"', "managed RDS logs");
-assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 4, "all four log groups need 30-day retention");
+assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 5, "all five log groups need 30-day retention");
 requireText(metadataText, "block_public_acls       = true", "S3 public access block");
 requireText(metadataText, "noncurrent_days = 35", "metadata backup expiry");
 requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
 requireText(metadataText, "deadLetterTargetArn", "SQS dead-letter queue");
 requireText(metadataText, 'resource "aws_budgets_budget" "monthly"', "cost budget");
 requireText(metadataText, 'Tier = "private-isolated"', "isolated subnet");
+requireText(metadataText, 'CostControl = "ephemeral-migration"', "ephemeral migration cost control");
+requireText(metadataText, '"ecr.api"', "private ECR API endpoint");
+requireText(metadataText, '"ecr.dkr"', "private ECR registry endpoint");
+requireText(metadataText, '"logs"', "private log endpoint");
+requireText(metadataText, '"secretsmanager"', "private secret endpoint");
+requireText(metadataText, "readonlyRootFilesystem = true", "read-only migration container");
+requireText(metadataText, 'image_tag_mutability = "IMMUTABLE"', "immutable migration image");
+requireText(metadataText, 'force_delete         = true', "ephemeral repository cleanup");
+requireText(metadataText, 'name = "PGPASSWORD"', "RDS-managed password injection");
+assert.doesNotMatch(metadataText, /task_role_arn\s*=/);
 requireText(metadataText, 'backend "s3" {}', "encrypted remote-state backend");
 requireText(bootstrapText, 'url            = "https://token.actions.githubusercontent.com"', "GitHub OIDC provider");
 requireText(bootstrapText, '"token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"', "OIDC audience restriction");
@@ -110,6 +124,11 @@ for (const action of [
   "s3:PutLifecycleConfiguration",
   "secretsmanager:CreateSecret",
   "secretsmanager:TagResource",
+  "ecs:RegisterTaskDefinition",
+  "ecs:RunTask",
+  "ecr:CreateRepository",
+  "ecr:PutImage",
+  "iam:PassRole",
 ]) requireText(bootstrapIdentity, `"${action}"`, "provider apply permission");
 requireText(
   bootstrapIdentity,
@@ -132,6 +151,16 @@ requireText(deployWorkflow, "role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}", "
 requireText(deployWorkflow, "tofu apply -input=false -auto-approve development.tfplan", "immutable apply plan");
 requireText(deployWorkflow, "Verify zero drift after apply", "post-apply drift check");
 assert.doesNotMatch(deployWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
+
+const migrationWorkflow = await read(".github/workflows/aws-postgres-migration.yml");
+requireText(migrationWorkflow, "id-token: write", "migration workflow token permission");
+requireText(migrationWorkflow, "environment: development", "migration environment boundary");
+requireText(migrationWorkflow, "github.ref == 'refs/heads/main'", "main-only migration boundary");
+requireText(migrationWorkflow, "migration_runner_enabled=true", "explicit migration enablement");
+requireText(migrationWorkflow, "migration_runner_enabled=false", "mandatory migration cleanup");
+requireText(migrationWorkflow, "assignPublicIp=DISABLED", "private Fargate task");
+requireText(migrationWorkflow, "Verify zero drift after cleanup", "post-cleanup drift gate");
+assert.doesNotMatch(migrationWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");

@@ -169,6 +169,28 @@ data "aws_iam_policy_document" "s3_endpoint" {
       values   = [var.aws_account_id]
     }
   }
+
+  dynamic "statement" {
+    for_each = var.migration_runner_enabled ? [1] : []
+
+    content {
+      sid       = "EphemeralEcrLayerPull"
+      effect    = "Allow"
+      actions   = ["s3:GetObject"]
+      resources = ["arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"]
+
+      principals {
+        type        = "*"
+        identifiers = ["*"]
+      }
+
+      condition {
+        test     = "StringEquals"
+        variable = "aws:PrincipalAccount"
+        values   = [var.aws_account_id]
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "protected" {

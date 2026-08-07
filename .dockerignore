@@ -1,0 +1,15 @@
+.git
+.DS_Store
+.env
+.env.*
+*.key
+*.mobileprovision
+*.p12
+*.p8
+*.pem
+*.pfx
+**/.terraform
+**/*.tfplan
+**/dist
+**/node_modules
+node_modules

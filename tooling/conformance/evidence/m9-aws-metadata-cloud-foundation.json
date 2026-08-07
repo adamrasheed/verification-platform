@@ -24,7 +24,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:43638ac9f987f08be52ea55ba3bb89d936f141144a41445a0942062a10d37b82"
+      "digest": "sha256:e6eee0146202392f1fb222916ae36412378cfe7740ec46f2c2b5a989a9b898ef"
     },
     {
       "path": "tooling/infra/aws/bootstrap/.terraform.lock.hcl",
@@ -36,7 +36,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:e4894001f5a85066c7b88a96861e55b8ead9d479886c3b645c2d3c1b69949371"
+      "digest": "sha256:060aefafc7d710d5f0b3102f09718cae1bf685f0f35f271b90f1276240b4214d"
     },
     {
       "path": "tooling/infra/aws/bootstrap/budget.tf",
@@ -60,19 +60,19 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/variables.tf",
-      "digest": "sha256:c2df5ce5bc22306d71fa25ea26b50f991ceac75e31ee5413b90217c0a24e64c6"
+      "digest": "sha256:999ee64e63e0108b8a8ff76f4886fb300464574f9abd3f90dece36edfb4138a5"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
-      "digest": "sha256:e155c78b7e90688822ef87a32bd8573ac0a37b7350e6206126c5411e027a5d25"
+      "digest": "sha256:ffb96fe65851a88cfde07a90b511b716ab2bb4d1572ff36fbba8e02b23d651cc"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:330d8e399e519091ad92ef69889f75cfb19dcfe23a52c297edd6c80263db4344"
+      "digest": "sha256:5dc3d101b92736c6628ec865401cdb5da080a154bdda0aab92129af6f1dd5abd"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:439fed4638c9cfe3033e7d393aa27dc4579e2df703a75dc751b17d24372391e7"
+      "digest": "sha256:6ca579f4a04a3b37859047e324cc56d1f9b040f644b4b56a248fdc3b148d98ff"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
@@ -84,7 +84,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:0f4278de29de28d16c83335a9a31efb99d2df018a0e2c2d5b4c81ca684aad3b2"
+      "digest": "sha256:dcb7602921333b75d61a8082b6977e8489fed81c4d4a19db7523275c8b8968ee"
     },
     {
       "path": ".github/workflows/ci.yml",
