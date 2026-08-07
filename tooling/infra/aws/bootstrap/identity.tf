@@ -138,6 +138,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Action = [
           "budgets:DescribeBudget",
           "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeNetworkInterfaces",
           "ec2:DescribePrefixLists",
           "ec2:DescribeRouteTables",
           "ec2:DescribeSecurityGroupRules",
