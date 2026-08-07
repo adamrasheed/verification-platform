@@ -4,23 +4,24 @@ import type {
   MetadataPublicationPayload,
   PublicationAuthorizationContext,
   PublicationIngestionReceipt,
-  PublicationIngestionStore,
   PublicationOutboxClaim,
   PublicationOutboxDelivery,
   PublicationOutboxEvent,
+  PublicationOutboxStore,
   PublishedRunDeletionOptions,
   PublishedRunListPage,
   PublishedRunRecord,
   PublishedRunResolution,
+  PublishedRunStore,
   PublishedRunTombstone,
 } from "./types.js";
 import { assertMetadataPublicationPayload } from "./validation.js";
 
-const MAXIMUM_LEASE_MS = 60_000;
-const MAXIMUM_DELIVERY_ATTEMPTS = 5;
-const MAXIMUM_LIST_LIMIT = 100;
-const MAXIMUM_CURSOR_COUNT = 1_000;
-const CURSOR_LIFETIME_MS = 5 * 60_000;
+export const MAXIMUM_PUBLICATION_LEASE_MS: number = 60_000;
+export const MAXIMUM_PUBLICATION_DELIVERY_ATTEMPTS: number = 5;
+export const MAXIMUM_PUBLISHED_RUN_LIST_LIMIT: number = 100;
+export const MAXIMUM_PUBLISHED_RUN_CURSOR_COUNT: number = 1_000;
+export const PUBLISHED_RUN_CURSOR_LIFETIME_MS: number = 5 * 60_000;
 
 type Admission = {
   readonly requestDigest: `sha256:${string}`;
@@ -63,14 +64,14 @@ function sha256(bytes: Uint8Array): `sha256:${string}` {
   return `sha256:${createHash("sha256").update(bytes).digest("hex")}`;
 }
 
-function bounded(value: unknown, maximum = 512): value is string {
+export function bounded(value: unknown, maximum = 512): value is string {
   return typeof value === "string"
     && value.length > 0
     && value.length <= maximum
     && !/[\u0000-\u001f\u007f]/.test(value);
 }
 
-function utc(value: unknown): value is string {
+export function utc(value: unknown): value is string {
   return typeof value === "string"
     && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(value)
     && Number.isFinite(Date.parse(value));
@@ -86,12 +87,12 @@ function compareText(left: string, right: string): number {
   return 0;
 }
 
-function structurallyEqual(left: unknown, right: unknown): boolean {
+export function structurallyEqual(left: unknown, right: unknown): boolean {
   return sha256(encodeCanonicalProtocolDocument(left))
     === sha256(encodeCanonicalProtocolDocument(right));
 }
 
-function assertPublishedRunRecord(record: PublishedRunRecord): void {
+export function assertPublishedRunRecord(record: PublishedRunRecord): void {
   assertMetadataPublicationPayload(record.projection);
   if (record.schemaVersion !== 1
     || !bounded(record.publishedRunId)
@@ -109,7 +110,7 @@ function assertPublishedRunRecord(record: PublishedRunRecord): void {
   }
 }
 
-function assertOutboxEvent(event: PublicationOutboxEvent, record: PublishedRunRecord): void {
+export function assertOutboxEvent(event: PublicationOutboxEvent, record: PublishedRunRecord): void {
   if (event.schemaVersion !== 1
     || !bounded(event.eventId)
     || event.eventType !== "PublishedRunAccepted"
@@ -123,7 +124,33 @@ function assertOutboxEvent(event: PublicationOutboxEvent, record: PublishedRunRe
   }
 }
 
-function assertDeletionOptions(
+export function assertPublicationAdmissionUnit(
+  tenantId: string,
+  idempotencyKey: string,
+  nonce: string,
+  requestDigest: `sha256:${string}`,
+  receipt: PublicationIngestionReceipt,
+  publishedRun: PublishedRunRecord,
+  outboxEvent: PublicationOutboxEvent,
+): void {
+  assertPublishedRunRecord(publishedRun);
+  assertOutboxEvent(outboxEvent, publishedRun);
+  if (receipt.publishedRunId !== publishedRun.publishedRunId
+    || receipt.intentId !== publishedRun.sourceIntentId
+    || receipt.tenantId !== tenantId
+    || receipt.tenantId !== publishedRun.tenantId
+    || receipt.projectId !== publishedRun.projectId
+    || receipt.idempotencyKey !== idempotencyKey
+    || receipt.idempotencyKey !== publishedRun.idempotencyKey
+    || receipt.payloadDigest !== publishedRun.payloadDigest
+    || receipt.acceptedAt !== publishedRun.publishedAt
+    || !bounded(nonce)
+    || !/^sha256:[a-f0-9]{64}$/.test(requestDigest)) {
+    throw new TypeError("VFY_PUBLICATION_ADMISSION_MALFORMED: atomic unit is inconsistent");
+  }
+}
+
+export function assertDeletionOptions(
   publishedRunId: string,
   options: PublishedRunDeletionOptions,
 ): PublishedRunTombstone {
@@ -148,7 +175,7 @@ function assertDeletionOptions(
   };
 }
 
-function deletionEvent(
+export function deletionEvent(
   tenantId: string,
   projectId: string,
   tombstone: PublishedRunTombstone,
@@ -178,7 +205,7 @@ function orderedAfter(record: ListingRecord, cursor: CursorState): boolean {
       && record.publishedRunId > cursor.afterPublishedRunId);
 }
 
-export class InMemoryPublicationIngestionStore implements PublicationIngestionStore {
+export class InMemoryPublicationIngestionStore implements PublishedRunStore, PublicationOutboxStore {
   #idempotency = new Map<string, Admission>();
   #nonces = new Map<string, string>();
   #publishedRuns = new Map<string, PublishedRunRecord>();
@@ -206,21 +233,15 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
     publishedRun: PublishedRunRecord,
     outboxEvent: PublicationOutboxEvent,
   ): PublicationIngestionReceipt {
-    assertPublishedRunRecord(publishedRun);
-    assertOutboxEvent(outboxEvent, publishedRun);
-    if (receipt.publishedRunId !== publishedRun.publishedRunId
-      || receipt.intentId !== publishedRun.sourceIntentId
-      || receipt.tenantId !== tenantId
-      || receipt.tenantId !== publishedRun.tenantId
-      || receipt.projectId !== publishedRun.projectId
-      || receipt.idempotencyKey !== idempotencyKey
-      || receipt.idempotencyKey !== publishedRun.idempotencyKey
-      || receipt.payloadDigest !== publishedRun.payloadDigest
-      || receipt.acceptedAt !== publishedRun.publishedAt
-      || !bounded(nonce)
-      || !/^sha256:[a-f0-9]{64}$/.test(requestDigest)) {
-      throw new TypeError("VFY_PUBLICATION_ADMISSION_MALFORMED: atomic unit is inconsistent");
-    }
+    assertPublicationAdmissionUnit(
+      tenantId,
+      idempotencyKey,
+      nonce,
+      requestDigest,
+      receipt,
+      publishedRun,
+      outboxEvent,
+    );
     const idempotencyIdentity = `${tenantId}\u0000${idempotencyKey}`;
     const nonceIdentity = `${tenantId}\u0000${nonce}`;
     const existing = this.#idempotency.get(idempotencyIdentity);
@@ -325,7 +346,7 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
       || !bounded(authorization.projectId)
       || !Number.isSafeInteger(options.limit)
       || options.limit <= 0
-      || options.limit > MAXIMUM_LIST_LIMIT) {
+      || options.limit > MAXIMUM_PUBLISHED_RUN_LIST_LIMIT) {
       throw new TypeError("VFY_PUBLISHED_RUN_LIST_INVALID: limit or scope is invalid");
     }
     const now = this.#clock().getTime();
@@ -369,7 +390,7 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
       projectId: authorization.projectId,
       afterPublishedAt: last.publishedAt,
       afterPublishedRunId: last.publishedRunId,
-      expiresAt: now + CURSOR_LIFETIME_MS,
+      expiresAt: now + PUBLISHED_RUN_CURSOR_LIFETIME_MS,
     });
     return { schemaVersion: 1, items, nextCursor };
   }
@@ -445,7 +466,7 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
     for (const [token, cursor] of this.#cursors) {
       if (cursor.expiresAt <= now) this.#cursors.delete(token);
     }
-    while (this.#cursors.size >= MAXIMUM_CURSOR_COUNT) {
+    while (this.#cursors.size >= MAXIMUM_PUBLISHED_RUN_CURSOR_COUNT) {
       const oldest = this.#cursors.keys().next().value as string | undefined;
       if (oldest === undefined) break;
       this.#cursors.delete(oldest);
@@ -466,14 +487,14 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
       || !Number.isFinite(now.getTime())
       || !Number.isSafeInteger(leaseMs)
       || leaseMs <= 0
-      || leaseMs > MAXIMUM_LEASE_MS) {
+      || leaseMs > MAXIMUM_PUBLICATION_LEASE_MS) {
       throw new TypeError("VFY_PUBLICATION_OUTBOX_CLAIM_INVALID: invalid worker or lease");
     }
     const eligible = [...this.#outbox.values()]
       .filter((state) => state.status === "pending"
         || (state.status === "leased"
           && Date.parse(state.leaseExpiresAt ?? "") <= now.getTime()))
-      .filter((state) => state.attempt < MAXIMUM_DELIVERY_ATTEMPTS)
+      .filter((state) => state.attempt < MAXIMUM_PUBLICATION_DELIVERY_ATTEMPTS)
       .sort((left, right) => compareText(left.event.occurredAt, right.event.occurredAt)
         || compareText(left.event.eventId, right.event.eventId))[0];
     if (eligible === undefined) return undefined;
@@ -527,7 +548,7 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
     }
     this.#outbox.set(claim.event.eventId, {
       event: state.event,
-      status: state.attempt >= MAXIMUM_DELIVERY_ATTEMPTS ? "deadLetter" : "pending",
+      status: state.attempt >= MAXIMUM_PUBLICATION_DELIVERY_ATTEMPTS ? "deadLetter" : "pending",
       attempt: state.attempt,
       fence: state.fence,
       failureCode,
@@ -552,12 +573,12 @@ export class InMemoryPublicationIngestionStore implements PublicationIngestionSt
 }
 
 export class PublicationOutboxWorker {
-  readonly #store: InMemoryPublicationIngestionStore;
+  readonly #store: PublicationOutboxStore;
   readonly #deliver: PublicationOutboxDelivery;
   readonly #clock: () => Date;
 
   constructor(
-    store: InMemoryPublicationIngestionStore,
+    store: PublicationOutboxStore,
     deliver: PublicationOutboxDelivery,
     clock: () => Date = () => new Date(),
   ) {
@@ -570,14 +591,14 @@ export class PublicationOutboxWorker {
     workerId: string,
     leaseMs: number,
   ): Promise<"idle" | "delivered" | "retry"> {
-    const claim = this.#store.claimOutbox(workerId, this.#clock(), leaseMs);
+    const claim = await this.#store.claimOutbox(workerId, this.#clock(), leaseMs);
     if (claim === undefined) return "idle";
     try {
       await this.#deliver(structuredClone(claim.event));
-      this.#store.acknowledgeOutbox(claim, this.#clock());
+      await this.#store.acknowledgeOutbox(claim, this.#clock());
       return "delivered";
     } catch {
-      this.#store.failOutbox(claim, "DELIVERY_FAILED", this.#clock());
+      await this.#store.failOutbox(claim, "DELIVERY_FAILED", this.#clock());
       return "retry";
     }
   }

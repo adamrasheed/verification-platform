@@ -88,7 +88,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "digest": "sha256:93715c8457e30079bd7ec286271ef57d07206cfa460f39b878ee08c6952465a2"
+      "digest": "sha256:723133bd8bc3b472a7e7c30fada4286e188d621297302a3cb0996a0ebf6d2cf3"
     },
     {
       "path": ".github/workflows/aws-oidc-smoke.yml",

@@ -267,6 +267,8 @@ export type PublicationOutboxDelivery = (
   event: PublicationOutboxEvent,
 ) => void | Promise<void>;
 
+export type PublicationStoreResult<T> = T | Promise<T>;
+
 export interface PublicationIngestionStore {
   accept(
     tenantId: string,
@@ -276,5 +278,46 @@ export interface PublicationIngestionStore {
     receipt: PublicationIngestionReceipt,
     publishedRun: PublishedRunRecord,
     outboxEvent: PublicationOutboxEvent,
-  ): PublicationIngestionReceipt;
+  ): PublicationStoreResult<PublicationIngestionReceipt>;
+}
+
+export interface PublishedRunStore extends PublicationIngestionStore {
+  readPublishedRun(
+    authorization: PublicationAuthorizationContext,
+    publishedRunId: string,
+  ): PublicationStoreResult<MetadataPublicationPayload | undefined>;
+  resolvePublishedRun(
+    authorization: PublicationAuthorizationContext,
+    publishedRunId: string,
+  ): PublicationStoreResult<PublishedRunResolution | undefined>;
+  listPublishedRuns(
+    authorization: PublicationAuthorizationContext,
+    options: { readonly limit: number; readonly cursor?: string },
+  ): PublicationStoreResult<PublishedRunListPage>;
+  deletePublishedRun(
+    authorization: PublicationAuthorizationContext,
+    publishedRunId: string,
+    options: PublishedRunDeletionOptions,
+  ): PublicationStoreResult<PublishedRunTombstone | undefined>;
+  assertPublishedRunRestorable(
+    authorization: PublicationAuthorizationContext,
+    publishedRunId: string,
+  ): PublicationStoreResult<void>;
+}
+
+export interface PublicationOutboxStore {
+  claimOutbox(
+    workerId: string,
+    now: Date,
+    leaseMs: number,
+  ): PublicationStoreResult<PublicationOutboxClaim | undefined>;
+  acknowledgeOutbox(
+    claim: PublicationOutboxClaim,
+    now: Date,
+  ): PublicationStoreResult<void>;
+  failOutbox(
+    claim: PublicationOutboxClaim,
+    failureCode: string,
+    now: Date,
+  ): PublicationStoreResult<void>;
 }

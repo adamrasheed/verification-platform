@@ -8,6 +8,7 @@ import {
 } from "node:crypto";
 import test from "node:test";
 import { encodeCanonicalProtocolDocument } from "@verify-internal/protocol";
+import { Pool } from "pg";
 import {
   CLOUD_SECONDARY_SINKS,
   TENANT_ISOLATION_SURFACES,
@@ -16,6 +17,7 @@ import {
   PublicationIngestionService,
   PublicationIdentifierService,
   PublicationOutboxWorker,
+  PostgresPublicationStore,
   assertCloudCanariesAbsent,
   assertCloudSecondarySinkInventory,
   assertMetadataPublicationPayload,
@@ -934,4 +936,189 @@ test("the exact secondary-sink inventory scans source, secret, and tenant canari
     }),
     /VFY_CLOUD_SINK_INVENTORY_INCOMPLETE/,
   );
+});
+
+test("PostgreSQL preserves atomic publication, fencing, tenant scope, retention, and tombstones", {
+  skip: process.env.VERIFY_POSTGRES_URL ? false : "VERIFY_POSTGRES_URL is not configured",
+}, async () => {
+  const pool = new Pool({ connectionString: process.env.VERIFY_POSTGRES_URL });
+  const store = new PostgresPublicationStore(pool);
+  const authorization = { tenantId: "tenant:one", projectId: "project:one" };
+  try {
+    await store.migrate();
+    await pool.query(`TRUNCATE TABLE
+      publication_nonces,
+      publication_idempotency,
+      publication_outbox,
+      published_runs,
+      published_run_tombstones,
+      published_run_listings,
+      published_run_cursors
+      RESTART IDENTITY CASCADE`);
+
+    const firstFixture = await publicationRequest();
+    const firstService = new PublicationIngestionService(
+      store,
+      publicationVerifier(firstFixture.keyPair.publicKey),
+    );
+    const acceptedAt = new Date("2026-07-22T21:01:00Z");
+    const concurrent = await Promise.all(Array.from(
+      { length: 5 },
+      () => firstService.ingest(firstFixture.request, authorization, acceptedAt),
+    ));
+    assert.equal(new Set(concurrent.map((receipt) => receipt.publishedRunId)).size, 1);
+    const firstReceipt = concurrent[0];
+    assert.ok(firstReceipt);
+    assert.deepEqual(
+      await store.readPublishedRun(authorization, firstReceipt.publishedRunId),
+      payload(),
+    );
+    assert.equal(
+      await store.resolvePublishedRun(
+        { tenantId: "tenant:other", projectId: "project:one" },
+        firstReceipt.publishedRunId,
+      ),
+      undefined,
+    );
+
+    const changedDocument = payload();
+    changedDocument.runId = "run:changed";
+    const changed = await publicationRequest({
+      document: changedDocument,
+      keyPair: firstFixture.keyPair,
+    });
+    await assert.rejects(
+      firstService.ingest(changed.request, authorization, acceptedAt),
+      /VFY_PUBLICATION_IDEMPOTENCY_CONFLICT/,
+    );
+
+    const firstClaim = await store.claimOutbox(
+      "worker:one",
+      new Date("2026-07-22T21:01:01Z"),
+      10_000,
+    );
+    assert.ok(firstClaim);
+    await assert.rejects(
+      store.acknowledgeOutbox(firstClaim, new Date("2026-07-22T21:01:12Z")),
+      /VFY_PUBLICATION_OUTBOX_STALE_FENCE/,
+    );
+    const secondClaim = await store.claimOutbox(
+      "worker:two",
+      new Date("2026-07-22T21:01:12Z"),
+      10_000,
+    );
+    assert.ok(secondClaim);
+    assert.ok(secondClaim.fence > firstClaim.fence);
+    await store.acknowledgeOutbox(secondClaim, new Date("2026-07-22T21:01:13Z"));
+
+    const firstTombstone = await store.deletePublishedRun(
+      authorization,
+      firstReceipt.publishedRunId,
+      {
+        deletedAt: "2026-07-22T21:02:00Z",
+        authority: "tenant-admin:one",
+        reasonClass: "TENANT_REQUEST",
+        affectedEdgeIds: ["edge:two", "edge:one"],
+      },
+    );
+    assert.deepEqual(firstTombstone?.affectedEdgeIds, ["edge:one", "edge:two"]);
+    assert.equal(
+      (await store.resolvePublishedRun(authorization, firstReceipt.publishedRunId))?.state,
+      "deleted_reference",
+    );
+    await assert.rejects(
+      store.assertPublishedRunRestorable(authorization, firstReceipt.publishedRunId),
+      /VFY_PUBLISHED_RUN_RESTORE_BLOCKED/,
+    );
+    await assert.rejects(
+      firstService.ingest(firstFixture.request, authorization, acceptedAt),
+      /VFY_PUBLISHED_RUN_RESTORE_BLOCKED/,
+    );
+    const deletedStorage = await pool.query(
+      `SELECT r.projection, t.affected_edge_ids
+         FROM published_run_listings l
+         LEFT JOIN published_runs r USING (tenant_id, project_id, published_run_id)
+         JOIN published_run_tombstones t USING (tenant_id, project_id, published_run_id)
+        WHERE l.tenant_id = $1 AND l.project_id = $2 AND l.published_run_id = $3`,
+      [authorization.tenantId, authorization.projectId, firstReceipt.publishedRunId],
+    );
+    assert.equal(deletedStorage.rows[0].projection, null);
+    assert.equal(JSON.stringify(deletedStorage.rows[0]).includes("sha256:"), false);
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const claimTime = new Date(`2026-07-22T21:02:${String(attempt + 1).padStart(2, "0")}Z`);
+      const claim = await store.claimOutbox(`worker:failure-${attempt}`, claimTime, 10_000);
+      assert.ok(claim);
+      await store.failOutbox(
+        claim,
+        "DELIVERY_FAILED",
+        new Date(claimTime.getTime() + 1_000),
+      );
+    }
+    const deadLetter = await pool.query(
+      "SELECT status, event, failure_code FROM publication_outbox WHERE tenant_id = $1",
+      [authorization.tenantId],
+    );
+    assert.equal(deadLetter.rows[0].status, "deadLetter");
+    assert.deepEqual(Object.keys(deadLetter.rows[0].event.payload), ["publishedRunId"]);
+    assert.equal(JSON.stringify(deadLetter.rows[0]).includes("sha256:"), false);
+
+    const secondDocument = payload();
+    secondDocument.runId = "run:two";
+    secondDocument.idempotencyKey = "idempotency:two";
+    secondDocument.auditCorrelationId = "audit:two";
+    const secondFixture = await publicationRequest({
+      document: secondDocument,
+      nonce: "nonce:two",
+      intentId: "intent:two",
+    });
+    const secondService = new PublicationIngestionService(
+      store,
+      publicationVerifier(secondFixture.keyPair.publicKey),
+    );
+    const secondReceipt = await secondService.ingest(
+      secondFixture.request,
+      authorization,
+      acceptedAt,
+    );
+    assert.equal(
+      await store.deleteExpiredPublishedRuns(new Date("2026-09-01T00:00:00Z")),
+      1,
+    );
+    assert.equal(
+      (await store.resolvePublishedRun(authorization, secondReceipt.publishedRunId))?.state,
+      "deleted_reference",
+    );
+
+    const firstPage = await store.listPublishedRuns(authorization, { limit: 1 });
+    assert.equal(firstPage.items.length, 1);
+    assert.ok(firstPage.nextCursor);
+    await assert.rejects(
+      store.listPublishedRuns(
+        { tenantId: "tenant:two", projectId: authorization.projectId },
+        { limit: 1, cursor: firstPage.nextCursor },
+      ),
+      /VFY_PUBLISHED_RUN_CURSOR_INVALID/,
+    );
+    const secondPage = await store.listPublishedRuns(authorization, {
+      limit: 1,
+      cursor: firstPage.nextCursor,
+    });
+    assert.equal(secondPage.items.length, 1);
+    assert.equal(secondPage.nextCursor, undefined);
+
+    await pool.query("UPDATE published_run_tombstones SET expires_at = $1", [
+      new Date("2026-08-31T00:00:00Z"),
+    ]);
+    await pool.query(
+      "UPDATE publication_outbox SET status = 'delivered', worker_id = NULL, lease_expires_at = NULL",
+    );
+    assert.equal(await store.purgeExpiredTombstones(new Date("2026-09-01T00:00:00Z")), 2);
+    assert.equal(
+      await store.resolvePublishedRun(authorization, firstReceipt.publishedRunId),
+      undefined,
+    );
+  } finally {
+    await pool.end();
+  }
 });
