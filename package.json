@@ -45,7 +45,7 @@
     "test": "npm run build && npm run test:m9-foundation"
   },
   "devDependencies": {
-    "@types/node": "26.1.1",
+    "@types/node": "26.1.2",
     "esbuild": "0.28.1",
     "typescript": "7.0.2"
   },
