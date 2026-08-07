@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-postgres-migration-runner",
+  "taskId": "M9-T04",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11.3-11.4,18,20.1(6)", "EDD §§19-21,26-27,29-31,33", "ADR-0013", "SP-CLOUD-002", "SP-RETENTION-001", "ORB-COST-001"],
+  "testIds": [
+    "postgres-migration:default-disabled-zero-resource",
+    "postgres-migration:main-protected-oidc-trigger",
+    "postgres-migration:private-fargate-no-public-ip",
+    "postgres-migration:one-az-ephemeral-service-endpoints",
+    "postgres-migration:exact-rds-managed-secret-injection",
+    "postgres-migration:immutable-kms-encrypted-image",
+    "postgres-migration:read-only-no-task-role",
+    "postgres-migration:live-probe-synthetic-cleanup",
+    "postgres-migration:always-cleanup-zero-drift"
+  ],
+  "command": "tofu -chdir=tooling/infra/aws/metadata-cloud test -no-color && node tooling/infra/check-aws-foundation.mjs && EXPECTED_POSTGRES_VERSION=<ephemeral-version> MIGRATION_RUN_ID=<git-sha> node tooling/infra/run-live-postgres-migration.mjs",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/infra/aws/metadata-cloud/migration.tf",
+      "digest": "sha256:376ff8431b4c281de2253f01229d4727a9665e10e57b6138fa6d4321fb30c8eb"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/network.tf",
+      "digest": "sha256:ffb96fe65851a88cfde07a90b511b716ab2bb4d1572ff36fbba8e02b23d651cc"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/security.tf",
+      "digest": "sha256:5dc3d101b92736c6628ec865401cdb5da080a154bdda0aab92129af6f1dd5abd"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/data.tf",
+      "digest": "sha256:6ca579f4a04a3b37859047e324cc56d1f9b040f644b4b56a248fdc3b148d98ff"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/variables.tf",
+      "digest": "sha256:999ee64e63e0108b8a8ff76f4886fb300464574f9abd3f90dece36edfb4138a5"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
+      "digest": "sha256:dcb7602921333b75d61a8082b6977e8489fed81c4d4a19db7523275c8b8968ee"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
+      "digest": "sha256:9c3e23875b79a28b807fafc30464b382d58050ae42c10c7beef2e4c764835392"
+    },
+    {
+      "path": ".dockerignore",
+      "digest": "sha256:95273a0b7770f0368c2c77dab7d99f544bd2921f097e7dfc30cfff23cecd7e56"
+    },
+    {
+      "path": "tooling/infra/run-live-postgres-migration.mjs",
+      "digest": "sha256:8623f89ac4b6ca583b523b18ba1d09d218471af87a980dc60ff8c0f4210e8189"
+    },
+    {
+      "path": ".github/workflows/aws-postgres-migration.yml",
+      "digest": "sha256:2e914096ceaf80e3557e6d4641038c9782b36c641c7c767987a9cf0fc380183a"
+    },
+    {
+      "path": "tooling/infra/aws/bootstrap/identity.tf",
+      "digest": "sha256:060aefafc7d710d5f0b3102f09718cae1bf685f0f35f271b90f1276240b4214d"
+    },
+    {
+      "path": "tooling/infra/check-aws-foundation.mjs",
+      "digest": "sha256:e6eee0146202392f1fb222916ae36412378cfe7740ec46f2c2b5a989a9b898ef"
+    },
+    {
+      "path": "docs/operations/M9_POSTGRES_MIGRATION.md",
+      "digest": "sha256:35223dacfff7f8eb599b06c0f4a4462c585328c5ef9677fa8ffd6cb1821db245"
+    }
+  ]
+}

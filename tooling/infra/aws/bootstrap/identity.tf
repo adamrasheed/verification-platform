@@ -147,6 +147,12 @@ resource "aws_iam_role_policy" "github_deploy" {
           "ec2:DescribeVpcEndpoints",
           "ec2:DescribeVpcs",
           "ecs:DescribeClusters",
+          "ecs:DescribeTaskDefinition",
+          "ecs:DescribeTasks",
+          "ecs:ListTaskDefinitions",
+          "ecr:DescribeRepositories",
+          "ecr:GetLifecyclePolicy",
+          "ecr:ListTagsForResource",
           "kms:DescribeKey",
           "kms:GetKeyPolicy",
           "kms:GetKeyRotationStatus",
@@ -187,7 +193,11 @@ resource "aws_iam_role_policy" "github_deploy" {
           "ec2:ModifySecurityGroupRules",
           "ecs:CreateCluster",
           "ecs:DeleteCluster",
+          "ecs:DeregisterTaskDefinition",
           "ecs:PutClusterCapacityProviders",
+          "ecs:RegisterTaskDefinition",
+          "ecs:RunTask",
+          "ecs:StopTask",
           "ecs:TagResource",
           "ecs:UntagResource",
           "kms:CreateAlias",
@@ -237,6 +247,68 @@ resource "aws_iam_role_policy" "github_deploy" {
         Condition = {
           StringEquals = {
             "aws:RequestedRegion" = var.aws_region
+          }
+        }
+      },
+      {
+        Sid      = "EcrAuthorization"
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageEphemeralMigrationRepository"
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:CompleteLayerUpload",
+          "ecr:CreateRepository",
+          "ecr:DeleteRepository",
+          "ecr:DescribeImages",
+          "ecr:DescribeRepositories",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:GetLifecyclePolicy",
+          "ecr:GetRepositoryPolicy",
+          "ecr:InitiateLayerUpload",
+          "ecr:ListImages",
+          "ecr:ListTagsForResource",
+          "ecr:PutImage",
+          "ecr:PutImageScanningConfiguration",
+          "ecr:PutImageTagMutability",
+          "ecr:SetRepositoryPolicy",
+          "ecr:StartImageScan",
+          "ecr:TagResource",
+          "ecr:UntagResource",
+          "ecr:UploadLayerPart",
+        ]
+        Resource = "arn:aws:ecr:${var.aws_region}:${var.aws_account_id}:repository/verification-${var.github_environment}-postgres-migration"
+      },
+      {
+        Sid    = "ManageEphemeralMigrationExecutionRole"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:DeleteRolePolicy",
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListRolePolicies",
+          "iam:PutRolePolicy",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:UpdateAssumeRolePolicy",
+        ]
+        Resource = "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution"
+      },
+      {
+        Sid      = "PassEphemeralMigrationExecutionRole"
+        Effect   = "Allow"
+        Action   = ["iam:PassRole"]
+        Resource = "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
           }
         }
       },

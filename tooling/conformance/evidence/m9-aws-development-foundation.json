@@ -40,15 +40,15 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
-      "digest": "sha256:e155c78b7e90688822ef87a32bd8573ac0a37b7350e6206126c5411e027a5d25"
+      "digest": "sha256:ffb96fe65851a88cfde07a90b511b716ab2bb4d1572ff36fbba8e02b23d651cc"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:330d8e399e519091ad92ef69889f75cfb19dcfe23a52c297edd6c80263db4344"
+      "digest": "sha256:5dc3d101b92736c6628ec865401cdb5da080a154bdda0aab92129af6f1dd5abd"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:439fed4638c9cfe3033e7d393aa27dc4579e2df703a75dc751b17d24372391e7"
+      "digest": "sha256:6ca579f4a04a3b37859047e324cc56d1f9b040f644b4b56a248fdc3b148d98ff"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
@@ -64,7 +64,7 @@
     },
     {
       "path": "docs/product/ROADMAP.md",
-      "digest": "sha256:4df43bfec0b60bd553148979a1e2c2f4a42467bb8f1170ec89804d98882392de"
+      "digest": "sha256:6e21df67c4daf0a8f1f2314723fe1908e8833d5556ad9ad94575ffb9ba3ed20c"
     },
     {
       "path": "package.json",

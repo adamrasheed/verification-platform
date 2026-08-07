@@ -1,0 +1,166 @@
+name: AWS PostgreSQL migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-postgres-migration-development
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Migrate and probe private development RDS
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: development
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4
+        with:
+          tofu_version: 1.12.5
+          tofu_wrapper: false
+
+      - name: Exchange GitHub OIDC for bounded AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: postgres-migration-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Initialize encrypted remote state
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu init -input=false \
+            -backend-config="bucket=${{ vars.AWS_STATE_BUCKET }}" \
+            -backend-config="key=metadata-cloud/development.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -backend-config="encrypt=true" \
+            -backend-config="kms_key_id=${{ vars.AWS_STATE_KMS_KEY_ARN }}" \
+            -backend-config="use_lockfile=true"
+
+      - name: Validate migration infrastructure
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu validate -no-color
+
+      - name: Build immutable migration-runner plan
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -out=migration.tfplan \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='migration_runner_enabled=true' \
+            -var='migration_image_tag=${{ github.sha }}'
+
+      - name: Apply immutable migration-runner plan
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu apply -input=false -auto-approve migration.tfplan
+
+      - name: Read non-secret runner coordinates
+        id: runner
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          echo "repository=$(tofu output -raw migration_repository_url)" >> "$GITHUB_OUTPUT"
+          echo "task_definition=$(tofu output -raw migration_task_definition_arn)" >> "$GITHUB_OUTPUT"
+          echo "cluster=$(tofu output -raw migration_cluster_arn)" >> "$GITHUB_OUTPUT"
+          echo "subnet=$(tofu output -raw migration_subnet_id)" >> "$GITHUB_OUTPUT"
+          echo "security_group=$(tofu output -raw migration_security_group_id)" >> "$GITHUB_OUTPUT"
+          echo "log_group=$(tofu output -raw migration_log_group_name)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push immutable migration image
+        env:
+          REPOSITORY: ${{ steps.runner.outputs.repository }}
+        run: |
+          registry="${REPOSITORY%%/*}"
+          aws ecr get-login-password --region "${{ vars.AWS_REGION }}" \
+            | docker login --username AWS --password-stdin "$registry"
+          docker build \
+            --file tooling/infra/aws/metadata-cloud/migration.Dockerfile \
+            --tag "$REPOSITORY:${{ github.sha }}" .
+          docker push "$REPOSITORY:${{ github.sha }}"
+
+      - name: Run migration and live conformance probe
+        id: migration
+        env:
+          CLUSTER: ${{ steps.runner.outputs.cluster }}
+          LOG_GROUP: ${{ steps.runner.outputs.log_group }}
+          SECURITY_GROUP: ${{ steps.runner.outputs.security_group }}
+          SUBNET: ${{ steps.runner.outputs.subnet }}
+          TASK_DEFINITION: ${{ steps.runner.outputs.task_definition }}
+        run: |
+          task_arn=$(aws ecs run-task \
+            --cluster "$CLUSTER" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --platform-version 1.4.0 \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          test "$task_arn" != "None"
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task_arn"
+          exit_code=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+          log_stream=$(aws logs describe-log-streams \
+            --log-group-name "$LOG_GROUP" \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 1 \
+            --query 'logStreams[0].logStreamName' \
+            --output text)
+          evidence=$(aws logs get-log-events \
+            --log-group-name "$LOG_GROUP" \
+            --log-stream-name "$log_stream" \
+            --limit 10 \
+            --query 'events[-1].message' \
+            --output text)
+          echo "$evidence" | jq -e '
+            .schemaVersion == 1
+            and .kind == "awsPostgresMigrationEvidence"
+            and .outcome == "passed"
+            and .migrationId == "0001_publication_store"
+            and (.serverVersion | startswith("17.6"))
+            and ([.checks[]] | all(. == "passed"))'
+          test "$exit_code" = "0"
+          echo "$evidence"
+
+      - name: Remove ephemeral migration resources
+        if: always()
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -out=cleanup.tfplan \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='migration_runner_enabled=false'
+          tofu apply -input=false -auto-approve cleanup.tfplan
+
+      - name: Verify zero drift after cleanup
+        if: always()
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -detailed-exitcode \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='migration_runner_enabled=false'

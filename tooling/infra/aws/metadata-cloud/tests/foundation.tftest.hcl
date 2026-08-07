@@ -8,6 +8,32 @@ override_resource {
   }
 }
 
+override_resource {
+  target = aws_db_instance.metadata
+  values = {
+    master_user_secret = [{
+      kms_key_id    = "arn:aws:kms:us-west-2:123456789012:key/11111111-2222-3333-4444-555555555555"
+      secret_arn    = "arn:aws:secretsmanager:us-west-2:123456789012:secret:rds!db-test"
+      secret_status = "active"
+    }]
+  }
+}
+
+override_resource {
+  target = aws_iam_role.migration_execution
+  values = {
+    arn = "arn:aws:iam::123456789012:role/verification-development-migration-execution"
+  }
+}
+
+override_resource {
+  target = aws_ecr_repository.migration
+  values = {
+    arn            = "arn:aws:ecr:us-west-2:123456789012:repository/verification-development-postgres-migration"
+    repository_url = "123456789012.dkr.ecr.us-west-2.amazonaws.com/verification-development-postgres-migration"
+  }
+}
+
 override_data {
   target = data.aws_iam_policy_document.environment_key
   values = {
@@ -24,6 +50,20 @@ override_data {
 
 override_data {
   target = data.aws_iam_policy_document.s3_endpoint
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = data.aws_iam_policy_document.migration_task_assume
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = data.aws_iam_policy_document.migration_execution
   values = {
     json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
   }
@@ -65,6 +105,43 @@ run "development_foundation_is_private_and_bounded" {
   assert {
     condition     = aws_cloudwatch_log_group.database_postgresql[0].retention_in_days == 30 && aws_cloudwatch_log_group.database_upgrade[0].retention_in_days == 30
     error_message = "RDS export logs must be explicitly managed with bounded retention."
+  }
+
+  assert {
+    condition     = length(aws_ecr_repository.migration) == 0 && length(aws_vpc_endpoint.migration) == 0 && length(aws_ecs_task_definition.migration) == 0
+    error_message = "Migration infrastructure must remain absent during an ordinary foundation deployment."
+  }
+}
+
+run "ephemeral_migration_runner_is_private_and_bounded" {
+  command = plan
+
+  variables {
+    deployment_enabled       = true
+    aws_account_id           = "123456789012"
+    budget_alert_email       = "alerts@example.com"
+    migration_runner_enabled = true
+    migration_image_tag      = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  }
+
+  assert {
+    condition     = length(aws_vpc_endpoint.migration) == 4 && alltrue([for endpoint in aws_vpc_endpoint.migration : length(endpoint.subnet_ids) == 1 && endpoint.private_dns_enabled])
+    error_message = "The migration runner requires exactly four one-AZ private service endpoints."
+  }
+
+  assert {
+    condition     = aws_ecr_repository.migration[0].image_tag_mutability == "IMMUTABLE" && aws_ecr_repository.migration[0].force_delete
+    error_message = "The ephemeral migration repository must use immutable tags and support automatic cleanup."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.migration[0].network_mode == "awsvpc" && contains(aws_ecs_task_definition.migration[0].requires_compatibilities, "FARGATE")
+    error_message = "The migration must run only as a private Fargate task."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.migration[0].container_definitions)[0].readonlyRootFilesystem && aws_cloudwatch_log_group.migration[0].retention_in_days == 30
+    error_message = "The migration container must be read-only and retain encrypted logs for 30 days while active."
   }
 }
 

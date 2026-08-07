@@ -115,3 +115,25 @@ variable "database_backup_retention_days" {
     error_message = "ADR-0013 requires exactly 35 days of database backup retention."
   }
 }
+
+variable "migration_runner_enabled" {
+  description = "Creates the ephemeral private Fargate migration runner; disabled outside an explicit migration operation."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.migration_runner_enabled || var.deployment_enabled
+    error_message = "The migration runner requires the guarded metadata-cloud deployment."
+  }
+}
+
+variable "migration_image_tag" {
+  description = "Immutable Git commit tag for the ephemeral migration image."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.migration_runner_enabled || can(regex("^[a-f0-9]{40}$", var.migration_image_tag))
+    error_message = "An exact 40-character Git commit tag is required for a migration run."
+  }
+}
