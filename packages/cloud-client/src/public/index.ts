@@ -33,6 +33,7 @@ export {
   InMemoryPublicationIngestionStore,
   PublicationOutboxWorker,
 } from "./published-runs.js";
+export { PostgresPublicationStore } from "./postgres-publication-store.js";
 export type {
   PublicationAdmissionFaultInjector,
   PublicationAdmissionFaultPoint,
@@ -65,12 +66,15 @@ export type {
   PublicationOutboxClaim,
   PublicationOutboxDelivery,
   PublicationOutboxEvent,
+  PublicationOutboxStore,
+  PublicationStoreResult,
   PublishedRunAcceptedOutboxEvent,
   PublishedRunDeletedOutboxEvent,
   PublishedRunDeletionOptions,
   PublishedRunListPage,
   PublishedRunRecord,
   PublishedRunResolution,
+  PublishedRunStore,
   PublishedRunTombstone,
   RetentionPolicyRef,
   SignedPublicationIntent,

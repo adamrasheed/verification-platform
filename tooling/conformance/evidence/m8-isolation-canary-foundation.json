@@ -25,7 +25,7 @@
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
-      "digest": "sha256:12f938ff7e33f0edbe7dc733ac8b57b8c2898fca507168e64efd1246ecdea806"
+      "digest": "sha256:c284f5a7cda89e0b712c081c8b1b36b530a20d8f62bee66b821055d2e53e87c9"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",

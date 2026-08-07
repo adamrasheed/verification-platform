@@ -60,11 +60,11 @@
     },
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:016ad84a1ef8d5b77ff47d40db780dbbe5089aa7494532dc0f0f69557fd13c28"
+      "digest": "sha256:4be6c40ad0a27e0f4c1bad53118d0037e14a5e5a09670565c92413e8739187b4"
     },
     {
       "path": "docs/product/ROADMAP.md",
-      "digest": "sha256:d8b6ef1204f22879fd01f02607eb3a9e3561414cff53abd5f6cc6d9f46b64402"
+      "digest": "sha256:4df43bfec0b60bd553148979a1e2c2f4a42467bb8f1170ec89804d98882392de"
     },
     {
       "path": "package.json",

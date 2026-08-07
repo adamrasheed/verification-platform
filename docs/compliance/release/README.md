@@ -38,10 +38,11 @@ included in the warm-discovery measurement.
 supply-chain artifacts that can be verified before a cloud provider exists. It
 is intentionally classified as `contractFoundation` and `not_releasable`.
 M9-T03 now supplies exact Evidence for the deployed AWS development foundation.
-Service SLO and disaster-recovery fields remain `blocked` until M9-T08, while
-provider deployment remains `blocked` on the concrete adapters, API, and
-customer workload dispatch in M9-T04 through M9-T07. This record is not
-production Evidence.
+M9-T04 supplies PostgreSQL adapter and PostgreSQL 17.6 CI conformance Evidence,
+but its protected private-RDS migration and live drills remain open. Service SLO
+and disaster-recovery fields remain `blocked` until M9-T08, while provider
+deployment remains `blocked` on the live adapters, API, and customer workload
+dispatch in M9-T04 through M9-T07. This record is not production Evidence.
 
 Run `npm run check:cloud-release-evidence` to verify the closed inventory and
 every retained SHA-256 digest. ADR-0013 resolves the provider decision but does

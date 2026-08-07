@@ -20,6 +20,22 @@ jobs:
     name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17.6@sha256:00bc86618629af00d2937fdc5a5d63db3ff8450acf52f0636ec813c7f4902929
+        env:
+          POSTGRES_DB: verification
+          POSTGRES_PASSWORD: verification-ci-only
+          POSTGRES_USER: verification
+        options: >-
+          --health-cmd "pg_isready -U verification -d verification"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      VERIFY_POSTGRES_URL: postgresql://verification:verification-ci-only@127.0.0.1:5432/verification
     strategy:
       fail-fast: false
       matrix:
