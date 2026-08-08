@@ -27,6 +27,7 @@ COPY --from=build --chown=node:node /app/packages/cloud-client/package.json ./pa
 COPY --from=build --chown=node:node /app/packages/cloud-client/dist ./packages/cloud-client/dist
 COPY --from=build --chown=node:node /app/packages/cloud-client/migrations ./packages/cloud-client/migrations
 COPY --from=build --chown=node:node /app/tooling/infra/run-live-postgres-migration.mjs ./tooling/infra/run-live-postgres-migration.mjs
+COPY --chown=node:node tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem /app/rds-ca-bundle.pem
 
 USER node
 

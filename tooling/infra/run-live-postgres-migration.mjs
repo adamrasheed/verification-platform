@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import process from "node:process";
 import { encodeCanonicalProtocolDocument } from "@verify-internal/protocol";
 import { Pool } from "pg";
@@ -9,12 +10,17 @@ import { PostgresPublicationStore } from "../../packages/cloud-client/dist/publi
 const migrationId = "0001_publication_store";
 const runId = process.env.MIGRATION_RUN_ID;
 const expectedPostgresVersion = process.env.EXPECTED_POSTGRES_VERSION;
+const sslRootCertPath = process.env.PGSSLROOTCERT;
 if (!/^[a-f0-9]{40}$/.test(runId ?? "")) {
   throw new TypeError("VFY_LIVE_MIGRATION_RUN_ID_INVALID");
 }
 if (!/^\d+\.\d+$/.test(expectedPostgresVersion ?? "")) {
   throw new TypeError("VFY_LIVE_MIGRATION_ENGINE_INVALID");
 }
+if (typeof sslRootCertPath !== "string" || !sslRootCertPath.startsWith("/app/")) {
+  throw new TypeError("VFY_LIVE_MIGRATION_TLS_ROOT_INVALID");
+}
+const sslRootCertificate = await readFile(sslRootCertPath, "utf8");
 
 const tenantId = `tenant:m9-live-${runId.slice(0, 12)}`;
 const projectId = `project:m9-live-${runId.slice(0, 12)}`;
@@ -23,6 +29,10 @@ const pool = new Pool({
   connectionTimeoutMillis: 10_000,
   idleTimeoutMillis: 10_000,
   max: 8,
+  ssl: {
+    ca: sslRootCertificate,
+    rejectUnauthorized: true,
+  },
 });
 const store = new PostgresPublicationStore(pool);
 let stage = "migration";
@@ -294,6 +304,8 @@ try {
     kind: "awsPostgresMigrationEvidence",
     outcome: "failed",
     failedCheck: stage,
+    errorName: error instanceof Error ? error.name : "UnknownError",
+    errorCode: typeof error?.code === "string" ? error.code : "UNCLASSIFIED",
     failureCode: error instanceof assert.AssertionError
       ? "LIVE_CONFORMANCE_ASSERTION_FAILED"
       : "LIVE_MIGRATION_FAILED",

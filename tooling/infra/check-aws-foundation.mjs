@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
+import { X509Certificate } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -54,6 +55,7 @@ const requiredFiles = [
   ".github/workflows/aws-metadata-cloud.yml",
   ".github/workflows/aws-postgres-migration.yml",
   "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
+  "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
   "tooling/infra/run-live-postgres-migration.mjs",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
@@ -67,7 +69,10 @@ const metadata = [
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
+const dockerignore = await read(".dockerignore");
 const metadataData = await read("tooling/infra/aws/metadata-cloud/data.tf");
+const migrationProbe = await read("tooling/infra/run-live-postgres-migration.mjs");
+const rdsCaBundle = await read("tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem");
 const metadataText = (await Promise.all(metadata)).join("\n");
 const allInfra = `${bootstrapText}\n${metadataText}`;
 
@@ -106,6 +111,17 @@ requireText(metadataText, "readonlyRootFilesystem = true", "read-only migration 
 requireText(metadataText, 'image_tag_mutability = "IMMUTABLE"', "immutable migration image");
 requireText(metadataText, 'force_delete         = true', "ephemeral repository cleanup");
 requireText(metadataText, 'name = "PGPASSWORD"', "RDS-managed password injection");
+requireText(metadataText, 'name = "PGSSLMODE", value = "verify-full"', "RDS TLS hostname verification");
+requireText(metadataText, 'name = "PGSSLROOTCERT", value = "/app/rds-ca-bundle.pem"', "RDS trust root path");
+requireText(migrationProbe, "rejectUnauthorized: true", "RDS certificate verification");
+requireText(dockerignore, "!tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem", "RDS CA build context");
+const rdsRootCertificates = rdsCaBundle.match(/-----BEGIN CERTIFICATE-----[^]*?-----END CERTIFICATE-----/g) ?? [];
+assert.equal(rdsRootCertificates.length, 3, "regional RDS trust bundle must contain three roots");
+for (const pem of rdsRootCertificates) {
+  const certificate = new X509Certificate(pem);
+  assert.equal(certificate.ca, true, "RDS trust bundle entries must be CA certificates");
+  assert.match(certificate.subject, /Amazon RDS us-west-2 Root CA/);
+}
 requireText(
   metadataData,
   'resources = ["arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"]',

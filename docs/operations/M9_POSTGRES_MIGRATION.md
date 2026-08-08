@@ -25,16 +25,23 @@ The workflow applies an immutable OpenTofu plan that temporarily creates:
   Secrets Manager.
 
 The task retains the existing workload security group: PostgreSQL egress is
-limited to the database security group, and TLS egress is limited to the
-ephemeral endpoint security group. It has no public IP or default route. The
-one-AZ endpoint placement is an explicit development cost control; AWS bills
-each endpoint ENI by provisioned hour, including partial hours.
+limited to the database security group. TLS egress is limited to the VPC CIDR
+for private interface endpoints and the regional AWS-managed S3 prefix list
+for ECR image layers; interface endpoint ingress accepts TLS only from the
+workload security group. The task has no public IP or default route. The one-AZ
+endpoint placement is an explicit development cost control; AWS bills each
+endpoint ENI by provisioned hour, including partial hours.
 
 ## Migration and probes
 
 The task reads the RDS-managed credential through ECS secret injection, runs
-`0001_publication_store`, and verifies the migration ledger. It then creates a
-unique synthetic tenant and proves:
+`0001_publication_store`, and verifies the migration ledger. The PostgreSQL
+client performs hostname and chain verification against the three-root AWS RDS
+`us-west-2` bundle vendored at
+`tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem`. Refresh that file only
+from `https://truststore.pki.rds.amazonaws.com/us-west-2/us-west-2-bundle.pem`,
+then inspect all certificates and update its pinned Evidence digest. The task
+then creates a unique synthetic tenant and proves:
 
 1. concurrent exact idempotency;
 2. cross-tenant read and list isolation;
