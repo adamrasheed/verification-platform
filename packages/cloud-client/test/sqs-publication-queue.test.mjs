@@ -65,8 +65,9 @@ test("SQS references are canonical, exact, and omit protected event payload fiel
   assert.equal(body.includes("payloadDigest"), false);
   assert.equal(body.includes("sha256:"), false);
   assert.equal(body.includes("occurredAt"), false);
+  const decoded = decodePublicationQueueReference(body);
   assert.throws(
-    () => decodePublicationQueueReference(body.replace("{", "{\"extra\":true,")),
+    () => decodePublicationQueueReference(JSON.stringify({ ...decoded, extra: true })),
     /VFY_PUBLICATION_QUEUE_REFERENCE_INVALID/,
   );
   assert.throws(

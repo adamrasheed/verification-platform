@@ -21,7 +21,7 @@
     },
     {
       "path": "packages/cloud-client/test/sqs-publication-queue.test.mjs",
-      "digest": "sha256:04d183c17b89d165b06fb2154219866aa36241b3dc93dcb153d721d3c4050625"
+      "digest": "sha256:deed8cb164e2cc2d78d5cef41781f2792e88ec89c7a80ace0d22e71557de6d8b"
     },
     {
       "path": "packages/cloud-client/schemas/publication-queue-reference.schema.json",
