@@ -5,6 +5,8 @@ WORKDIR /app
 COPY . .
 
 RUN npm ci --ignore-scripts \
+  && npm run build --workspace @verify-internal/contracts \
+  && npm run build --workspace @verify-internal/events \
   && npm run build --workspace @verify-internal/protocol \
   && npm run build --workspace @verify-internal/cloud-client \
   && npm prune --omit=dev --ignore-scripts \
@@ -15,6 +17,10 @@ FROM node:22.19.0-bookworm-slim@sha256:4a4884e8a44826194dff92ba316264f392056cbe2
 WORKDIR /app
 
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/packages/contracts/package.json ./packages/contracts/package.json
+COPY --from=build --chown=node:node /app/packages/contracts/dist ./packages/contracts/dist
+COPY --from=build --chown=node:node /app/packages/events/package.json ./packages/events/package.json
+COPY --from=build --chown=node:node /app/packages/events/dist ./packages/events/dist
 COPY --from=build --chown=node:node /app/packages/protocol/package.json ./packages/protocol/package.json
 COPY --from=build --chown=node:node /app/packages/protocol/dist ./packages/protocol/dist
 COPY --from=build --chown=node:node /app/packages/cloud-client/package.json ./packages/cloud-client/package.json
