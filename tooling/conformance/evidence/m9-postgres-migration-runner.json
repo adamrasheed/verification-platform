@@ -60,7 +60,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:3560abe18e0a8486c9168aeed56b2d426201af02e7f9d089e73e1dfcc3efa348"
+      "digest": "sha256:6880632637af98409d27a76f7fa7933b42282608541cf9d92f2778d2407045ce"
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
