@@ -50,13 +50,18 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/data.tf",
   "tooling/infra/aws/metadata-cloud/compute.tf",
   "tooling/infra/aws/metadata-cloud/migration.tf",
+  "tooling/infra/aws/metadata-cloud/queue-runner.tf",
   "tooling/infra/aws/metadata-cloud/budget.tf",
   ".github/workflows/aws-oidc-smoke.yml",
   ".github/workflows/aws-metadata-cloud.yml",
   ".github/workflows/aws-postgres-migration.yml",
+  ".github/workflows/aws-sqs-conformance.yml",
   "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
+  "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",
   "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
   "tooling/infra/run-live-postgres-migration.mjs",
+  "tooling/infra/run-live-sqs-conformance.mjs",
+  "tooling/infra/aws-sqs-publication-transport.mjs",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
 await Promise.all(requiredFiles.map((file) => read(file)));
@@ -65,13 +70,15 @@ const bootstrap = ["versions.tf", "variables.tf", "main.tf", "identity.tf", "bud
   .map((file) => readFile(path.join(bootstrapRoot, file), "utf8"));
 const metadata = [
   "versions.tf", "variables.tf", "locals.tf", "network.tf", "security.tf",
-  "data.tf", "compute.tf", "migration.tf", "budget.tf", "outputs.tf",
+  "data.tf", "compute.tf", "migration.tf", "queue-runner.tf", "budget.tf", "outputs.tf",
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
 const dockerignore = await read(".dockerignore");
 const metadataData = await read("tooling/infra/aws/metadata-cloud/data.tf");
 const migrationProbe = await read("tooling/infra/run-live-postgres-migration.mjs");
+const queueProbe = await read("tooling/infra/run-live-sqs-conformance.mjs");
+const queueTransport = await read("tooling/infra/aws-sqs-publication-transport.mjs");
 const rdsCaBundle = await read("tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem");
 const metadataText = (await Promise.all(metadata)).join("\n");
 const allInfra = `${bootstrapText}\n${metadataText}`;
@@ -95,7 +102,7 @@ requireText(metadataText, 'condition     = var.environment != "production" || va
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
 requireText(metadataText, 'name              = "/aws/rds/instance/${local.name}-postgres/postgresql"', "managed RDS logs");
-assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 5, "all five log groups need 30-day retention");
+assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 6, "all six log groups need 30-day retention");
 requireText(metadataText, "block_public_acls       = true", "S3 public access block");
 requireText(metadataText, "noncurrent_days = 35", "metadata backup expiry");
 requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
@@ -103,6 +110,7 @@ requireText(metadataText, "deadLetterTargetArn", "SQS dead-letter queue");
 requireText(metadataText, 'resource "aws_budgets_budget" "monthly"', "cost budget");
 requireText(metadataText, 'Tier = "private-isolated"', "isolated subnet");
 requireText(metadataText, 'CostControl = "ephemeral-migration"', "ephemeral migration cost control");
+requireText(metadataText, 'CostControl = "ephemeral-sqs-conformance"', "ephemeral SQS cost control");
 requireText(metadataText, '"ecr.api"', "private ECR API endpoint");
 requireText(metadataText, '"ecr.dkr"', "private ECR registry endpoint");
 requireText(metadataText, '"logs"', "private log endpoint");
@@ -114,6 +122,11 @@ requireText(metadataText, 'name = "PGPASSWORD"', "RDS-managed password injection
 requireText(metadataText, 'name = "PGSSLMODE", value = "verify-full"', "RDS TLS hostname verification");
 requireText(metadataText, 'name = "PGSSLROOTCERT", value = "/app/rds-ca-bundle.pem"', "RDS trust root path");
 requireText(migrationProbe, "rejectUnauthorized: true", "RDS certificate verification");
+requireText(queueProbe, "rejectUnauthorized: true", "SQS runner RDS certificate verification");
+requireText(queueProbe, "assertCloudCanariesAbsent", "live bounded secondary-sink scan");
+requireText(queueProbe, "maximumReceiveCount: 5", "live bounded SQS retries");
+requireText(queueTransport, "MaxNumberOfMessages: 1", "single-message SQS receive");
+requireText(queueTransport, "MessageAttributeNames: []", "message attribute exclusion");
 requireText(dockerignore, "!tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem", "RDS CA build context");
 const rdsRootCertificates = rdsCaBundle.match(/-----BEGIN CERTIFICATE-----[^]*?-----END CERTIFICATE-----/g) ?? [];
 assert.equal(rdsRootCertificates.length, 3, "regional RDS trust bundle must contain three roots");
@@ -133,7 +146,8 @@ const ecrLayerPolicy = metadataData.slice(
 );
 assert.ok(ecrLayerPolicy.length > 0, "ephemeral ECR layer endpoint policy must exist");
 assert.doesNotMatch(ecrLayerPolicy, /condition\s*\{/);
-assert.doesNotMatch(metadataText, /task_role_arn\s*=/);
+assert.equal((metadataText.match(/task_role_arn\s*=/g) ?? []).length, 1, "only the SQS runner may have a task role");
+requireText(metadataText, "task_role_arn            = aws_iam_role.queue_runner_task[0].arn", "exact SQS task identity");
 requireText(metadataText, 'backend "s3" {}', "encrypted remote-state backend");
 requireText(bootstrapText, 'url            = "https://token.actions.githubusercontent.com"', "GitHub OIDC provider");
 requireText(bootstrapText, '"token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"', "OIDC audience restriction");
@@ -190,6 +204,18 @@ requireText(migrationWorkflow, "assignPublicIp=DISABLED", "private Fargate task"
 requireText(migrationWorkflow, "Verify zero drift after cleanup", "post-cleanup drift gate");
 assert.doesNotMatch(migrationWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
+const queueWorkflow = await read(".github/workflows/aws-sqs-conformance.yml");
+requireText(queueWorkflow, "id-token: write", "SQS workflow token permission");
+requireText(queueWorkflow, "environment: development", "SQS environment boundary");
+requireText(queueWorkflow, "github.ref == 'refs/heads/main'", "main-only SQS boundary");
+requireText(queueWorkflow, "queue_runner_enabled=true", "explicit SQS runner enablement");
+requireText(queueWorkflow, "queue_runner_enabled=false", "mandatory SQS runner cleanup");
+requireText(queueWorkflow, "assignPublicIp=DISABLED", "private SQS Fargate task");
+requireText(queueWorkflow, "Verify zero drift after cleanup", "SQS post-cleanup drift gate");
+assert.doesNotMatch(queueWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
+
+await checked("node", ["--test", "tooling/infra/test-aws-sqs-publication-transport.mjs"]);
+
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");
   requireText(lock, 'version     = "6.56.0"', "provider lock");
@@ -209,7 +235,9 @@ requireText(roadmap, "Epic M9 — AWS Metadata Cloud Deployment", "roadmap");
 
 await checked("tofu", ["fmt", "-check", "-recursive", infraRoot]);
 for (const directory of [bootstrapRoot, metadataRoot]) {
-  await checked("tofu", ["init", "-backend=false", "-lockfile=readonly", "-input=false"], directory);
+  await checked("tofu", [
+    "init", "-backend=false", "-reconfigure", "-lockfile=readonly", "-input=false",
+  ], directory);
   await checked("tofu", ["validate", "-no-color"], directory);
   await checked("tofu", ["test", "-no-color"], directory);
 }

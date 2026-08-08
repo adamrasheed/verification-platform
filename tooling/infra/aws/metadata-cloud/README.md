@@ -19,3 +19,11 @@ protection and final snapshots are enforced by configuration.
 No plan or apply output is release Evidence. Deployed adapter, isolation,
 secondary-sink, load, restore, tombstone-replay, recovery, and cost-abuse drills
 must pass before the foundation report can become releasable.
+
+`queue_runner_enabled=true` temporarily adds the exact private endpoints,
+least-privilege IAM roles, immutable ECR repository, encrypted log group, and
+read-only Fargate task definition used by the protected M9-T05 SQS run. The
+runner can reach only PostgreSQL, the regional ECR/log/secret/SQS endpoints,
+and the S3 gateway used for ECR layers. The workflow always replans with the
+flag disabled, removes every runner resource, and requires a final zero-drift
+plan.

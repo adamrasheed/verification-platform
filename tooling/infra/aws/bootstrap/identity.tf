@@ -6,7 +6,7 @@ resource "aws_iam_service_linked_role" "ecs" {
   count = var.deployment_enabled ? 1 : 0
 
   aws_service_name = "ecs.amazonaws.com"
-  description      = "Service-linked role required for private ECS migration tasks"
+  description      = "Service-linked role required for private ECS runner tasks"
 
   lifecycle {
     prevent_destroy = true
@@ -188,6 +188,15 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.github_environment}/migration:*"
       },
       {
+        Sid    = "ReadEphemeralSqsConformanceLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents",
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.github_environment}/sqs-conformance:*"
+      },
+      {
         Sid    = "ManageRegionalDevelopmentFoundation"
         Effect = "Allow"
         Action = [
@@ -278,7 +287,7 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "*"
       },
       {
-        Sid    = "ManageEphemeralMigrationRepository"
+        Sid    = "ManageEphemeralRunnerRepositories"
         Effect = "Allow"
         Action = [
           "ecr:BatchCheckLayerAvailability",
@@ -302,10 +311,13 @@ resource "aws_iam_role_policy" "github_deploy" {
           "ecr:UntagResource",
           "ecr:UploadLayerPart",
         ]
-        Resource = "arn:aws:ecr:${var.aws_region}:${var.aws_account_id}:repository/verification-${var.github_environment}-postgres-migration"
+        Resource = [
+          "arn:aws:ecr:${var.aws_region}:${var.aws_account_id}:repository/verification-${var.github_environment}-postgres-migration",
+          "arn:aws:ecr:${var.aws_region}:${var.aws_account_id}:repository/verification-${var.github_environment}-sqs-conformance",
+        ]
       },
       {
-        Sid    = "ManageEphemeralMigrationExecutionRole"
+        Sid    = "ManageEphemeralRunnerRoles"
         Effect = "Allow"
         Action = [
           "iam:CreateRole",
@@ -321,13 +333,21 @@ resource "aws_iam_role_policy" "github_deploy" {
           "iam:UntagRole",
           "iam:UpdateAssumeRolePolicy",
         ]
-        Resource = "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution"
+        Resource = [
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution",
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-sqs-conformance-execution",
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-sqs-conformance-task",
+        ]
       },
       {
-        Sid      = "PassEphemeralMigrationExecutionRole"
-        Effect   = "Allow"
-        Action   = ["iam:PassRole"]
-        Resource = "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution"
+        Sid    = "PassEphemeralRunnerRoles"
+        Effect = "Allow"
+        Action = ["iam:PassRole"]
+        Resource = [
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-migration-execution",
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-sqs-conformance-execution",
+          "arn:aws:iam::${var.aws_account_id}:role/verification-${var.github_environment}-sqs-conformance-task",
+        ]
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "ecs-tasks.amazonaws.com"

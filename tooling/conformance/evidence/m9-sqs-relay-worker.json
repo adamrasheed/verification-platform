@@ -37,11 +37,11 @@
     },
     {
       "path": "package-lock.json",
-      "digest": "sha256:2f0df4509ac119584992dcf83d4c60d3379f2119b1f629de656c820ed49c2d54"
+      "digest": "sha256:f6992814c76ecfb5e174d78457e74edac0606e3fdd6b36645e91389f11bfab9a"
     },
     {
       "path": "docs/operations/M9_SQS_WORKER.md",
-      "digest": "sha256:95d958a5b6d5fddf958de8e65ee8e9dcd1909dc6462c15695476dda33bb1f38f"
+      "digest": "sha256:f8d0091b8db0ef78688344aa5da60944e8dd9f2d387c730ca11d192668d9ded6"
     }
   ]
 }

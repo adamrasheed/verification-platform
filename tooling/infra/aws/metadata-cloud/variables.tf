@@ -137,3 +137,25 @@ variable "migration_image_tag" {
     error_message = "An exact 40-character Git commit tag is required for a migration run."
   }
 }
+
+variable "queue_runner_enabled" {
+  description = "Creates the ephemeral private Fargate SQS conformance runner; disabled outside an explicit protected run."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.queue_runner_enabled || var.deployment_enabled
+    error_message = "The queue runner requires the guarded metadata-cloud deployment."
+  }
+}
+
+variable "queue_runner_image_tag" {
+  description = "Immutable Git commit tag for the ephemeral SQS conformance image."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.queue_runner_enabled || can(regex("^[a-f0-9]{40}$", var.queue_runner_image_tag))
+    error_message = "An exact 40-character Git commit tag is required for an SQS conformance run."
+  }
+}

@@ -33,7 +33,7 @@
     { "path": "docs/compliance/release/SECURITY_REPORT.json", "digest": "sha256:4178ac5c79635a60ff5be73754f93e2594eb95d2d7d52789575db056d9297f45" },
     { "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json", "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc" },
     { "path": "docs/compliance/release/AWS_POSTGRES_MIGRATION.json", "digest": "sha256:ae1b27e3dd1579e5284496dc0df2f2a6d741b69230123c49b80437227830772a" },
-    { "path": "package-lock.json", "digest": "sha256:2f0df4509ac119584992dcf83d4c60d3379f2119b1f629de656c820ed49c2d54" },
+    { "path": "package-lock.json", "digest": "sha256:f6992814c76ecfb5e174d78457e74edac0606e3fdd6b36645e91389f11bfab9a" },
     { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
   ]
 }

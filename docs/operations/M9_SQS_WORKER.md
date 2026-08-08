@@ -57,3 +57,9 @@ RDS and SQS resources:
 
 No production delivery, SLO, or recovery claim exists until that protected run
 and the later M9-T08 drills are retained as Evidence.
+
+The concrete adapter is isolated in
+`tooling/infra/aws-sqs-publication-transport.mjs`; provider-neutral cloud-client
+code does not depend on the AWS SDK. The default-off infrastructure and
+protected runner are defined by `queue-runner.tf`, `queue-runner.Dockerfile`,
+and `.github/workflows/aws-sqs-conformance.yml`.
