@@ -122,7 +122,10 @@ export function encodePublicationQueueReference(
 
 export function decodePublicationQueueReference(body: string): PublicationQueueReference {
   const encoded = new TextEncoder().encode(body);
-  if (encoded.byteLength === 0 || encoded.byteLength > MAXIMUM_REFERENCE_BYTES) {
+  if (encoded.byteLength === 0) {
+    throw new TypeError("VFY_PUBLICATION_QUEUE_REFERENCE_INVALID: reference is empty");
+  }
+  if (encoded.byteLength > MAXIMUM_REFERENCE_BYTES) {
     throw new TypeError("VFY_PUBLICATION_QUEUE_REFERENCE_INVALID: reference is oversized");
   }
   const value = parseCanonicalProtocolDocument(body);
@@ -178,7 +181,8 @@ export class PublicationSqsWorker {
     this.#baseRetrySeconds = options.baseRetrySeconds ?? 2;
     this.#maximumRetrySeconds = options.maximumRetrySeconds ?? 30;
     this.#jitter = options.jitter ?? Math.random;
-    if (!Number.isSafeInteger(this.#waitTimeSeconds)
+    if (typeof this.#jitter !== "function"
+      || !Number.isSafeInteger(this.#waitTimeSeconds)
       || this.#waitTimeSeconds < 0
       || this.#waitTimeSeconds > 20
       || !Number.isSafeInteger(this.#visibilityTimeoutSeconds)
@@ -211,11 +215,20 @@ export class PublicationSqsWorker {
       await this.#transport.acknowledge(message.receiptHandle);
       return outcome;
     } catch {
-      if (message.receiveCount < this.#maximumReceiveCount) {
-        await this.#transport.defer(
-          message.receiptHandle,
-          this.#retrySeconds(message.receiveCount),
-        );
+      const receiveCount = Number.isSafeInteger(message.receiveCount)
+        && message.receiveCount >= 1
+        ? message.receiveCount
+        : this.#maximumReceiveCount;
+      if (receiveCount < this.#maximumReceiveCount) {
+        try {
+          await this.#transport.defer(
+            message.receiptHandle,
+            this.#retrySeconds(receiveCount),
+          );
+        } catch {
+          // A visibility update is best-effort. Leaving the message unacknowledged
+          // lets the source queue retry it under its configured redrive policy.
+        }
       }
       return "retry";
     }

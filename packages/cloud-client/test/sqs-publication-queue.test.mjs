@@ -74,6 +74,10 @@ test("SQS references are canonical, exact, and omit protected event payload fiel
     () => decodePublicationQueueReference(`{ "schemaVersion": 1, "kind": "publicationOutboxReference" }`),
     /VFY_PUBLICATION_QUEUE_REFERENCE_INVALID/,
   );
+  assert.throws(
+    () => decodePublicationQueueReference(""),
+    /reference is empty/,
+  );
 });
 
 test("the relay publishes one minimal reference and acknowledges only a successful send", async () => {
@@ -175,4 +179,45 @@ test("worker failures use bounded backoff and terminal poison messages remain sa
   assert.deepEqual(transport.acknowledged, []);
   assert.equal(JSON.stringify(transport).includes("SECRET_CANARY"), false);
   assert.equal(queueReferenceBody().includes("payloadDigest"), false);
+});
+
+test("worker configuration rejects a non-callable jitter source", () => {
+  assert.throws(
+    () => new PublicationSqsWorker(new FakeTransport(), () => "processed", { jitter: 0.5 }),
+    /VFY_PUBLICATION_QUEUE_WORKER_INVALID/,
+  );
+});
+
+test("invalid receive counts and retry transport failures cannot escape the worker loop", async () => {
+  const invalidCountTransport = new FakeTransport();
+  invalidCountTransport.messages.push({
+    messageId: "message:invalid-count",
+    receiptHandle: "receipt:invalid-count",
+    body: queueReferenceBody(),
+    receiveCount: Number.NaN,
+  });
+  const invalidCountWorker = new PublicationSqsWorker(
+    invalidCountTransport,
+    () => { throw new Error("handler failure"); },
+  );
+  assert.equal(await invalidCountWorker.processOne(), "retry");
+  assert.deepEqual(invalidCountTransport.deferred, []);
+
+  const failingDeferTransport = new FakeTransport();
+  failingDeferTransport.messages.push({
+    messageId: "message:defer-failure",
+    receiptHandle: "receipt:defer-failure",
+    body: queueReferenceBody(),
+    receiveCount: 1,
+  });
+  failingDeferTransport.defer = async () => {
+    throw new Error("visibility update failed");
+  };
+  const failingDeferWorker = new PublicationSqsWorker(
+    failingDeferTransport,
+    () => { throw new Error("handler failure"); },
+    { jitter: () => Number.NaN },
+  );
+  assert.equal(await failingDeferWorker.processOne(), "retry");
+  assert.deepEqual(failingDeferTransport.acknowledged, []);
 });

@@ -17,11 +17,11 @@
   "artifacts": [
     {
       "path": "packages/cloud-client/src/public/sqs-publication-queue.ts",
-      "digest": "sha256:d3751646629cdeaef6a3b8a0dd3511c721d03b3bd0cadfe792ab80ab623e15ec"
+      "digest": "sha256:3754cc71c9d302332b228e52809a02e3dd9cce124d8e06f965072304b8f29b2c"
     },
     {
       "path": "packages/cloud-client/test/sqs-publication-queue.test.mjs",
-      "digest": "sha256:deed8cb164e2cc2d78d5cef41781f2792e88ec89c7a80ace0d22e71557de6d8b"
+      "digest": "sha256:2d2d5929fed9a9d177f2349e83ad10bf0488708bba99810d3536e39350fb52e1"
     },
     {
       "path": "packages/cloud-client/schemas/publication-queue-reference.schema.json",
