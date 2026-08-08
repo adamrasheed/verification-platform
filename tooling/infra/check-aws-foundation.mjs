@@ -67,6 +67,7 @@ const metadata = [
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
+const metadataData = await read("tooling/infra/aws/metadata-cloud/data.tf");
 const metadataText = (await Promise.all(metadata)).join("\n");
 const allInfra = `${bootstrapText}\n${metadataText}`;
 
@@ -105,6 +106,17 @@ requireText(metadataText, "readonlyRootFilesystem = true", "read-only migration 
 requireText(metadataText, 'image_tag_mutability = "IMMUTABLE"', "immutable migration image");
 requireText(metadataText, 'force_delete         = true', "ephemeral repository cleanup");
 requireText(metadataText, 'name = "PGPASSWORD"', "RDS-managed password injection");
+requireText(
+  metadataData,
+  'resources = ["arn:aws:s3:::prod-${var.aws_region}-starport-layer-bucket/*"]',
+  "regional ECR layer bucket boundary",
+);
+const ecrLayerPolicy = metadataData.slice(
+  metadataData.indexOf('sid       = "EphemeralEcrLayerPull"'),
+  metadataData.indexOf('resource "aws_s3_bucket_policy" "protected"'),
+);
+assert.ok(ecrLayerPolicy.length > 0, "ephemeral ECR layer endpoint policy must exist");
+assert.doesNotMatch(ecrLayerPolicy, /condition\s*\{/);
 assert.doesNotMatch(metadataText, /task_role_arn\s*=/);
 requireText(metadataText, 'backend "s3" {}', "encrypted remote-state backend");
 requireText(bootstrapText, 'url            = "https://token.actions.githubusercontent.com"', "GitHub OIDC provider");
