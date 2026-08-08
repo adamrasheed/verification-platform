@@ -36,7 +36,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:3560abe18e0a8486c9168aeed56b2d426201af02e7f9d089e73e1dfcc3efa348"
+      "digest": "sha256:1a90e42e310f3f0d4ea6acb47d09401b8eba7bb2efa7aab7484e8ddce1ab3dca"
     },
     {
       "path": "tooling/infra/aws/bootstrap/budget.tf",

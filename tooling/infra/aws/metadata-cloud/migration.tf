@@ -142,14 +142,14 @@ resource "aws_ecs_task_definition" "migration" {
     environment = [
       { name = "EXPECTED_POSTGRES_VERSION", value = var.postgres_engine_version },
       { name = "PGDATABASE", value = "verification" },
+      { name = "PGHOST", value = aws_db_instance.metadata[0].address },
+      { name = "PGPORT", value = "5432" },
       { name = "PGSSLMODE", value = "require" },
+      { name = "PGUSER", value = "verification_admin" },
       { name = "MIGRATION_RUN_ID", value = var.migration_image_tag },
     ]
     secrets = [
-      { name = "PGHOST", valueFrom = "${aws_db_instance.metadata[0].master_user_secret[0].secret_arn}:host::" },
       { name = "PGPASSWORD", valueFrom = "${aws_db_instance.metadata[0].master_user_secret[0].secret_arn}:password::" },
-      { name = "PGPORT", valueFrom = "${aws_db_instance.metadata[0].master_user_secret[0].secret_arn}:port::" },
-      { name = "PGUSER", valueFrom = "${aws_db_instance.metadata[0].master_user_secret[0].secret_arn}:username::" },
     ]
     linuxParameters = { initProcessEnabled = true }
     logConfiguration = {

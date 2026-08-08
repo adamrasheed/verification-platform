@@ -2,6 +2,17 @@ locals {
   github_oidc_subject = "${var.github_oidc_subject_prefix}:environment:${var.github_environment}"
 }
 
+resource "aws_iam_service_linked_role" "ecs" {
+  count = var.deployment_enabled ? 1 : 0
+
+  aws_service_name = "ecs.amazonaws.com"
+  description      = "Service-linked role required for private ECS migration tasks"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 resource "aws_iam_openid_connect_provider" "github" {
   count = var.deployment_enabled ? 1 : 0
 
@@ -166,6 +177,15 @@ resource "aws_iam_role_policy" "github_deploy" {
           "rds:DescribeDBSubnetGroups",
         ]
         Resource = "*"
+      },
+      {
+        Sid    = "ReadEphemeralMigrationLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents",
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.github_environment}/migration:*"
       },
       {
         Sid    = "ManageRegionalDevelopmentFoundation"
