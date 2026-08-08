@@ -20,7 +20,7 @@
   "artifacts": [
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.tf",
-      "digest": "sha256:376ff8431b4c281de2253f01229d4727a9665e10e57b6138fa6d4321fb30c8eb"
+      "digest": "sha256:bb103b59da10e144a1e993de6a8055304e48d8b5e5b01091436a14899e8f99fa"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
@@ -60,7 +60,7 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:6880632637af98409d27a76f7fa7933b42282608541cf9d92f2778d2407045ce"
+      "digest": "sha256:1a90e42e310f3f0d4ea6acb47d09401b8eba7bb2efa7aab7484e8ddce1ab3dca"
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",

@@ -179,6 +179,15 @@ resource "aws_iam_role_policy" "github_deploy" {
         Resource = "*"
       },
       {
+        Sid    = "ReadEphemeralMigrationLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogStreams",
+          "logs:GetLogEvents",
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/verification/${var.github_environment}/migration:*"
+      },
+      {
         Sid    = "ManageRegionalDevelopmentFoundation"
         Effect = "Allow"
         Action = [
