@@ -130,6 +130,11 @@ run "ephemeral_migration_runner_is_private_and_bounded" {
   }
 
   assert {
+    condition     = length(aws_vpc_security_group_egress_rule.migration_to_s3) == 1 && aws_vpc_security_group_egress_rule.migration_to_s3[0].from_port == 443 && aws_vpc_security_group_egress_rule.migration_to_s3[0].to_port == 443
+    error_message = "The migration runner requires one bounded TLS path to the S3 gateway endpoint for ECR layers."
+  }
+
+  assert {
     condition     = aws_ecr_repository.migration[0].image_tag_mutability == "IMMUTABLE" && aws_ecr_repository.migration[0].force_delete
     error_message = "The ephemeral migration repository must use immutable tags and support automatic cleanup."
   }
