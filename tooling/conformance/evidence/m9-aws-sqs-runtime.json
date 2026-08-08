@@ -30,7 +30,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/queue-runner.tf",
-      "digest": "sha256:4e65b17af361f650ea625b59d6b3939b2ca90b1a9c2a4f34c636103bc3c990c9"
+      "digest": "sha256:3d6f0b31d8fd7dbab4e7471f1b437890e563fbfd9f127522dd8a1311c79263c6"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",

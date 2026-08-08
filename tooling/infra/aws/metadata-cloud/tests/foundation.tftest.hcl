@@ -178,8 +178,8 @@ run "ephemeral_sqs_runner_is_private_and_bounded" {
   }
 
   assert {
-    condition     = length(aws_vpc_security_group_egress_rule.queue_runner_to_endpoints) == 1 && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].cidr_ipv4 == var.vpc_cidr && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].from_port == 443 && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].to_port == 443
-    error_message = "The SQS runner requires one VPC-bounded TLS path to private interface endpoints."
+    condition     = length(aws_vpc_security_group_egress_rule.queue_runner_to_endpoints) == 1 && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].referenced_security_group_id == aws_security_group.queue_runner_endpoints[0].id && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].from_port == 443 && aws_vpc_security_group_egress_rule.queue_runner_to_endpoints[0].to_port == 443
+    error_message = "The SQS runner requires one identity-bound TLS path to private interface endpoints."
   }
 
   assert {

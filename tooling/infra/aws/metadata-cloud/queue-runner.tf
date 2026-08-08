@@ -207,12 +207,12 @@ resource "aws_vpc_security_group_ingress_rule" "queue_runner_endpoints" {
 resource "aws_vpc_security_group_egress_rule" "queue_runner_to_endpoints" {
   count = var.deployment_enabled ? (var.queue_runner_enabled ? 1 : 0) : 0
 
-  security_group_id = aws_security_group.queue_runner[0].id
-  cidr_ipv4         = var.vpc_cidr
-  from_port         = 443
-  to_port           = 443
-  ip_protocol       = "tcp"
-  description       = "TLS only inside the VPC for SQS conformance endpoints"
+  security_group_id            = aws_security_group.queue_runner[0].id
+  referenced_security_group_id = aws_security_group.queue_runner_endpoints[0].id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+  description                  = "TLS only to the SQS conformance endpoint identity"
 }
 
 resource "aws_vpc_security_group_egress_rule" "queue_runner_to_s3" {
