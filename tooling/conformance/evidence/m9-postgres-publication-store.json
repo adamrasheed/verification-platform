@@ -36,7 +36,7 @@
     },
     {
       "path": "packages/cloud-client/src/public/index.ts",
-      "digest": "sha256:721b0d4d4788923ffdebd883c067d82b2fefd8db649e3be90f621cd0fa64252a"
+      "digest": "sha256:e4106e0b355616d214bd023499fae99c84f1d05755c0775f810b6b557b87c8c6"
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
@@ -48,7 +48,7 @@
     },
     {
       "path": "package-lock.json",
-      "digest": "sha256:8f4b0ad6e65a61e63d8d56a7dc347f725983ee31b91f6d1c2a686efb7e7d2569"
+      "digest": "sha256:2f0df4509ac119584992dcf83d4c60d3379f2119b1f629de656c820ed49c2d54"
     },
     {
       "path": ".github/workflows/ci.yml",

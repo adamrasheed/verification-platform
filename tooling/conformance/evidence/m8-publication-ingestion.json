@@ -26,7 +26,7 @@
     },
     {
       "path": "packages/cloud-client/src/public/index.ts",
-      "digest": "sha256:721b0d4d4788923ffdebd883c067d82b2fefd8db649e3be90f621cd0fa64252a"
+      "digest": "sha256:e4106e0b355616d214bd023499fae99c84f1d05755c0775f810b6b557b87c8c6"
     },
     {
       "path": "packages/cloud-client/schemas/publication-intent.schema.json",

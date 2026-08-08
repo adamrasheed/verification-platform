@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-sqs-relay-worker",
+  "taskId": "M9-T05",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11.3-11.4,18", "EDD §§19-21,26-28,31", "ADR-0005", "ADR-0013", "SP-CLOUD-002", "ORB-QUEUE-002"],
+  "testIds": [
+    "sqs-relay:canonical-digest-free-reference",
+    "sqs-relay:acknowledge-only-after-send",
+    "sqs-worker:idempotent-duplicate-acknowledgement",
+    "sqs-worker:bounded-jittered-retry",
+    "sqs-worker:sanitized-terminal-redrive",
+    "sqs-port:single-message-bounded-receive"
+  ],
+  "command": "npm run test --workspace @verify-internal/cloud-client && npm run check:schemas",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/src/public/sqs-publication-queue.ts",
+      "digest": "sha256:3754cc71c9d302332b228e52809a02e3dd9cce124d8e06f965072304b8f29b2c"
+    },
+    {
+      "path": "packages/cloud-client/test/sqs-publication-queue.test.mjs",
+      "digest": "sha256:2d2d5929fed9a9d177f2349e83ad10bf0488708bba99810d3536e39350fb52e1"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-queue-reference.schema.json",
+      "digest": "sha256:124485291446d0a9a26ac6c8a2a55c5eaba98378dc34a3867c841162ead11c8a"
+    },
+    {
+      "path": "packages/cloud-client/src/public/index.ts",
+      "digest": "sha256:e4106e0b355616d214bd023499fae99c84f1d05755c0775f810b6b557b87c8c6"
+    },
+    {
+      "path": "packages/cloud-client/package.json",
+      "digest": "sha256:6c0eeadd326466410c15ea945f54a88c3657e9876f82d92182dd1c1848ff2d17"
+    },
+    {
+      "path": "package-lock.json",
+      "digest": "sha256:2f0df4509ac119584992dcf83d4c60d3379f2119b1f629de656c820ed49c2d54"
+    },
+    {
+      "path": "docs/operations/M9_SQS_WORKER.md",
+      "digest": "sha256:95d958a5b6d5fddf958de8e65ee8e9dcd1909dc6462c15695476dda33bb1f38f"
+    }
+  ]
+}
