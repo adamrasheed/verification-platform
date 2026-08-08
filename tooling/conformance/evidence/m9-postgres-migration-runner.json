@@ -28,7 +28,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:5dc3d101b92736c6628ec865401cdb5da080a154bdda0aab92129af6f1dd5abd"
+      "digest": "sha256:fbb998a9928f28c0c2e2c35fbbb00ab32d1e94ca74f79555a5e0e6b1716690f3"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
@@ -40,7 +40,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:dcb7602921333b75d61a8082b6977e8489fed81c4d4a19db7523275c8b8968ee"
+      "digest": "sha256:92da548727b16279323c63e9c77079fc3a3147bcf6f39d756f84f1e64e77d0c8"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",

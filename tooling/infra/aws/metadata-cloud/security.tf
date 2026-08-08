@@ -122,3 +122,14 @@ resource "aws_vpc_security_group_egress_rule" "migration_to_endpoints" {
   ip_protocol                  = "tcp"
   description                  = "TLS only to ephemeral AWS service endpoints"
 }
+
+resource "aws_vpc_security_group_egress_rule" "migration_to_s3" {
+  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+
+  security_group_id = aws_security_group.workload[0].id
+  prefix_list_id    = aws_vpc_endpoint.s3[0].prefix_list_id
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  description       = "TLS only to S3 for ephemeral ECR image layers"
+}
