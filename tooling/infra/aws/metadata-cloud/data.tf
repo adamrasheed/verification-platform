@@ -183,12 +183,6 @@ data "aws_iam_policy_document" "s3_endpoint" {
         type        = "*"
         identifiers = ["*"]
       }
-
-      condition {
-        test     = "StringEquals"
-        variable = "aws:PrincipalAccount"
-        values   = [var.aws_account_id]
-      }
     }
   }
 }

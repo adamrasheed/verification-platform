@@ -24,7 +24,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:e6eee0146202392f1fb222916ae36412378cfe7740ec46f2c2b5a989a9b898ef"
+      "digest": "sha256:98a786807548edb1dc5b84df8ed09c49f23f398e1a091dc757d6a8101ee62a45"
     },
     {
       "path": "tooling/infra/aws/bootstrap/.terraform.lock.hcl",
@@ -72,7 +72,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:6ca579f4a04a3b37859047e324cc56d1f9b040f644b4b56a248fdc3b148d98ff"
+      "digest": "sha256:cd9f1ca0d43ec5ae69acfdbed59d986ee70e69c8b29e3149ca5c9d1bf4d2fdcf"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",

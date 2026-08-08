@@ -48,7 +48,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:6ca579f4a04a3b37859047e324cc56d1f9b040f644b4b56a248fdc3b148d98ff"
+      "digest": "sha256:cd9f1ca0d43ec5ae69acfdbed59d986ee70e69c8b29e3149ca5c9d1bf4d2fdcf"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
