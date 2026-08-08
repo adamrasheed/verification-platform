@@ -13,6 +13,7 @@ import {
   PublicationSqsWorker,
   assertCloudCanariesAbsent,
   assertCloudSecondarySinkInventory,
+  decodePublicationQueueReference,
   encodePublicationQueueReference,
   publicationQueueReference,
 } from "../../packages/cloud-client/dist/public/index.js";
@@ -188,6 +189,26 @@ async function assertQueueEmpty(transport, label) {
   }
 }
 
+async function removeSyntheticQueueMessages(transport) {
+  for (let index = 0; index < 10; index += 1) {
+    const message = await transport.receiveOne({ waitTimeSeconds: 1, visibilityTimeoutSeconds: 1 });
+    if (message === undefined) return;
+    let reference;
+    try {
+      reference = decodePublicationQueueReference(message.body);
+    } catch {
+      await transport.defer(message.receiptHandle, 1).catch(() => undefined);
+      throw new TypeError("VFY_LIVE_SQS_CLEANUP_UNRELATED_MESSAGE");
+    }
+    if (reference.tenantId !== tenantId) {
+      await transport.defer(message.receiptHandle, 1).catch(() => undefined);
+      throw new TypeError("VFY_LIVE_SQS_CLEANUP_UNRELATED_MESSAGE");
+    }
+    await transport.acknowledge(message.receiptHandle);
+  }
+  throw new TypeError("VFY_LIVE_SQS_CLEANUP_BOUND_EXCEEDED");
+}
+
 function sinkInventory() {
   return {
     schemaVersion: 1,
@@ -206,6 +227,8 @@ function sinkInventory() {
 
 try {
   await cleanSyntheticRows();
+  await removeSyntheticQueueMessages(primary);
+  await removeSyntheticQueueMessages(deadLetter);
   const preexistingDeliveries = await pool.query(
     "SELECT count(*)::integer AS count FROM publication_outbox WHERE status IN ('pending', 'leased')",
   );
@@ -259,10 +282,16 @@ try {
     jitter: () => 0,
   });
   for (let attempt = 1; attempt <= 5; attempt += 1) {
+    stage = `bounded-retry-attempt-${attempt}`;
     assert.equal(await poisonWorker.processOne(), "retry");
   }
-  await delay(1_500);
-  const redriven = await deadLetter.receiveOne({ waitTimeSeconds: 20, visibilityTimeoutSeconds: 30 });
+  stage = "source-bound-redrive";
+  let redriven;
+  for (let trigger = 0; trigger < 3 && redriven === undefined; trigger += 1) {
+    await delay(1_500);
+    await poisonWorker.processOne();
+    redriven = await deadLetter.receiveOne({ waitTimeSeconds: 5, visibilityTimeoutSeconds: 30 });
+  }
   assert.ok(redriven, "terminal delivery must reach the source-bound DLQ");
   assert.equal(redriven.body, stableBody);
 
@@ -345,6 +374,9 @@ try {
   }));
 } catch (error) {
   await cleanSyntheticRows().catch(() => undefined);
+  await delay(1_500);
+  await removeSyntheticQueueMessages(primary).catch(() => undefined);
+  await removeSyntheticQueueMessages(deadLetter).catch(() => undefined);
   console.error(JSON.stringify({
     schemaVersion: 1,
     kind: "awsSqsWorkerEvidence",
