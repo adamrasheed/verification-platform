@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsPostgresMigrationEvidence",
+  "evidenceDate": "2026-08-08",
+  "taskId": "M9-T04",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "dbaefc6f62c7fe18a0be6d218bc762fb5a438e59",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0"
+  },
+  "workflow": {
+    "name": "AWS PostgreSQL migration",
+    "runId": 31252812822,
+    "jobId": 93091675182,
+    "event": "workflow_dispatch",
+    "protectedEnvironment": "development",
+    "createdAt": "2026-08-08T10:27:20Z",
+    "startedAt": "2026-08-08T10:27:25Z",
+    "completedAt": "2026-08-08T10:36:25Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "imageBuildAndPush": "passed",
+    "liveMigrationAndProbe": "passed",
+    "cleanup": "passed",
+    "postCleanupZeroDrift": "passed",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/31252812822",
+    "jobUrl": "https://github.com/adamrasheed/verification-platform/actions/runs/31252812822/job/93091675182"
+  },
+  "topology": {
+    "runtime": "private AWS Fargate task",
+    "publicIp": false,
+    "internetGateway": false,
+    "natGateway": false,
+    "ephemeralServiceEndpoints": "one availability zone",
+    "databaseTransport": "PostgreSQL verify-full TLS with the pinned official us-west-2 RDS CA bundle",
+    "taskRole": false
+  },
+  "migrationProbe": {
+    "schemaVersion": 1,
+    "kind": "awsPostgresMigrationEvidence",
+    "migrationId": "0001_publication_store",
+    "serverVersion": "17.6",
+    "outcome": "passed",
+    "checks": {
+      "migrationRecorded": "passed",
+      "concurrentIdempotency": "passed",
+      "tenantIsolation": "passed",
+      "fencedOutbox": "passed",
+      "atomicDeletion": "passed",
+      "digestFreeTombstone": "passed",
+      "restoreReplayGate": "passed",
+      "activeRetention": "passed",
+      "tombstoneRetention": "passed",
+      "syntheticDataRemoved": "passed"
+    }
+  },
+  "postCleanupAudit": {
+    "command": "node tooling/infra/audit-aws-development.mjs",
+    "observedAt": "2026-08-08T10:36:44.662Z",
+    "foundationOutcome": "passed",
+    "ephemeralResourcesRemaining": 0,
+    "secretValuesRead": false
+  },
+  "dataHandling": {
+    "customerDataUsed": false,
+    "syntheticDataRemoved": true,
+    "secretValuesRetained": false
+  },
+  "sourceArtifacts": [
+    {
+      "path": ".github/workflows/aws-postgres-migration.yml",
+      "digest": "sha256:2e914096ceaf80e3557e6d4641038c9782b36c641c7c767987a9cf0fc380183a"
+    },
+    {
+      "path": "tooling/infra/run-live-postgres-migration.mjs",
+      "digest": "sha256:cf1c9357b6e3489c2c73eaa1f7d567548c1890f498d4df2c265683152d401b9b"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/migration.tf",
+      "digest": "sha256:9ed1545fc49d109c73284454b21cfe184d7125fd263ca8a4f3ab6c0203ad255c"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
+      "digest": "sha256:33fd6fd5dfd4b618afcd6f45436b2507d270fd4cac5e9334cca63db0ea07f9c7"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
+      "digest": "sha256:733b52e4b589586377e3e00f7c4625b61e14cbf0b5e08cace28b4f8aecc27c66"
+    },
+    {
+      "path": "packages/cloud-client/migrations/0001_publication_store.sql",
+      "digest": "sha256:dfd047d581aaf905ed4e319f90bb97d72807bcc94519b4b5414151b6e1188559"
+    }
+  ]
+}

@@ -16,7 +16,7 @@
     "postgres-migration:live-probe-synthetic-cleanup",
     "postgres-migration:always-cleanup-zero-drift"
   ],
-  "command": "tofu -chdir=tooling/infra/aws/metadata-cloud test -no-color && node tooling/infra/check-aws-foundation.mjs && EXPECTED_POSTGRES_VERSION=<ephemeral-version> MIGRATION_RUN_ID=<git-sha> node tooling/infra/run-live-postgres-migration.mjs",
+  "command": "tofu -chdir=tooling/infra/aws/metadata-cloud test -no-color && node tooling/infra/check-aws-foundation.mjs && gh run watch 31252812822 --exit-status && node tooling/infra/check-aws-postgres-migration-evidence.mjs",
   "outcome": "passed",
   "artifacts": [
     {
@@ -74,6 +74,14 @@
     {
       "path": "docs/operations/M9_POSTGRES_MIGRATION.md",
       "digest": "sha256:831af9f04ebe8fb425e086976b979f99639978de1cb36605c26bbc2c9c5af593"
+    },
+    {
+      "path": "docs/compliance/release/AWS_POSTGRES_MIGRATION.json",
+      "digest": "sha256:ae1b27e3dd1579e5284496dc0df2f2a6d741b69230123c49b80437227830772a"
+    },
+    {
+      "path": "tooling/infra/check-aws-postgres-migration-evidence.mjs",
+      "digest": "sha256:101c37faf275d85cc02b247689265ae7503e8ee1ca86710be89fa84599e73b52"
     }
   ]
 }
