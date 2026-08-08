@@ -34,7 +34,12 @@ Outbox conformance uses expiring fenced leases, a stable event identity,
 bounded attempts, and idempotent acknowledgement. `PostgresPublicationStore`
 implements admission and deletion transactions, `FOR UPDATE SKIP LOCKED`
 claims, monotonically increasing fences, bounded serialization retries, and
-sanitized terminal dead letters. SQS relay remains the separate M9-T05 gate.
+sanitized terminal dead letters. The M9-T05 queue port now transports only a
+canonical, digest-free outbox reference, receives one message at a time, deletes
+only processed or idempotent duplicate deliveries, and uses bounded jittered
+visibility changes before source-bound DLQ redrive. The concrete AWS adapter
+must bind the exact regional queue URL; protected live relay/worker and
+secondary-sink scans remain the deployment gate.
 
 Authorized deletion atomically removes the active projection and any queued
 acceptance event, installs a minimal digest-free tombstone, and emits one

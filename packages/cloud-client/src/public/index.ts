@@ -34,6 +34,22 @@ export {
   PublicationOutboxWorker,
 } from "./published-runs.js";
 export { PostgresPublicationStore } from "./postgres-publication-store.js";
+export {
+  PublicationSqsRelay,
+  PublicationSqsWorker,
+  assertPublicationQueueReference,
+  decodePublicationQueueReference,
+  encodePublicationQueueReference,
+  publicationQueueReference,
+} from "./sqs-publication-queue.js";
+export type {
+  PublicationQueueHandler,
+  PublicationQueueHandlerResult,
+  PublicationQueueMessage,
+  PublicationQueueReference,
+  PublicationQueueTransport,
+  PublicationQueueWorkerOptions,
+} from "./sqs-publication-queue.js";
 export type {
   PublicationAdmissionFaultInjector,
   PublicationAdmissionFaultPoint,
