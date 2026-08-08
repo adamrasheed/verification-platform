@@ -33,15 +33,15 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:cd9f1ca0d43ec5ae69acfdbed59d986ee70e69c8b29e3149ca5c9d1bf4d2fdcf"
+      "digest": "sha256:ed87da1086180f1d184130c357f147d08c93c4e8d8403311b3c0edf11aac6932"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/variables.tf",
-      "digest": "sha256:999ee64e63e0108b8a8ff76f4886fb300464574f9abd3f90dece36edfb4138a5"
+      "digest": "sha256:f2d703c307247865d1f4d49a74c11327c21e8e1efbfb2c99a254c762d5435f4f"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:d75c484530e8b936ede4c721cfa99ea961c9d189dd40e13e86536f41ac2545b8"
+      "digest": "sha256:992c4d7368fb6ce5798b3248b8a32267e8ebb471f7752c6bc96e17529fedd5ed"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
@@ -65,11 +65,11 @@
     },
     {
       "path": "tooling/infra/aws/bootstrap/identity.tf",
-      "digest": "sha256:1a90e42e310f3f0d4ea6acb47d09401b8eba7bb2efa7aab7484e8ddce1ab3dca"
+      "digest": "sha256:5005519a31d2994a962ac33e3f75e0e88db1b6cc1265892f32206c7fb78a810f"
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:7b0840746ee16bb73a5a33e281f3e9a6aa34425f3924527c1a5d41814d823638"
+      "digest": "sha256:54e32401ed711822e47f677bc8d98a82a41b65608b14f9f94dbbc3e72fa8c143"
     },
     {
       "path": "docs/operations/M9_POSTGRES_MIGRATION.md",

@@ -48,7 +48,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:cd9f1ca0d43ec5ae69acfdbed59d986ee70e69c8b29e3149ca5c9d1bf4d2fdcf"
+      "digest": "sha256:ed87da1086180f1d184130c357f147d08c93c4e8d8403311b3c0edf11aac6932"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
@@ -60,7 +60,7 @@
     },
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:c92be02f2004fa8cb1ff1f1bf4f880700bc858fdfcbba442ea0024ab6cdb9faa"
+      "digest": "sha256:8a1f1afb6c79b60d4ae6925b69f55a146f2bbb1faca99ebd4ffc9a780d4ed947"
     },
     {
       "path": "docs/product/ROADMAP.md",
@@ -68,7 +68,7 @@
     },
     {
       "path": "package.json",
-      "digest": "sha256:dc04fdaef3747d5ccd1d5171280505df0e5e914e1f6e967ad0e0c2dec9352c73"
+      "digest": "sha256:cdb3b88c4bd5ae7d34fec6a7642943c80ac17ec16b2f03a67a805bc4d2b02179"
     }
   ]
 }

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-sqs-runtime",
+  "taskId": "M9-T05",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11.3-11.4,18", "EDD §§19-21,26-28,31", "ADR-0005", "ADR-0013", "SP-CLOUD-002", "ORB-QUEUE-002"],
+  "testIds": [
+    "aws-sqs:exact-account-region-queue-url",
+    "aws-sqs:single-message-bounded-receive",
+    "aws-sqs:independent-primary-dlq-iam-and-endpoint-policy",
+    "aws-sqs:private-readonly-fargate-runner",
+    "aws-sqs:default-off-ephemeral-plan",
+    "aws-sqs:mandatory-cleanup-zero-drift-workflow",
+    "aws-sqs:live-canary-probe-contract"
+  ],
+  "command": "npm run check:cloud-infra && npm run check:conformance",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/infra/aws-sqs-publication-transport.mjs",
+      "digest": "sha256:5188134edf9a61f2e21679340a06e2da94eabbcacb6bb59c42615dd854e74aa9"
+    },
+    {
+      "path": "tooling/infra/test-aws-sqs-publication-transport.mjs",
+      "digest": "sha256:11ad1e8a270904a4fa79a8f603f91af7b98d244b0f755bc68f87e630a9c57592"
+    },
+    {
+      "path": "tooling/infra/run-live-sqs-conformance.mjs",
+      "digest": "sha256:0d598d5f0cbe27c58183af3849486a5d0ad4dd0511e6b8249ce573351f3918f5"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/queue-runner.tf",
+      "digest": "sha256:4e65b17af361f650ea625b59d6b3939b2ca90b1a9c2a4f34c636103bc3c990c9"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",
+      "digest": "sha256:078d30b688153507f9b73ccc66c47d3a7a63d4c1d4fe6c8f3bacd80f9ee5e654"
+    },
+    {
+      "path": ".github/workflows/aws-sqs-conformance.yml",
+      "digest": "sha256:359415b97ade7e1bbd837af4137ba0cdd222d4aed5a0c8ce1fc42ea15ec431fb"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/outputs.tf",
+      "digest": "sha256:fbc3edeecb88dcaa6fc549ba7e957c75c68da3e109a968fa224285a2b54cb77c"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/README.md",
+      "digest": "sha256:3fe927e0b9ee94e8a2dd5c7fb4459338d1a366abcd83f587386417ce7745a5e5"
+    }
+  ]
+}
