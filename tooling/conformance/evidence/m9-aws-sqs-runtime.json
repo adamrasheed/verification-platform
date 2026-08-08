@@ -26,7 +26,7 @@
     },
     {
       "path": "tooling/infra/run-live-sqs-conformance.mjs",
-      "digest": "sha256:0d598d5f0cbe27c58183af3849486a5d0ad4dd0511e6b8249ce573351f3918f5"
+      "digest": "sha256:61b289755ed8339d7dae4b382a33f9edc2909a1c05826ee0811ca98ae9475535"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/queue-runner.tf",
