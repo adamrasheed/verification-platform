@@ -294,6 +294,7 @@ resource "aws_iam_role_policy" "github_deploy" {
           "iam:GetRole",
           "iam:GetRolePolicy",
           "iam:ListAttachedRolePolicies",
+          "iam:ListInstanceProfilesForRole",
           "iam:ListRolePolicies",
           "iam:PutRolePolicy",
           "iam:TagRole",
