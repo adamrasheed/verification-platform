@@ -12,6 +12,7 @@
     "postgres-migration:exact-rds-managed-secret-injection",
     "postgres-migration:immutable-kms-encrypted-image",
     "postgres-migration:read-only-no-task-role",
+    "postgres-migration:rds-tls-full-verification",
     "postgres-migration:live-probe-synthetic-cleanup",
     "postgres-migration:always-cleanup-zero-drift"
   ],
@@ -20,7 +21,7 @@
   "artifacts": [
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.tf",
-      "digest": "sha256:bb103b59da10e144a1e993de6a8055304e48d8b5e5b01091436a14899e8f99fa"
+      "digest": "sha256:9ed1545fc49d109c73284454b21cfe184d7125fd263ca8a4f3ab6c0203ad255c"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
@@ -44,15 +45,19 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
-      "digest": "sha256:0054cb23d729d55ac2d63459dafac5e83a1a9f475643a259280026b0f77bed05"
+      "digest": "sha256:33fd6fd5dfd4b618afcd6f45436b2507d270fd4cac5e9334cca63db0ea07f9c7"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
+      "digest": "sha256:733b52e4b589586377e3e00f7c4625b61e14cbf0b5e08cace28b4f8aecc27c66"
     },
     {
       "path": ".dockerignore",
-      "digest": "sha256:95273a0b7770f0368c2c77dab7d99f544bd2921f097e7dfc30cfff23cecd7e56"
+      "digest": "sha256:7b3d3aaa8eb26d95e879cd7bf7328b376c9d6b711f1eca8d07faf57af4e2258d"
     },
     {
       "path": "tooling/infra/run-live-postgres-migration.mjs",
-      "digest": "sha256:8623f89ac4b6ca583b523b18ba1d09d218471af87a980dc60ff8c0f4210e8189"
+      "digest": "sha256:cf1c9357b6e3489c2c73eaa1f7d567548c1890f498d4df2c265683152d401b9b"
     },
     {
       "path": ".github/workflows/aws-postgres-migration.yml",
@@ -64,11 +69,11 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:98a786807548edb1dc5b84df8ed09c49f23f398e1a091dc757d6a8101ee62a45"
+      "digest": "sha256:7b0840746ee16bb73a5a33e281f3e9a6aa34425f3924527c1a5d41814d823638"
     },
     {
       "path": "docs/operations/M9_POSTGRES_MIGRATION.md",
-      "digest": "sha256:35223dacfff7f8eb599b06c0f4a4462c585328c5ef9677fa8ffd6cb1821db245"
+      "digest": "sha256:831af9f04ebe8fb425e086976b979f99639978de1cb36605c26bbc2c9c5af593"
     }
   ]
 }

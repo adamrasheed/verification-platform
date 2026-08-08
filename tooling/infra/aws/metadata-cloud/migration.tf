@@ -144,7 +144,8 @@ resource "aws_ecs_task_definition" "migration" {
       { name = "PGDATABASE", value = "verification" },
       { name = "PGHOST", value = aws_db_instance.metadata[0].address },
       { name = "PGPORT", value = "5432" },
-      { name = "PGSSLMODE", value = "require" },
+      { name = "PGSSLMODE", value = "verify-full" },
+      { name = "PGSSLROOTCERT", value = "/app/rds-ca-bundle.pem" },
       { name = "PGUSER", value = "verification_admin" },
       { name = "MIGRATION_RUN_ID", value = var.migration_image_tag },
     ]
