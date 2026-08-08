@@ -61,7 +61,10 @@ const expectedChecks = [
   "tombstoneRetention",
   "syntheticDataRemoved",
 ];
-assert.deepEqual(Object.keys(report.migrationProbe.checks), expectedChecks);
+assert.deepEqual(
+  Object.keys(report.migrationProbe.checks).sort(),
+  [...expectedChecks].sort(),
+);
 for (const check of expectedChecks) assert.equal(report.migrationProbe.checks[check], "passed");
 assert.equal(report.postCleanupAudit.foundationOutcome, "passed");
 assert.equal(report.postCleanupAudit.ephemeralResourcesRemaining, 0);

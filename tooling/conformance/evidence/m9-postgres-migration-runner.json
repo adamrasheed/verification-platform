@@ -81,7 +81,7 @@
     },
     {
       "path": "tooling/infra/check-aws-postgres-migration-evidence.mjs",
-      "digest": "sha256:39010e9246a078fef058e0e0f20e4148ce9299b76cec03c40568b83741263d6d"
+      "digest": "sha256:101c37faf275d85cc02b247689265ae7503e8ee1ca86710be89fa84599e73b52"
     }
   ]
 }
