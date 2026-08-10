@@ -16,7 +16,7 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:82cf35d9737e4ecd22fc2fc5ca61a6348833ee4e82a9f0b82c8c53a7e70ae57d"
+      "digest": "sha256:793c63f03ea90435cd1120b9185f0cee7c54f23e5d220e6f43d8de6d6d56eed1"
     },
     {
       "path": "tooling/release/check-metadata-cloud-evidence.mjs",

@@ -159,3 +159,30 @@ variable "queue_runner_image_tag" {
     error_message = "An exact 40-character Git commit tag is required for an SQS conformance run."
   }
 }
+
+variable "control_api_runner_enabled" {
+  description = "Creates the ephemeral private control API conformance runner; disabled outside an explicit protected run."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.control_api_runner_enabled || var.deployment_enabled
+    error_message = "The control API runner requires the guarded metadata-cloud deployment."
+  }
+
+  validation {
+    condition     = !var.control_api_runner_enabled || !var.migration_runner_enabled
+    error_message = "The control API and migration runners share one ephemeral namespace and cannot be enabled together."
+  }
+}
+
+variable "control_api_runner_image_tag" {
+  description = "Immutable Git commit tag for the ephemeral control API conformance image."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.control_api_runner_enabled || can(regex("^[a-f0-9]{40}$", var.control_api_runner_image_tag))
+    error_message = "An exact 40-character Git commit tag is required for a control API conformance run."
+  }
+}

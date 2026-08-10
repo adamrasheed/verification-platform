@@ -75,3 +75,27 @@ output "queue_runner_security_group_id" {
 output "queue_runner_log_group_name" {
   value = try(aws_cloudwatch_log_group.queue_runner[0].name, null)
 }
+
+output "control_api_runner_repository_url" {
+  value = try(aws_ecr_repository.control_api_runner[0].repository_url, null)
+}
+
+output "control_api_runner_task_definition_arn" {
+  value = try(aws_ecs_task_definition.control_api_runner[0].arn, null)
+}
+
+output "control_api_runner_cluster_arn" {
+  value = try(aws_ecs_cluster.metadata[0].arn, null)
+}
+
+output "control_api_runner_subnet_id" {
+  value = var.deployment_enabled && var.control_api_runner_enabled ? aws_subnet.private[var.availability_zones[0]].id : null
+}
+
+output "control_api_runner_security_group_id" {
+  value = try(aws_security_group.control_api_runner[0].id, null)
+}
+
+output "control_api_runner_log_group_name" {
+  value = try(aws_cloudwatch_log_group.control_api_runner[0].name, null)
+}

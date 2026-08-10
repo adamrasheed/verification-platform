@@ -32,9 +32,9 @@
     { "path": "tooling/conformance/evidence/m8-isolation-canary-foundation.json", "digest": "sha256:20fee730f071763a995d44db72669591dc994a31f01a230240fb8c0e121a8ad1" },
     { "path": "docs/compliance/release/SECURITY_REPORT.json", "digest": "sha256:4178ac5c79635a60ff5be73754f93e2594eb95d2d7d52789575db056d9297f45" },
     { "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json", "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc" },
-    { "path": "docs/compliance/release/AWS_POSTGRES_MIGRATION.json", "digest": "sha256:ae1b27e3dd1579e5284496dc0df2f2a6d741b69230123c49b80437227830772a" },
+    { "path": "docs/compliance/release/AWS_POSTGRES_MIGRATION.json", "digest": "sha256:ed2e497fd3c9e35842ec9d1ad708ed4bac3c8c43c2918b7ac3882ab92912c1e5" },
     { "path": "docs/compliance/release/AWS_SQS_WORKER.json", "digest": "sha256:54c9e3409582df7968e68756d286ff48b0b50f0bf88cd049b3bcc615405e6dd1" },
-    { "path": "package-lock.json", "digest": "sha256:a5f00e7e458c6e47bb6450f2497c359b9a7f4b59ec2ec52cb4b24511b4db7d5e" },
+    { "path": "package-lock.json", "digest": "sha256:b5a3bd03a63473acc3689c86cd03d6044c295b42eef13dbdfeac4921f78bf73e" },
     { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
   ]
 }

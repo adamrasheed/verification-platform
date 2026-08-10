@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-control-api-runtime",
+  "taskId": "M9-T06",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§10-12,16,18",
+    "EDD §§23-28,33",
+    "ADR-0013"
+  ],
+  "testIds": [
+    "control-api:postgres-identity-grants-and-revocation",
+    "control-api:serializable-idempotent-intent-admission",
+    "control-api:sanitized-postgres-audit",
+    "control-api:duplicate-safe-node-http-boundary",
+    "control-api:private-default-disabled-fargate-runner",
+    "control-api:exclusive-ephemeral-runner-namespace",
+    "control-api:mandatory-cleanup-and-zero-drift-workflow"
+  ],
+  "command": "VERIFY_POSTGRES_URL=postgresql://<ephemeral-postgresql>/verification npm test --workspace @verify-internal/control-api && node --test tooling/infra/test-control-api-node-http.mjs && tofu -chdir=tooling/infra/aws/metadata-cloud test -no-color && npm run check:cloud-infra",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "apps/control-api/migrations/0001_control_api.sql",
+      "digest": "sha256:213e59401e683f18fc5b33716dd9c80f1c193af389ec8fad237d97aa7be86dad"
+    },
+    {
+      "path": "apps/control-api/src/public/postgres-control-store.ts",
+      "digest": "sha256:68023f25c63158914bd3a625e6ae129b135ffd557f2ede326b82f92b44f55973"
+    },
+    {
+      "path": "tooling/infra/control-api-node-http.mjs",
+      "digest": "sha256:372d49d2340b1b52eb903963beb67e7639771b3cd7dd47a0ed48de2558b343cf"
+    },
+    {
+      "path": "apps/control-api/src/public/index.ts",
+      "digest": "sha256:8aad19d46beba9454d4d186d0a859573a3c2f2b5f4511232118b417d37604d84"
+    },
+    {
+      "path": "apps/control-api/test/postgres-control-store.test.mjs",
+      "digest": "sha256:673744d0169a5f2af4c392db387ae6918c0c46bd9084cdded25d44fa61fb6fe7"
+    },
+    {
+      "path": "tooling/infra/test-control-api-node-http.mjs",
+      "digest": "sha256:bf5d9e2624a9be5ea82004a654a0abdd51dd44b8a1da5a2878afc2e4bf2c583b"
+    },
+    {
+      "path": "apps/control-api/package.json",
+      "digest": "sha256:28171173d6e42a3a1f086e496fd1add280f78fa8b56ac79b5d6b40f08e593818"
+    },
+    {
+      "path": "package-lock.json",
+      "digest": "sha256:b5a3bd03a63473acc3689c86cd03d6044c295b42eef13dbdfeac4921f78bf73e"
+    },
+    {
+      "path": "tooling/infra/run-live-control-api-conformance.mjs",
+      "digest": "sha256:e799f933f7a5e9add28670fd37e65918ec5a392bf83c064eaacc21ba8f5c7ed8"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
+      "digest": "sha256:bdefe0d2f64aac6f395d46dff4699703129d2ce91100c60a8fc296d9a3a520fa"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile",
+      "digest": "sha256:111615c5c8862d77b392b7afb8ac9e90ed8df99c41ea1033fc9e2de8a14e37f0"
+    },
+    {
+      "path": ".github/workflows/aws-control-api-conformance.yml",
+      "digest": "sha256:2c080d93a7edfc775a33592eaf8b608f7d3e5b40f765f374bed9c930a7df4cad"
+    },
+    {
+      "path": "docs/operations/AWS_CONTROL_API_CONFORMANCE.md",
+      "digest": "sha256:faf16a54b49a15c97b55a9389d874622b89f7a3a1ab82ac5d74bc252b35cbfed"
+    }
+  ]
+}
