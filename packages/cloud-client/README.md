@@ -76,3 +76,22 @@ is covered by `cloud-client:test`. The digest-bound metadata-cloud
 foundation report retains contract, security, and supply-chain verification,
 but is explicitly not releasable: provider deployment, service SLO, and
 disaster recovery remain blocked until their deployed M9 Evidence exists.
+
+## Customer-controlled workload dispatch
+
+M9-T07 dispatch admission accepts a protocol `DispatchVerificationRequest`
+only when its customer workload binding is explicitly allowlisted and its
+nested Verify request is offline with an allowlisted checkout root binding.
+Admission atomically creates the dispatch, tenant-scoped idempotency record,
+and a minimal outbox reference. Exact retries return the original dispatch;
+changed canonical bytes fail closed.
+
+`InMemoryCustomerWorkloadDispatchStore` is the provider-neutral conformance
+model. `PostgresCustomerWorkloadDispatchStore` is its durable adapter. Both use
+bounded expiring leases and monotonically increasing fences, so an expired
+worker cannot accept, heartbeat, cancel, or finalize a newer claim. Gateway
+forwarding and customer-workload acceptance/termination are separate
+cancellation acknowledgements. A successful completion retains only the
+nested Verify invocation ID and the ID of a separately ingested, allowlisted
+published run. It cannot carry source, Evidence bodies, provider secrets, or a
+full local `VerifyResult` into cloud storage or the outbox.

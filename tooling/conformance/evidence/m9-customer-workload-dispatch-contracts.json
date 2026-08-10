@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-customer-workload-dispatch-contracts",
+  "taskId": "M9-T07",
+  "owner": "cloud-platform",
+  "governingClauses": ["EDD §§19-21,23-24,27,33", "ADR-0005", "ADR-0008"],
+  "testIds": [
+    "workload-dispatch:offline-nested-verify",
+    "workload-dispatch:exact-workload-and-workspace-binding",
+    "workload-dispatch:atomic-idempotent-admission-outbox",
+    "workload-dispatch:tenant-project-isolation",
+    "workload-dispatch:bounded-fenced-leases",
+    "workload-dispatch:separate-cancellation-acknowledgements",
+    "workload-dispatch:allowlisted-publication-reference-only",
+    "workload-dispatch:source-egress-canary-absent"
+  ],
+  "command": "VERIFY_POSTGRES_URL=postgresql://<ephemeral-postgresql>/verification npm test --workspace @verify-internal/cloud-client",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/cloud-client/migrations/0002_customer_workload_dispatch.sql",
+      "digest": "sha256:e050715d3624241819af63f9462d7abc8c9947b8e23590e6ddd32280c494c23a"
+    },
+    {
+      "path": "packages/cloud-client/src/public/postgres-workload-dispatch-store.ts",
+      "digest": "sha256:0248390b6e28869a25e80edc8f7ba6f94351d1c9498e1053edc11ab4c3d6624f"
+    },
+    {
+      "path": "packages/cloud-client/src/public/workload-dispatch.ts",
+      "digest": "sha256:b9ed893f15eb107517fe6b7906ded67ff410943b8a6e22be36d70990cb1ab327"
+    },
+    {
+      "path": "packages/cloud-client/src/public/types.ts",
+      "digest": "sha256:ef0257f9599b776199fe94b2708732248d9fd6d583203b1ff20cf4df525c32e6"
+    },
+    {
+      "path": "packages/cloud-client/src/public/index.ts",
+      "digest": "sha256:d7bb9fef16c4dd9c7ccd1067a830d5825b39a5319cc521ce88b052758ac7cf53"
+    },
+    {
+      "path": "packages/cloud-client/test/workload-dispatch.test.mjs",
+      "digest": "sha256:20811cf4d094472b867325133c4a62893b48b711bc4bf12697edcb2a1fbad3c0"
+    },
+    {
+      "path": "packages/cloud-client/README.md",
+      "digest": "sha256:1a4d84a15621ac9de7344432d38990ca5efd2355d16df26ef9026a20702fd0b6"
+    },
+    {
+      "path": "packages/cloud-client/package.json",
+      "digest": "sha256:6c0eeadd326466410c15ea945f54a88c3657e9876f82d92182dd1c1848ff2d17"
+    },
+    {
+      "path": "package-lock.json",
+      "digest": "sha256:b5a3bd03a63473acc3689c86cd03d6044c295b42eef13dbdfeac4921f78bf73e"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "digest": "sha256:723133bd8bc3b472a7e7c30fada4286e188d621297302a3cb0996a0ebf6d2cf3"
+    }
+  ]
+}

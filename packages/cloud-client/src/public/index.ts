@@ -34,6 +34,7 @@ export {
   PublicationOutboxWorker,
 } from "./published-runs.js";
 export { PostgresPublicationStore } from "./postgres-publication-store.js";
+export { PostgresCustomerWorkloadDispatchStore } from "./postgres-workload-dispatch-store.js";
 export {
   PublicationSqsRelay,
   PublicationSqsWorker,
@@ -59,8 +60,17 @@ export {
   METADATA_PUBLICATION_SCHEMA_MAJOR,
   POLICY_DISTRIBUTION_SCHEMA_MAJOR,
   PUBLICATION_INTENT_SCHEMA_MAJOR,
+  WORKLOAD_DISPATCH_SCHEMA_MAJOR,
 } from "./types.js";
 export type {
+  CustomerWorkloadCompletion,
+  CustomerWorkloadDispatchAdmission,
+  CustomerWorkloadDispatchReceipt,
+  CustomerWorkloadDispatchRecord,
+  CustomerWorkloadDispatchStore,
+  CustomerWorkloadOfferClaim,
+  DispatchAuthorizationContext,
+  DispatchCancellationState,
   DisclosureField,
   DisclosureManifest,
   DisclosureOptions,
@@ -95,7 +105,17 @@ export type {
   RetentionPolicyRef,
   SignedPublicationIntent,
   SignedPolicyDistribution,
+  WorkloadDispatchLifecycleState,
 } from "./types.js";
+export {
+  InMemoryCustomerWorkloadDispatchStore,
+  MAXIMUM_WORKLOAD_DISPATCH_ATTEMPTS,
+  MAXIMUM_WORKLOAD_DISPATCH_LEASE_MS,
+  assertCustomerWorkloadDispatchRequest,
+  assertCustomerWorkloadDispatchAdmission,
+  customerWorkloadDispatchDigest,
+  dispatchAdmission,
+} from "./workload-dispatch.js";
 export {
   assertMetadataPublicationPayload,
   assertPolicyBundle,
