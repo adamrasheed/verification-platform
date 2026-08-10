@@ -53,6 +53,7 @@ interface DispatchRow extends QueryResultRow {
 }
 
 interface IdempotencyRow extends QueryResultRow {
+  project_id: string;
   request_digest: string;
   receipt: unknown;
 }
@@ -245,12 +246,17 @@ implements CustomerWorkloadDispatchStore {
       const idempotencyKey = admission.request.arguments.idempotencyKey;
       await lock(client, ["dispatch-idempotency", tenantId, idempotencyKey]);
       const existing = await client.query<IdempotencyRow>(
-        `SELECT request_digest, receipt FROM workload_dispatch_idempotency
+        `SELECT project_id, request_digest, receipt FROM workload_dispatch_idempotency
           WHERE tenant_id = $1 AND idempotency_key = $2 FOR UPDATE`,
         [tenantId, idempotencyKey],
       );
       if (existing.rowCount === 1) {
         const row = existing.rows[0] as IdempotencyRow;
+        if (row.project_id !== projectId) {
+          throw new TypeError(
+            "VFY_DISPATCH_IDEMPOTENCY_CONFLICT: key is bound to another project",
+          );
+        }
         if (row.request_digest !== admission.requestDigest) {
           throw new TypeError("VFY_DISPATCH_IDEMPOTENCY_CONFLICT: key reused for different bytes");
         }
@@ -331,6 +337,26 @@ implements CustomerWorkloadDispatchStore {
       throw new TypeError("VFY_DISPATCH_WORKLOAD_INVALID: workload binding is invalid");
     }
     return transaction(this.#pool, async (client) => {
+      await client.query(
+        `WITH exhausted AS (
+           UPDATE workload_dispatches
+              SET state = 'failed', updated_at = $2,
+                  reason_codes = '["DISPATCH_ATTEMPTS_EXHAUSTED"]'::jsonb,
+                  lease_expires_at = NULL
+            WHERE workload_binding = $1
+              AND state IN ('queued', 'offered', 'running', 'cancellation_requested')
+              AND attempt >= $3
+              AND (lease_expires_at IS NULL OR lease_expires_at <= $2)
+          RETURNING tenant_id, project_id, dispatch_id
+         )
+         UPDATE workload_dispatch_outbox AS outbox
+            SET status = 'delivered', lease_expires_at = NULL
+           FROM exhausted
+          WHERE outbox.tenant_id = exhausted.tenant_id
+            AND outbox.project_id = exhausted.project_id
+            AND outbox.dispatch_id = exhausted.dispatch_id`,
+        [workloadBinding, now, MAXIMUM_WORKLOAD_DISPATCH_ATTEMPTS],
+      );
       const selected = await client.query<DispatchRow>(
         `SELECT * FROM workload_dispatches
           WHERE workload_binding = $1

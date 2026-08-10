@@ -213,6 +213,11 @@ implements CustomerWorkloadDispatchStore {
       if (existing === undefined) {
         throw new TypeError("VFY_DISPATCH_STORE_INCONSISTENT: idempotency target is missing");
       }
+      if (existing.record.projectId !== admission.authorization.projectId) {
+        throw new TypeError(
+          "VFY_DISPATCH_IDEMPOTENCY_CONFLICT: key is bound to another project",
+        );
+      }
       if (existing.requestDigest !== admission.requestDigest) {
         throw new TypeError("VFY_DISPATCH_IDEMPOTENCY_CONFLICT: key reused for different bytes");
       }

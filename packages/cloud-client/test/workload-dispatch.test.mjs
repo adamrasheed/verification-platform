@@ -89,6 +89,14 @@ test("admission is tenant-idempotent and changed bytes fail without a second dis
     () => store.admit(dispatchAdmission(authorization, changed, at(1))),
     /VFY_DISPATCH_IDEMPOTENCY_CONFLICT/,
   );
+  assert.throws(
+    () => store.admit(dispatchAdmission(
+      { tenantId: "tenant:one", projectId: "project:other" },
+      request(),
+      at(1),
+    )),
+    /key is bound to another project/,
+  );
   assert.equal(store.size, 1);
 });
 
@@ -217,6 +225,14 @@ test("PostgreSQL atomically persists dispatch, outbox, fencing, cancellation, an
       store.admit(structuredClone(admission)),
     ]);
     assert.deepEqual(retry, first);
+    await assert.rejects(
+      store.admit(dispatchAdmission(
+        { tenantId: "tenant:one", projectId: "project:other" },
+        request(),
+        at(1),
+      )),
+      /key is bound to another project/,
+    );
     const counts = await pool.query(`SELECT
       (SELECT count(*)::int FROM workload_dispatches) AS dispatches,
       (SELECT count(*)::int FROM workload_dispatch_idempotency) AS idempotency,
@@ -288,6 +304,35 @@ test("PostgreSQL atomically persists dispatch, outbox, fencing, cancellation, an
     const cancelled = await store.resolve(authorization, cancellable.result.dispatchId);
     assert.equal(cancelled.state, "cancelled");
     assert.equal(cancelled.cancellation.workloadAcknowledgement, "terminal");
+
+    const exhaustedRequest = request();
+    exhaustedRequest.arguments.idempotencyKey = "idempotency:exhausted-postgres";
+    exhaustedRequest.invocationId = "invocation:dispatch-exhausted-postgres";
+    exhaustedRequest.arguments.verifyRequest.invocationId = "invocation:verify-exhausted-postgres";
+    const exhausted = await store.admit(
+      dispatchAdmission(authorization, exhaustedRequest, at(18)),
+    );
+    await pool.query(
+      `UPDATE workload_dispatches
+          SET attempt = 5, lease_expires_at = $1
+        WHERE tenant_id = $2 AND project_id = $3 AND dispatch_id = $4`,
+      [at(18), authorization.tenantId, authorization.projectId, exhausted.result.dispatchId],
+    );
+    assert.equal(await store.claimOffer(
+      "workload:github:owner/repository",
+      "runner:exhausted",
+      at(19),
+      20_000,
+    ), undefined);
+    const failed = await store.resolve(authorization, exhausted.result.dispatchId);
+    assert.equal(failed.state, "failed");
+    assert.deepEqual(failed.reasonCodes, ["DISPATCH_ATTEMPTS_EXHAUSTED"]);
+    const exhaustedOutbox = await pool.query(
+      `SELECT status FROM workload_dispatch_outbox
+        WHERE tenant_id = $1 AND project_id = $2 AND dispatch_id = $3`,
+      [authorization.tenantId, authorization.projectId, exhausted.result.dispatchId],
+    );
+    assert.equal(exhaustedOutbox.rows[0].status, "delivered");
   } finally {
     await pool.query(`TRUNCATE TABLE
       workload_dispatch_outbox,

@@ -23,11 +23,11 @@
     },
     {
       "path": "packages/cloud-client/src/public/postgres-workload-dispatch-store.ts",
-      "digest": "sha256:0248390b6e28869a25e80edc8f7ba6f94351d1c9498e1053edc11ab4c3d6624f"
+      "digest": "sha256:9193295338e91f1053d7f8346c1c4162068bd2948dad6270d51537a821b27088"
     },
     {
       "path": "packages/cloud-client/src/public/workload-dispatch.ts",
-      "digest": "sha256:b9ed893f15eb107517fe6b7906ded67ff410943b8a6e22be36d70990cb1ab327"
+      "digest": "sha256:3184e5d4a8082ab7621b9319333edae924f928d2ad49f6f627bbb067cd4bb1cf"
     },
     {
       "path": "packages/cloud-client/src/public/types.ts",
@@ -39,7 +39,7 @@
     },
     {
       "path": "packages/cloud-client/test/workload-dispatch.test.mjs",
-      "digest": "sha256:20811cf4d094472b867325133c4a62893b48b711bc4bf12697edcb2a1fbad3c0"
+      "digest": "sha256:04cefdabacd53b632bff5dceab6d08bb284edddeb3375a80091463d83d4b7f44"
     },
     {
       "path": "packages/cloud-client/README.md",
