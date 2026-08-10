@@ -83,7 +83,7 @@ requireCheck(
 
 const endpoints = (await aws("ec2", "describe-vpc-endpoints", [
   "--filters", `Name=vpc-id,Values=${vpc.VpcId}`,
-])).VpcEndpoints;
+])).VpcEndpoints.filter((endpoint) => endpoint.State === "available");
 requireCheck(
   endpoints.length === 1
     && endpoints[0].VpcEndpointType === "Gateway"

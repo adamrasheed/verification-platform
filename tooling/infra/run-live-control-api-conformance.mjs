@@ -8,6 +8,7 @@ import {
 import { once } from "node:events";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
 import {
   PostgresControlApiStore,
@@ -27,7 +28,7 @@ const region = process.env.AWS_REGION;
 const sslRootCertPath = process.env.PGSSLROOTCERT;
 if (!/^[a-f0-9]{40}$/.test(runId ?? "")) throw new TypeError("VFY_LIVE_CONTROL_API_RUN_ID_INVALID");
 if (region !== "us-west-2") throw new TypeError("VFY_LIVE_CONTROL_API_REGION_INVALID");
-if (typeof sslRootCertPath !== "string" || !sslRootCertPath.startsWith("/app/")) {
+if (typeof sslRootCertPath !== "string" || !path.isAbsolute(sslRootCertPath)) {
   throw new TypeError("VFY_LIVE_CONTROL_API_TLS_ROOT_INVALID");
 }
 
@@ -107,6 +108,7 @@ const ingestion = new PublicationIngestionService(
     && verify(null, bytes, intentKeys.publicKey, signature),
 );
 let correlation = 0;
+let phase = "bootstrap";
 const handler = createControlApiHandler({
   expectedAudience: audience,
   authenticator: controlStore,
@@ -165,10 +167,12 @@ async function api(path, { method = "GET", token = identityToken(), body, key } 
 }
 
 try {
+  phase = "migrate";
   await publicationStore.migrate();
   await controlStore.migrate();
   await cleanSyntheticRows();
 
+  phase = "seed-authority";
   await pool.query(
     `INSERT INTO control_principals
       (principal_id, principal_kind, identity_key_id, expires_at, revoked)
@@ -246,6 +250,7 @@ try {
   assert.equal(typeof address, "object");
   origin = `http://127.0.0.1:${address.port}`;
 
+  phase = "publication-intent";
   const base = `/v1/tenants/${encodeURIComponent(tenantId)}/projects/${encodeURIComponent(projectId)}`;
   const firstIntent = await api(`${base}/publication-intents`, {
     method: "POST", key: idempotencyKey, body: intentBody,
@@ -261,6 +266,7 @@ try {
   });
   assert.equal(conflictingIntent.status, 409);
 
+  phase = "publication";
   const publicationBody = {
     schemaVersion: 1,
     signedIntent: firstIntent.value,
@@ -278,6 +284,7 @@ try {
   assert.equal(replayPublication.status, 201);
   assert.deepEqual(replayPublication.value, firstPublication.value);
 
+  phase = "published-run-read";
   const publishedRunId = firstPublication.value.publishedRunId;
   await pool.query(
     `INSERT INTO control_authorization_grants
@@ -301,6 +308,7 @@ try {
   assert.equal(read.status, 200);
   assert.equal(read.value.projection.applicationAlias, sensitiveCanary);
 
+  phase = "tenant-isolation";
   const wrongProject = await api(
     `/v1/tenants/${encodeURIComponent(tenantId)}/projects/${encodeURIComponent(otherProjectId)}/runs/${encodeURIComponent(publishedRunId)}`,
   );
@@ -314,6 +322,7 @@ try {
     ["VFY_CONTROL_API_NOT_AUTHORIZED", "VFY_CONTROL_API_NOT_AUTHORIZED", "VFY_CONTROL_API_NOT_AUTHORIZED"],
   );
 
+  phase = "identity-rejection";
   const wrongAudience = await api(`${base}/runs`, {
     token: identityToken({ tokenAudience: "wrong-audience" }),
   });
@@ -336,6 +345,7 @@ try {
   });
   assert.deepEqual([wrongAudience.status, expired.status, revoked.status], [401, 401, 401]);
 
+  phase = "audit";
   const audit = await pool.query(
     `SELECT occurred_at, correlation_id, principal_id, principal_kind, action,
             tenant_id, resource_type, resource_id, phase, outcome, reason_code,
@@ -360,6 +370,7 @@ try {
     false,
   );
 
+  phase = "evidence";
   console.log(JSON.stringify({
     schemaVersion: 1,
     kind: "awsControlApiEvidence",
@@ -379,6 +390,21 @@ try {
       sanitizedAudit: "passed",
     },
   }));
+} catch (error) {
+  console.error(error);
+  console.log(JSON.stringify({
+    schemaVersion: 1,
+    kind: "awsControlApiEvidence",
+    outcome: "failed",
+    region,
+    runId,
+    phase,
+    error: {
+      name: error instanceof Error ? error.name : "UnknownError",
+      code: typeof error?.code === "string" ? error.code : "VFY_LIVE_CONTROL_API_UNCLASSIFIED",
+    },
+  }));
+  process.exitCode = 1;
 } finally {
   if (server.listening) {
     server.close();
