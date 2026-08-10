@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verification.internal/schemas/auth/cloud-identity/v1",
+  "title": "CloudIdentityContractsV1",
+  "oneOf": [
+    { "$ref": "#/$defs/verificationKey" },
+    { "$ref": "#/$defs/tokenClaims" }
+  ],
+  "$defs": {
+    "opaqueId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "verificationKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keyId", "issuer", "audience", "publicKeyPem", "notBefore", "expiresAt", "revoked"
+      ],
+      "properties": {
+        "keyId": { "$ref": "#/$defs/opaqueId" },
+        "issuer": { "$ref": "#/$defs/opaqueId" },
+        "audience": { "$ref": "#/$defs/opaqueId" },
+        "publicKeyPem": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "notBefore": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "revoked": { "type": "boolean" }
+      }
+    },
+    "tokenClaims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["iss", "sub", "aud", "iat", "exp", "jti", "principalKind"],
+      "properties": {
+        "iss": { "$ref": "#/$defs/opaqueId" },
+        "sub": { "$ref": "#/$defs/opaqueId" },
+        "aud": { "$ref": "#/$defs/opaqueId" },
+        "iat": { "type": "integer", "minimum": 0 },
+        "exp": { "type": "integer", "minimum": 1 },
+        "jti": { "$ref": "#/$defs/opaqueId" },
+        "principalKind": { "enum": ["user", "workload", "integration", "operator"] }
+      }
+    }
+  }
+}

@@ -13,6 +13,12 @@ export type {
   CloudResourceRef,
   CloudResourceType,
 } from "./cloud-authorization.js";
+export { verifyCloudIdentityToken } from "./cloud-identity.js";
+export type {
+  CloudIdentityTokenDecision,
+  CloudIdentityTokenRevocationCheck,
+  CloudIdentityVerificationKey,
+} from "./cloud-identity.js";
 
 export type LocalPermission =
   | "workspace.read"

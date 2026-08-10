@@ -201,6 +201,16 @@
       "state": "active",
       "allowedDependencies": ["adapter-core", "github-check-projector", "protocol"],
       "governingClauses": ["Freeze §§4,11.3,12", "EDD §18"]
+    },
+    {
+      "id": "control-api",
+      "path": "apps/control-api",
+      "kind": "application",
+      "owner": "cloud-platform",
+      "milestone": "M9",
+      "state": "active",
+      "allowedDependencies": ["auth", "cloud-client", "protocol"],
+      "governingClauses": ["Freeze §§10-12,16,18", "EDD §§23-28", "ADR-0013"]
     }
   ],
   "prohibitedProductionDependencies": [

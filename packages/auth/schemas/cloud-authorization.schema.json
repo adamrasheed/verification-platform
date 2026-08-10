@@ -47,7 +47,7 @@
         "kind", "id", "authenticated", "audience", "issuedAt", "expiresAt", "revoked"
       ],
       "properties": {
-        "kind": { "enum": ["user", "workload", "operator"] },
+        "kind": { "enum": ["user", "workload", "integration", "operator"] },
         "id": { "$ref": "#/$defs/opaqueId" },
         "authenticated": { "type": "boolean" },
         "audience": { "$ref": "#/$defs/opaqueId" },

@@ -117,9 +117,9 @@ test("authentication, audience, validity, and revocation fail before resource lo
   }
 });
 
-test("workload and operator principals receive no implicit tenant authority", () => {
+test("workload, integration, and operator principals receive no implicit tenant authority", () => {
   const request = requestFor(entryFor("dispatch:create"));
-  for (const kind of ["workload", "operator"]) {
+  for (const kind of ["workload", "integration", "operator"]) {
     assert.deepEqual(
       authorizeCloudAction(
         principal({ kind }),

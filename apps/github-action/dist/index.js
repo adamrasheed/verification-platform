@@ -1414,6 +1414,12 @@ import { createHash as createHash11, randomUUID as randomUUID3 } from "node:cryp
 
 // ../../packages/auth/dist/public/index.js
 import path from "node:path";
+
+// ../../packages/auth/dist/public/cloud-identity.js
+init_public();
+var MAXIMUM_TOKEN_LIFETIME_SECONDS = 15 * 60;
+
+// ../../packages/auth/dist/public/index.js
 function normalizedRoot(value) {
   return path.resolve(value);
 }

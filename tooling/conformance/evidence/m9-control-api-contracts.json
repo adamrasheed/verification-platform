@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-control-api-contracts",
+  "taskId": "M9-T06",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§10-12,16,18",
+    "EDD §§23-28,33",
+    "ADR-0013"
+  ],
+  "testIds": [
+    "auth:short-lived-workload-identity",
+    "auth:audience-issuer-expiry-revocation",
+    "auth:algorithm-confusion-and-duplicate-key-rejection",
+    "control-api:closed-route-action-resource-matrix",
+    "control-api:cross-tenant-idor-missing-resource",
+    "control-api:hostile-request-bounds",
+    "control-api:idempotency-and-sanitized-audit",
+    "control-api:openapi-implementation-parity"
+  ],
+  "command": "npm test --workspace @verify-internal/auth && npm test --workspace @verify-internal/control-api && npm run check:inventory && npm run check:architecture && npm run check:schemas",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "packages/auth/src/public/cloud-identity.ts",
+      "digest": "sha256:42cbad96ac3434f26fedeaee7f1bcf81f58584b036baaee0c0fcd6f1424e8a1d"
+    },
+    {
+      "path": "packages/auth/schemas/cloud-identity.schema.json",
+      "digest": "sha256:ea0c5108e6db84687329de24ffa3fe43adef5857505b1801ee0bb2e710ce8573"
+    },
+    {
+      "path": "packages/auth/test/cloud-identity.test.mjs",
+      "digest": "sha256:043abcc1237ac5604d185e6d015070125a148166c0b5f64efa02a4b11f906c79"
+    },
+    {
+      "path": "apps/control-api/src/public/handler.ts",
+      "digest": "sha256:bede82462771b75d4a8ccab8d9e69e16c99ff49a492ccd1960de5f0cfbba6ba3"
+    },
+    {
+      "path": "apps/control-api/src/public/identity.ts",
+      "digest": "sha256:6377695ae26a35c48c02ec6b085d349f069adeefe08d3a8fd5da4f571034485f"
+    },
+    {
+      "path": "apps/control-api/src/public/types.ts",
+      "digest": "sha256:0e7b9050fd5626087d72e8ee2775035af27e8184da0191ad9c541897deaa54bc"
+    },
+    {
+      "path": "apps/control-api/resources/openapi.json",
+      "digest": "sha256:c24129f9c9b374154b493ae341c5e0bac006decff5c92fe534ade24ce0c8b0cd"
+    },
+    {
+      "path": "apps/control-api/test/control-api.test.mjs",
+      "digest": "sha256:f51b255dcd0bc9b1c1d24331d09c1d6a193754cea2bd954c31003b9749dbf603"
+    },
+    {
+      "path": "tooling/architecture/workspaces.json",
+      "digest": "sha256:c75b7ada05f300fd456e759f7cff145b83a7d5cefc8ed9b33ad7134cf55f160e"
+    }
+  ]
+}
