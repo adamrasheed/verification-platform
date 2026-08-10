@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-control-api-live",
+  "taskId": "M9-T06",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§10-12,16,18",
+    "EDD §§23-28,33",
+    "ADR-0013",
+    "SP-CLOUD-002"
+  ],
+  "testIds": [
+    "aws-control-api-live:private-postgres-tls",
+    "aws-control-api-live:real-http-boundary",
+    "aws-control-api-live:signed-workload-identity",
+    "aws-control-api-live:exact-action-resource-authorization",
+    "aws-control-api-live:tenant-isolation-and-idor",
+    "aws-control-api-live:intent-and-publication-idempotency",
+    "aws-control-api-live:bounded-read-list",
+    "aws-control-api-live:token-expiry-revocation",
+    "aws-control-api-live:sanitized-audit",
+    "aws-control-api-live:ephemeral-teardown-zero-drift"
+  ],
+  "command": "gh run watch 31439141302 --exit-status && npm run check:aws-control-api-evidence",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_CONTROL_API.json",
+      "digest": "sha256:ab099c3e4ab8d25bbbd169c92e735bc50399afd4f4fd688ff10e7d9d2acd9b80"
+    },
+    {
+      "path": "tooling/infra/check-aws-control-api-evidence.mjs",
+      "digest": "sha256:1301b9bce4f1a787a254dafcb2c1994850a3a2375c3734ba9af1e18eb2df58f6"
+    },
+    {
+      "path": ".github/workflows/aws-control-api-conformance.yml",
+      "digest": "sha256:c49b54f0f96e719ec4a448ef72b623a42c84b653cc03e09b276642f8128aa46f"
+    },
+    {
+      "path": "tooling/infra/run-live-control-api-conformance.mjs",
+      "digest": "sha256:095017478b2130fab813997a4405e54c8f81417ffb99c179e55ea1ad96616b1f"
+    }
+  ]
+}

@@ -31,6 +31,7 @@
     "check:aws-development-evidence": "node tooling/infra/check-aws-development-evidence.mjs",
     "check:aws-postgres-migration-evidence": "node tooling/infra/check-aws-postgres-migration-evidence.mjs",
     "check:aws-sqs-evidence": "node tooling/infra/check-aws-sqs-evidence.mjs",
+    "check:aws-control-api-evidence": "node tooling/infra/check-aws-control-api-evidence.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:packages": "npm run test --workspaces --if-present",
     "test:contracts": "npm run test --workspace @verify-internal/contracts",
@@ -43,7 +44,7 @@
     "test:m6": "npm run test:m5 && npm run check:native-release-tools && npm run test --workspace @verify-internal/plugin-sdk && npm run test --workspace @verify-internal/plugin-runtime && npm run test --workspace @verify-internal/github-repository-policy",
     "test:m7": "npm run test:m6 && npm run test --workspace @verify-internal/adapter-core && npm run test --workspace @verify-internal/mcp-server && npm run test --workspace @verify-internal/github-check-projector && npm run test --workspace @verify-internal/github-action",
     "test:m8-foundation": "npm run test:m7 && npm run test --workspace @verify-internal/cloud-client && npm run check:cloud-release-evidence",
-    "test:m9-foundation": "npm run test:m8-foundation && npm run test --workspace @verify-internal/control-api && npm run check:cloud-infra && npm run check:aws-development-evidence && npm run check:aws-postgres-migration-evidence && npm run check:aws-sqs-evidence",
+    "test:m9-foundation": "npm run test:m8-foundation && npm run test --workspace @verify-internal/control-api && npm run check:cloud-infra && npm run check:aws-development-evidence && npm run check:aws-postgres-migration-evidence && npm run check:aws-sqs-evidence && npm run check:aws-control-api-evidence",
     "test": "npm run build && npm run test:m9-foundation"
   },
   "devDependencies": {

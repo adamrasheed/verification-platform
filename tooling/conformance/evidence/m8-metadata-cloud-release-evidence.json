@@ -16,11 +16,11 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:793c63f03ea90435cd1120b9185f0cee7c54f23e5d220e6f43d8de6d6d56eed1"
+      "digest": "sha256:969c2e43bff7f18aee95bdac74340b17c89e5343e891c3ff96fc34d4881cd154"
     },
     {
       "path": "tooling/release/check-metadata-cloud-evidence.mjs",
-      "digest": "sha256:ed681604335fafae9415a5e3efd755ddd7b543f2a8f41b03979bbbff020bac0a"
+      "digest": "sha256:1424570bb6c2129654fcfc8267877a2d7fc1a638748d42613fcdf18d1b70f34e"
     },
     {
       "path": "tooling/release/test/release.test.mjs",
