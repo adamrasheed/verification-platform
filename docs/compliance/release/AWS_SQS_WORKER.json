@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsSqsWorkerEvidence",
+  "evidenceDate": "2026-08-08",
+  "taskId": "M9-T05",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "7f023c871e0ee07959de23e38f73a00df8756659",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0",
+    "awsSdkSqsVersion": "3.1106.0"
+  },
+  "workflow": {
+    "name": "AWS SQS worker conformance",
+    "runId": 31255571094,
+    "jobId": 93098315154,
+    "event": "workflow_dispatch",
+    "protectedEnvironment": "development",
+    "createdAt": "2026-08-08T11:42:09Z",
+    "startedAt": "2026-08-08T11:42:15Z",
+    "completedAt": "2026-08-08T11:51:01Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "imageBuildAndPush": "passed",
+    "liveRelayAndWorkerProbe": "passed",
+    "cleanup": "passed",
+    "postCleanupZeroDrift": "passed",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/31255571094",
+    "jobUrl": "https://github.com/adamrasheed/verification-platform/actions/runs/31255571094/job/93098315154"
+  },
+  "topology": {
+    "runtime": "private AWS Fargate task",
+    "queueType": "Amazon SQS standard",
+    "publicIp": false,
+    "internetGateway": false,
+    "natGateway": false,
+    "ephemeralInterfaceEndpoints": 5,
+    "endpointAvailabilityZones": 1,
+    "databaseTransport": "PostgreSQL verify-full TLS with the pinned official us-west-2 RDS CA bundle",
+    "taskRole": "exact primary queue operations plus protected DLQ read/delete",
+    "queueEncryption": "environment KMS key"
+  },
+  "queueProbe": {
+    "schemaVersion": 1,
+    "kind": "awsSqsWorkerEvidence",
+    "outcome": "passed",
+    "queueType": "standard",
+    "maxReceiveCount": 5,
+    "checks": {
+      "exactQueueTransport": "passed",
+      "fencedOutboxRelay": "passed",
+      "duplicateSideEffectCount": 1,
+      "boundedVisibilityRetry": "passed",
+      "sourceBoundDeadLetterRedrive": "passed",
+      "digestFreeDeadLetter": "passed",
+      "digestFreeDeletion": "passed",
+      "secondarySinkInventoryCount": 10,
+      "boundedCanaryScan": "passed",
+      "syntheticDataRemoved": "passed"
+    }
+  },
+  "postCleanupAudit": {
+    "ephemeralResourcesCreated": 19,
+    "ephemeralResourcesDestroyed": 19,
+    "persistentResourcesRestored": 1,
+    "ephemeralResourcesRemaining": 0,
+    "primaryQueueSyntheticMessagesRemaining": 0,
+    "deadLetterSyntheticMessagesRemaining": 0,
+    "zeroDrift": true
+  },
+  "dataHandling": {
+    "customerDataUsed": false,
+    "syntheticDataRemoved": true,
+    "sourceCanaryRetained": false,
+    "secretCanaryRetained": false,
+    "digestCanaryRetained": false,
+    "secretValuesRetained": false
+  },
+  "sourceArtifacts": [
+    {
+      "path": ".github/workflows/aws-sqs-conformance.yml",
+      "digest": "sha256:359415b97ade7e1bbd837af4137ba0cdd222d4aed5a0c8ce1fc42ea15ec431fb"
+    },
+    {
+      "path": "tooling/infra/aws-sqs-publication-transport.mjs",
+      "digest": "sha256:5188134edf9a61f2e21679340a06e2da94eabbcacb6bb59c42615dd854e74aa9"
+    },
+    {
+      "path": "tooling/infra/run-live-sqs-conformance.mjs",
+      "digest": "sha256:61b289755ed8339d7dae4b382a33f9edc2909a1c05826ee0811ca98ae9475535"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/queue-runner.tf",
+      "digest": "sha256:3d6f0b31d8fd7dbab4e7471f1b437890e563fbfd9f127522dd8a1311c79263c6"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",
+      "digest": "sha256:078d30b688153507f9b73ccc66c47d3a7a63d4c1d4fe6c8f3bacd80f9ee5e654"
+    },
+    {
+      "path": "packages/cloud-client/src/public/sqs-publication-queue.ts",
+      "digest": "sha256:3754cc71c9d302332b228e52809a02e3dd9cce124d8e06f965072304b8f29b2c"
+    },
+    {
+      "path": "packages/cloud-client/schemas/publication-queue-reference.schema.json",
+      "digest": "sha256:124485291446d0a9a26ac6c8a2a55c5eaba98378dc34a3867c841162ead11c8a"
+    },
+    {
+      "path": "docs/operations/M9_SQS_WORKER.md",
+      "digest": "sha256:f8d0091b8db0ef78688344aa5da60944e8dd9f2d387c730ca11d192668d9ded6"
+    }
+  ]
+}
