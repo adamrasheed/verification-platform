@@ -26,9 +26,9 @@
   "artifacts": [
     { "path": "tooling/conformance/evidence/m8-cloud-foundation.json", "digest": "sha256:d3b5495355faa14c3116f762430f510b2d85d6824a28ed00bf1a19ca531ffdeb" },
     { "path": "tooling/conformance/evidence/m8-durable-mapping-auth.json", "digest": "sha256:cd12dfa4664a8265fa5f71ecef1a3aff60a900b4a47403066e0d8e80b329ead3" },
-    { "path": "tooling/conformance/evidence/m8-publication-ingestion.json", "digest": "sha256:a9b946875c8c49ecc05161cc65082bb42cc5ba8c040bd0a36cd3934056ba11c0" },
+    { "path": "tooling/conformance/evidence/m8-publication-ingestion.json", "digest": "sha256:22fa17268b9a80239a492efab5eefbe357ae8875af585db14652cf42f3cabacb" },
     { "path": "tooling/conformance/evidence/m8-projection-outbox.json", "digest": "sha256:cb3a3c5afa35434ed0f41123711f175386c489723640f3ea768789e9a694bed7" },
-    { "path": "tooling/conformance/evidence/m8-retention-bounded-reads.json", "digest": "sha256:753bf7b8ef083ee3a10e3dac4ad60cdfe051be726e62f519b26d236fb98c8919" },
+    { "path": "tooling/conformance/evidence/m8-retention-bounded-reads.json", "digest": "sha256:769be0bec30892ea7eaab9624f77a4512be3d19d37681dbeea0dbc4c0fc47ceb" },
     { "path": "tooling/conformance/evidence/m8-isolation-canary-foundation.json", "digest": "sha256:20fee730f071763a995d44db72669591dc994a31f01a230240fb8c0e121a8ad1" },
     { "path": "docs/compliance/release/SECURITY_REPORT.json", "digest": "sha256:4178ac5c79635a60ff5be73754f93e2594eb95d2d7d52789575db056d9297f45" },
     { "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json", "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc" },
