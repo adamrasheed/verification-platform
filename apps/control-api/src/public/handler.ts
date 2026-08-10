@@ -14,7 +14,9 @@ import type {
   PublicationLimits,
   SignedPublicationIntent,
 } from "@verify-internal/cloud-client";
+import { dispatchAdmission } from "@verify-internal/cloud-client";
 import {
+  decodeCommandRequest,
   encodeCanonicalProtocolDocument,
   parseCanonicalProtocolDocument,
 } from "@verify-internal/protocol";
@@ -34,13 +36,17 @@ interface Route {
     | "issuePublicationIntent"
     | "publishRun"
     | "listPublishedRuns"
-    | "getPublishedRun";
+    | "getPublishedRun"
+    | "createDispatch"
+    | "getDispatch"
+    | "cancelDispatch";
   readonly action: CloudAction;
   readonly tenantId: string;
   readonly projectId: string;
   readonly resourceType: CloudResourceType;
   readonly resourceId: string;
   readonly publishedRunId?: string;
+  readonly dispatchId?: string;
 }
 
 interface IntentBody {
@@ -96,10 +102,54 @@ function routeFor(request: Request): Route | undefined {
   if (raw.at(-1) === "") return undefined;
   const segments = raw.map(decodeSegment);
   if (segments.some((segment) => segment === undefined)) return undefined;
-  const [version, tenants, tenantId, projects, projectId, resource, resourceId] =
+  const [version, tenants, tenantId, projects, projectId, resource, resourceId, subresource] =
     segments as string[];
   if (version !== "v1" || tenants !== "tenants" || projects !== "projects"
     || !tenantId || !projectId) return undefined;
+  if (request.method === "POST"
+    && segments.length === 6
+    && resource === "dispatches"
+    && url.search === "") {
+    return {
+      operation: "createDispatch",
+      action: "dispatch:create",
+      tenantId,
+      projectId,
+      resourceType: "project",
+      resourceId: projectId,
+    };
+  }
+  if (request.method === "GET"
+    && segments.length === 7
+    && resource === "dispatches"
+    && resourceId
+    && url.search === "") {
+    return {
+      operation: "getDispatch",
+      action: "project:read",
+      tenantId,
+      projectId,
+      resourceType: "project",
+      resourceId: projectId,
+      dispatchId: resourceId,
+    };
+  }
+  if (request.method === "POST"
+    && segments.length === 8
+    && resource === "dispatches"
+    && resourceId
+    && subresource === "cancellations"
+    && url.search === "") {
+    return {
+      operation: "cancelDispatch",
+      action: "dispatch:cancel",
+      tenantId,
+      projectId,
+      resourceType: "dispatch",
+      resourceId,
+      dispatchId: resourceId,
+    };
+  }
   if (request.method === "POST"
     && segments.length === 6
     && resource === "publication-intents"
@@ -290,6 +340,20 @@ function publicationBody(value: unknown): PublicationBody {
   return value as unknown as PublicationBody;
 }
 
+function dispatchBody(value: unknown) {
+  const decoded = decodeCommandRequest(value);
+  if (decoded.kind !== "ok" || decoded.value.command !== "dispatchVerification") {
+    throw new TypeError("VFY_CONTROL_API_REQUEST_INVALID");
+  }
+  return decoded.value;
+}
+
+function cancellationBody(value: unknown): void {
+  if (!record(value) || !exactKeys(value, ["schemaVersion"]) || value.schemaVersion !== 1) {
+    throw new TypeError("VFY_CONTROL_API_REQUEST_INVALID");
+  }
+}
+
 function bearerToken(request: Request): string | undefined {
   const authorization = request.headers.get("authorization");
   if (!authorization || !authorization.startsWith("Bearer ")) return undefined;
@@ -450,6 +514,48 @@ export function createControlApiHandler(options: ControlApiOptions): ControlApiH
         }, authorization, now);
         await auditOperation(options, route, principal, decision, correlationId, now, true);
         return jsonResponse(201, receipt, correlationId);
+      }
+      if (route.operation === "createDispatch") {
+        const key = idempotencyKey(request);
+        const body = dispatchBody(await jsonBody(request));
+        if (body.arguments.idempotencyKey !== key) {
+          throw new TypeError("VFY_DISPATCH_IDEMPOTENCY_CONFLICT");
+        }
+        const receipt = await options.dispatches.admit(dispatchAdmission(
+          authorization,
+          body,
+          now,
+        ));
+        await auditOperation(options, route, principal, decision, correlationId, now, true);
+        return jsonResponse(202, receipt.result, correlationId);
+      }
+      if (route.operation === "cancelDispatch") {
+        const cancellationId = idempotencyKey(request);
+        cancellationBody(await jsonBody(request));
+        const dispatch = await options.dispatches.requestCancellation(
+          authorization,
+          route.dispatchId as string,
+          cancellationId,
+          now,
+        );
+        if (!dispatch) {
+          await auditOperation(options, route, principal, decision, correlationId, now, false);
+          return errorResponse(404, "VFY_CONTROL_API_NOT_AUTHORIZED", "permission", "never", route.operation, correlationId);
+        }
+        await auditOperation(options, route, principal, decision, correlationId, now, true);
+        return jsonResponse(202, dispatch, correlationId);
+      }
+      if (route.operation === "getDispatch") {
+        const dispatch = await options.dispatches.resolve(
+          authorization,
+          route.dispatchId as string,
+        );
+        if (!dispatch) {
+          await auditOperation(options, route, principal, decision, correlationId, now, false);
+          return errorResponse(404, "VFY_CONTROL_API_NOT_AUTHORIZED", "permission", "never", route.operation, correlationId);
+        }
+        await auditOperation(options, route, principal, decision, correlationId, now, true);
+        return jsonResponse(200, dispatch, correlationId);
       }
       if (route.operation === "listPublishedRuns") {
         const url = new URL(request.url);

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-customer-workload-dispatch-api",
+  "taskId": "M9-T07",
+  "owner": "cloud-platform",
+  "governingClauses": ["EDD §§19-24,27,33", "ADR-0008"],
+  "testIds": [
+    "dispatch-api:closed-create-read-cancel-routes",
+    "dispatch-api:exact-action-resource-authorization",
+    "dispatch-api:header-body-idempotency-binding",
+    "dispatch-api:offline-customer-workload-only",
+    "dispatch-api:missing-and-idor-indistinguishable",
+    "dispatch-api:separate-gateway-cancellation-acknowledgement",
+    "dispatch-api:source-free-audit"
+  ],
+  "command": "VERIFY_POSTGRES_URL=postgresql://<ephemeral-postgresql>/verification npm test --workspace @verify-internal/control-api",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "apps/control-api/src/public/handler.ts",
+      "digest": "sha256:3b8d3b5b704881f8b1b9c1df2514072c112f18adbd6864788bed7f5f6c47663e"
+    },
+    {
+      "path": "apps/control-api/src/public/types.ts",
+      "digest": "sha256:98ebb145d22895ac8593c3706591fcd9dfdaba70fba1291607f0f1d5926a2c02"
+    },
+    {
+      "path": "apps/control-api/src/public/index.ts",
+      "digest": "sha256:9aef9d0d8b73e42bae7e21aab62fe10b7fd3c5bc648469332a63f7a3d24fe7ce"
+    },
+    {
+      "path": "apps/control-api/resources/openapi.json",
+      "digest": "sha256:2e55e106f4d4c912856d6f08150328159416353de068eec0cb10b4f1a22c9c6e"
+    },
+    {
+      "path": "apps/control-api/test/control-api.test.mjs",
+      "digest": "sha256:92d887dc31e5831bce184b0d31c7da9484a652973317df687a30000e790cf773"
+    },
+    {
+      "path": "apps/control-api/README.md",
+      "digest": "sha256:49623c193cb33de8e54ec300072b26b165eaed535b3d4674fa97f95b8c533784"
+    }
+  ]
+}

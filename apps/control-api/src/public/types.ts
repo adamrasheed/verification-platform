@@ -5,6 +5,9 @@ import type {
   CloudPrincipal,
 } from "@verify-internal/auth";
 import type {
+  CustomerWorkloadDispatchAdmission,
+  CustomerWorkloadDispatchReceipt,
+  CustomerWorkloadDispatchRecord,
   DisclosureManifest,
   PublicationAuthorizationContext,
   PublicationIngestionReceipt,
@@ -70,6 +73,24 @@ export interface ControlApiPublishedRunStore {
   ): PublishedRunListPage | Promise<PublishedRunListPage>;
 }
 
+export interface ControlApiDispatchStore {
+  admit(
+    admission: CustomerWorkloadDispatchAdmission,
+  ): CustomerWorkloadDispatchReceipt | Promise<CustomerWorkloadDispatchReceipt>;
+  resolve(
+    authorization: PublicationAuthorizationContext,
+    dispatchId: string,
+  ): CustomerWorkloadDispatchRecord | undefined
+    | Promise<CustomerWorkloadDispatchRecord | undefined>;
+  requestCancellation(
+    authorization: PublicationAuthorizationContext,
+    dispatchId: string,
+    cancellationId: string,
+    now: Date,
+  ): CustomerWorkloadDispatchRecord | undefined
+    | Promise<CustomerWorkloadDispatchRecord | undefined>;
+}
+
 export interface ControlApiAuditEvent {
   readonly schemaVersion: 1;
   readonly occurredAt: string;
@@ -98,6 +119,7 @@ export interface ControlApiOptions {
   readonly intents: ControlApiPublicationIntentService;
   readonly publications: ControlApiPublicationService;
   readonly publishedRuns: ControlApiPublishedRunStore;
+  readonly dispatches: ControlApiDispatchStore;
   readonly audit: ControlApiAuditSink;
   readonly now?: () => Date;
   readonly correlationId?: () => string;

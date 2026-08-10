@@ -28,7 +28,10 @@ function grant(request, overrides = {}) {
 }
 
 function fixtures(overrides = {}) {
-  const calls = { intents: [], publications: [], lists: [], reads: [], grants: [], audit: [] };
+  const calls = {
+    intents: [], publications: [], lists: [], reads: [],
+    dispatchAdmissions: [], dispatchReads: [], cancellations: [], grants: [], audit: [],
+  };
   const options = {
     expectedAudience: "verify-cloud-api",
     authenticator: {
@@ -103,12 +106,100 @@ function fixtures(overrides = {}) {
         };
       },
     },
+    dispatches: {
+      admit: (admission) => {
+        calls.dispatchAdmissions.push(structuredClone(admission));
+        return {
+          schemaVersion: 1,
+          admittedAt: admission.admittedAt,
+          result: {
+            kind: "dispatchVerification",
+            dispatchId: "dispatch:one",
+            state: "accepted",
+            workloadBinding: admission.request.arguments.workloadBinding,
+            reasonCodes: [],
+          },
+        };
+      },
+      resolve: (authorization, dispatchId) => {
+        calls.dispatchReads.push({ authorization, dispatchId });
+        return dispatchRecord(dispatchId, authorization);
+      },
+      requestCancellation: (authorization, dispatchId, cancellationId, now) => {
+        calls.cancellations.push({ authorization, dispatchId, cancellationId, now });
+        return {
+          ...dispatchRecord(dispatchId, authorization),
+          state: "cancellation_requested",
+          updatedAt: now.toISOString(),
+          cancellation: {
+            cancellationId,
+            requestedAt: now.toISOString(),
+            gatewayAcknowledgement: "accepted",
+            workloadAcknowledgement: "pending",
+          },
+        };
+      },
+    },
     audit: { record: (event) => calls.audit.push(structuredClone(event)) },
     now: () => current,
     correlationId: () => "correlation:one",
     ...overrides,
   };
   return { calls, handler: createControlApiHandler(options) };
+}
+
+function dispatchRecord(dispatchId, authorization = {
+  tenantId: "tenant:one",
+  projectId: "project:one",
+}) {
+  return {
+    schemaVersion: 1,
+    dispatchId,
+    tenantId: authorization.tenantId,
+    projectId: authorization.projectId,
+    workloadBinding: "workload:github:owner/repository",
+    state: "queued",
+    admittedAt: current.toISOString(),
+    updatedAt: current.toISOString(),
+    reasonCodes: [],
+  };
+}
+
+function dispatchRequest() {
+  return {
+    schemaVersion: 1,
+    command: "dispatchVerification",
+    invocationId: "invocation:dispatch-one",
+    arguments: {
+      workloadBinding: "workload:github:owner/repository",
+      idempotencyKey: "idempotency:dispatch-one",
+      verifyRequest: {
+        schemaVersion: 1,
+        command: "verify",
+        invocationId: "invocation:verify-one",
+        arguments: {},
+        configurationReferences: [],
+        policyReferences: [],
+        consentGrantReferences: [],
+        offline: true,
+        outputMode: "json",
+        environment: {
+          platform: "github-action",
+          allowlistedBindings: ["workspace:checkout"],
+        },
+        workspace: { rootBinding: "workspace:checkout" },
+      },
+    },
+    configurationReferences: [],
+    policyReferences: [],
+    consentGrantReferences: [],
+    offline: false,
+    outputMode: "json",
+    environment: {
+      platform: "control-api",
+      allowlistedBindings: ["workload:github:owner/repository"],
+    },
+  };
 }
 
 function jsonRequest(path, method = "GET", body, headers = {}) {
@@ -138,7 +229,7 @@ const intentBody = {
   expiresAt: "2026-08-10T20:04:00Z",
 };
 
-test("the four closed routes bind exact actions and resources", async () => {
+test("the seven closed routes bind exact actions and resources", async () => {
   const { calls, handler } = fixtures();
   const intent = await handler(jsonRequest(
     "/v1/tenants/tenant:one/projects/project:one/publication-intents",
@@ -169,15 +260,90 @@ test("the four closed routes bind exact actions and resources", async () => {
     "/v1/tenants/tenant:one/projects/project:one/runs/published-run:one",
   ));
   assert.equal(read.status, 200);
+  const createDispatch = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches",
+    "POST",
+    dispatchRequest(),
+    { "idempotency-key": "idempotency:dispatch-one" },
+  ));
+  assert.equal(createDispatch.status, 202);
+  assert.equal((await createDispatch.json()).dispatchId, "dispatch:one");
+  const getDispatch = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:one",
+  ));
+  assert.equal(getDispatch.status, 200);
+  const cancelDispatch = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:one/cancellations",
+    "POST",
+    { schemaVersion: 1 },
+    { "idempotency-key": "cancellation:one" },
+  ));
+  assert.equal(cancelDispatch.status, 202);
   assert.deepEqual(calls.grants, [
     { action: "run:publish", resource: { tenantId: "tenant:one", resourceType: "project", resourceId: "project:one" } },
     { action: "run:publish", resource: { tenantId: "tenant:one", resourceType: "project", resourceId: "project:one" } },
     { action: "project:read", resource: { tenantId: "tenant:one", resourceType: "project", resourceId: "project:one" } },
     { action: "run:readPublished", resource: { tenantId: "tenant:one", resourceType: "publishedRun", resourceId: "published-run:one" } },
+    { action: "dispatch:create", resource: { tenantId: "tenant:one", resourceType: "project", resourceId: "project:one" } },
+    { action: "project:read", resource: { tenantId: "tenant:one", resourceType: "project", resourceId: "project:one" } },
+    { action: "dispatch:cancel", resource: { tenantId: "tenant:one", resourceType: "dispatch", resourceId: "dispatch:one" } },
   ]);
   assert.equal(calls.intents[0].idempotencyKey, "idempotency:intent:one");
   assert.equal(calls.publications[0].request.idempotencyKey, "idempotency:publication:one");
   assert.deepEqual(calls.lists[0].options, { limit: 25, cursor: "cursor:one" });
+  assert.equal(calls.dispatchAdmissions[0].request.arguments.verifyRequest.offline, true);
+  assert.equal(calls.dispatchReads[0].dispatchId, "dispatch:one");
+  assert.equal(calls.cancellations[0].cancellationId, "cancellation:one");
+});
+
+test("dispatch boundaries reject idempotency drift, online work, and missing resources", async () => {
+  const { calls, handler } = fixtures();
+  const mismatched = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches",
+    "POST",
+    dispatchRequest(),
+    { "idempotency-key": "idempotency:other" },
+  ));
+  assert.equal(mismatched.status, 409);
+  const online = dispatchRequest();
+  online.arguments.verifyRequest.offline = false;
+  const rejected = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches",
+    "POST",
+    online,
+    { "idempotency-key": "idempotency:dispatch-one" },
+  ));
+  assert.equal(rejected.status, 400);
+  const malformedCancellation = await handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:one/cancellations",
+    "POST",
+    { schemaVersion: 1, reason: "SOURCE_CANARY" },
+    { "idempotency-key": "cancellation:one" },
+  ));
+  assert.equal(malformedCancellation.status, 400);
+  assert.equal(calls.dispatchAdmissions.length, 0);
+  assert.equal(JSON.stringify(calls.audit).includes("SOURCE_CANARY"), false);
+
+  const missing = fixtures({
+    dispatches: {
+      admit: () => { throw new Error("not used"); },
+      resolve: () => undefined,
+      requestCancellation: () => undefined,
+    },
+  });
+  const missingRead = await missing.handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:missing",
+  ));
+  const missingCancellation = await missing.handler(jsonRequest(
+    "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:missing/cancellations",
+    "POST",
+    { schemaVersion: 1 },
+    { "idempotency-key": "cancellation:missing" },
+  ));
+  assert.equal(missingRead.status, 404);
+  assert.equal(missingCancellation.status, 404);
+  assert.equal((await missingRead.json()).error.code, "VFY_CONTROL_API_NOT_AUTHORIZED");
+  assert.equal((await missingCancellation.json()).error.code, "VFY_CONTROL_API_NOT_AUTHORIZED");
 });
 
 test("unauthenticated, cross-tenant, IDOR, and missing-resource reads reveal no protected existence", async () => {
@@ -281,6 +447,9 @@ test("OpenAPI declares exactly the implemented routes and closes both mutation s
   ));
   assert.equal(document.openapi, "3.1.1");
   assert.deepEqual(Object.keys(document.paths), [
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches",
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches/{dispatchId}",
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches/{dispatchId}/cancellations",
     "/v1/tenants/{tenantId}/projects/{projectId}/publication-intents",
     "/v1/tenants/{tenantId}/projects/{projectId}/publications",
     "/v1/tenants/{tenantId}/projects/{projectId}/runs",
@@ -288,9 +457,15 @@ test("OpenAPI declares exactly the implemented routes and closes both mutation s
   ]);
   assert.equal(document.components.schemas.PublicationIntentRequest.additionalProperties, false);
   assert.equal(document.components.schemas.PublicationRequest.additionalProperties, false);
+  assert.equal(document.components.schemas.DispatchCancellationRequest.additionalProperties, false);
   assert.equal(document.components.schemas.PublicationIntentRequest.properties.limits.additionalProperties, false);
   assert.deepEqual(document.security, [{ bearerIdentity: [] }]);
-  for (const path of Object.values(document.paths).slice(0, 2)) {
+  for (const path of [
+    document.paths["/v1/tenants/{tenantId}/projects/{projectId}/dispatches"],
+    document.paths["/v1/tenants/{tenantId}/projects/{projectId}/dispatches/{dispatchId}/cancellations"],
+    document.paths["/v1/tenants/{tenantId}/projects/{projectId}/publication-intents"],
+    document.paths["/v1/tenants/{tenantId}/projects/{projectId}/publications"],
+  ]) {
     assert.ok(path.post.parameters.some((parameter) => parameter.$ref.endsWith("/IdempotencyKey")));
   }
 });

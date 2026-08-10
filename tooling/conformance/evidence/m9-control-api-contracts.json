@@ -35,7 +35,7 @@
     },
     {
       "path": "apps/control-api/src/public/handler.ts",
-      "digest": "sha256:bede82462771b75d4a8ccab8d9e69e16c99ff49a492ccd1960de5f0cfbba6ba3"
+      "digest": "sha256:3b8d3b5b704881f8b1b9c1df2514072c112f18adbd6864788bed7f5f6c47663e"
     },
     {
       "path": "apps/control-api/src/public/identity.ts",
@@ -43,15 +43,15 @@
     },
     {
       "path": "apps/control-api/src/public/types.ts",
-      "digest": "sha256:0e7b9050fd5626087d72e8ee2775035af27e8184da0191ad9c541897deaa54bc"
+      "digest": "sha256:98ebb145d22895ac8593c3706591fcd9dfdaba70fba1291607f0f1d5926a2c02"
     },
     {
       "path": "apps/control-api/resources/openapi.json",
-      "digest": "sha256:c24129f9c9b374154b493ae341c5e0bac006decff5c92fe534ade24ce0c8b0cd"
+      "digest": "sha256:2e55e106f4d4c912856d6f08150328159416353de068eec0cb10b4f1a22c9c6e"
     },
     {
       "path": "apps/control-api/test/control-api.test.mjs",
-      "digest": "sha256:f51b255dcd0bc9b1c1d24331d09c1d6a193754cea2bd954c31003b9749dbf603"
+      "digest": "sha256:92d887dc31e5831bce184b0d31c7da9484a652973317df687a30000e790cf773"
     },
     {
       "path": "tooling/architecture/workspaces.json",
