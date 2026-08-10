@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsControlApiEvidence",
+  "evidenceDate": "2026-08-10",
+  "taskId": "M9-T06",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "4c086139d8fa2d65d9b31e2ed948dedec5f5a45d",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0",
+    "nodeVersion": "22.19.0",
+    "postgresVersion": "17.9"
+  },
+  "workflow": {
+    "name": "AWS control API conformance",
+    "runId": 31439141302,
+    "jobId": 93619908939,
+    "event": "workflow_dispatch",
+    "protectedEnvironment": "development",
+    "createdAt": "2026-08-10T22:38:26Z",
+    "startedAt": "2026-08-10T22:38:31Z",
+    "completedAt": "2026-08-10T22:47:41Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "imageBuildAndPush": "passed",
+    "liveControlApiProbe": "passed",
+    "cleanup": "passed",
+    "postCleanupZeroDrift": "passed",
+    "postCleanupFoundationAudit": "passed",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/31439141302",
+    "jobUrl": "https://github.com/adamrasheed/verification-platform/actions/runs/31439141302/job/93619908939"
+  },
+  "topology": {
+    "runtime": "private AWS Fargate task",
+    "publicIp": false,
+    "internetGateway": false,
+    "natGateway": false,
+    "ephemeralInterfaceEndpoints": 4,
+    "endpointAvailabilityZones": 1,
+    "databaseTransport": "PostgreSQL verify-full TLS with the pinned official us-west-2 RDS CA bundle",
+    "taskRole": false,
+    "rootFilesystemReadOnly": true
+  },
+  "controlApiProbe": {
+    "schemaVersion": 1,
+    "kind": "awsControlApiEvidence",
+    "runId": "4c086139d8fa2d65d9b31e2ed948dedec5f5a45d",
+    "outcome": "passed",
+    "checks": {
+      "privatePostgresTls": "passed",
+      "realHttpBoundary": "passed",
+      "signedIdentity": "passed",
+      "exactAuthorization": "passed",
+      "tenantIsolation": "passed",
+      "intentIdempotency": "passed",
+      "publicationIdempotency": "passed",
+      "boundedReadAndList": "passed",
+      "tokenExpiryAndRevocation": "passed",
+      "sanitizedAudit": "passed"
+    }
+  },
+  "postCleanupAudit": {
+    "ephemeralResourcesCreated": 16,
+    "ephemeralResourcesDestroyed": 16,
+    "persistentResourcesRestored": 1,
+    "ephemeralResourcesRemaining": 0,
+    "zeroDrift": true,
+    "foundationOutcome": "passed"
+  },
+  "dataHandling": {
+    "customerDataUsed": false,
+    "syntheticDataRemoved": true,
+    "sensitiveCanaryRetained": false,
+    "identityTokensRetained": false,
+    "secretValuesRetained": false
+  },
+  "sourceArtifacts": [
+    {
+      "path": ".github/workflows/aws-control-api-conformance.yml",
+      "digest": "sha256:c49b54f0f96e719ec4a448ef72b623a42c84b653cc03e09b276642f8128aa46f"
+    },
+    {
+      "path": "tooling/infra/run-live-control-api-conformance.mjs",
+      "digest": "sha256:095017478b2130fab813997a4405e54c8f81417ffb99c179e55ea1ad96616b1f"
+    },
+    {
+      "path": "tooling/infra/control-api-node-http.mjs",
+      "digest": "sha256:372d49d2340b1b52eb903963beb67e7639771b3cd7dd47a0ed48de2558b343cf"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
+      "digest": "sha256:67804b6fe1e9e2929418787ec0604d216be9ce63ed102ddc51c446ec28b3a51f"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/data.tf",
+      "digest": "sha256:eefc348f251cb0b2c4ddd724536313d9128cae036a8b59297e733a05b79414d0"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile",
+      "digest": "sha256:111615c5c8862d77b392b7afb8ac9e90ed8df99c41ea1033fc9e2de8a14e37f0"
+    },
+    {
+      "path": "apps/control-api/src/public/postgres-control-store.ts",
+      "digest": "sha256:68023f25c63158914bd3a625e6ae129b135ffd557f2ede326b82f92b44f55973"
+    },
+    {
+      "path": "apps/control-api/migrations/0001_control_api.sql",
+      "digest": "sha256:213e59401e683f18fc5b33716dd9c80f1c193af389ec8fad237d97aa7be86dad"
+    },
+    {
+      "path": "docs/operations/AWS_CONTROL_API_CONFORMANCE.md",
+      "digest": "sha256:faf16a54b49a15c97b55a9389d874622b89f7a3a1ab82ac5d74bc252b35cbfed"
+    }
+  ]
+}
