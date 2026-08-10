@@ -114,6 +114,16 @@ jobs:
             --tasks "$task_arn" \
             --query 'tasks[0].containers[0].exitCode' \
             --output text)
+          stopped_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].stoppedReason' \
+            --output text)
+          container_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].containers[0].reason' \
+            --output text)
           log_stream=$(aws logs describe-log-streams \
             --log-group-name "$LOG_GROUP" \
             --order-by LastEventTime \
@@ -121,19 +131,21 @@ jobs:
             --max-items 1 \
             --query 'logStreams[0].logStreamName' \
             --output text)
-          evidence=$(aws logs get-log-events \
+          log_messages=$(aws logs get-log-events \
             --log-group-name "$LOG_GROUP" \
             --log-stream-name "$log_stream" \
-            --limit 20 \
-            --query 'events[-1].message' \
-            --output text)
+            --limit 100 \
+            --query 'events[].message' \
+            --output json)
+          evidence=$(jq -r '.[-1]' <<< "$log_messages")
+          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
+          jq -r '.[]' <<< "$log_messages"
           echo "$evidence" | jq -e '
             .schemaVersion == 1
             and .kind == "awsControlApiEvidence"
             and .outcome == "passed"
             and ([.checks[]] | all(. == "passed"))'
           test "$exit_code" = "0"
-          echo "$evidence"
 
       - name: Remove ephemeral control API conformance resources
         if: always()

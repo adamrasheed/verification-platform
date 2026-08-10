@@ -54,7 +54,7 @@
     },
     {
       "path": "tooling/infra/run-live-control-api-conformance.mjs",
-      "digest": "sha256:e799f933f7a5e9add28670fd37e65918ec5a392bf83c064eaacc21ba8f5c7ed8"
+      "digest": "sha256:095017478b2130fab813997a4405e54c8f81417ffb99c179e55ea1ad96616b1f"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
@@ -66,7 +66,7 @@
     },
     {
       "path": ".github/workflows/aws-control-api-conformance.yml",
-      "digest": "sha256:664ce48f2fd58d15e7e477c04f72c154804b01b1cffab4fea4b94cc78662d68e"
+      "digest": "sha256:d2cb0d55cc30a5d813ae843861757b77fa9e94337b31379bf9ba8aaa23ecae78"
     },
     {
       "path": "docs/operations/AWS_CONTROL_API_CONFORMANCE.md",
