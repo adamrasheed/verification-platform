@@ -77,7 +77,7 @@
   "sourceArtifacts": [
     {
       "path": ".github/workflows/aws-postgres-migration.yml",
-      "digest": "sha256:2e914096ceaf80e3557e6d4641038c9782b36c641c7c767987a9cf0fc380183a"
+      "digest": "sha256:45da41fd8d007edc0c32841ac44bdfeb0e024fbcfd225f90c2fedd4a45dba59d"
     },
     {
       "path": "tooling/infra/run-live-postgres-migration.mjs",

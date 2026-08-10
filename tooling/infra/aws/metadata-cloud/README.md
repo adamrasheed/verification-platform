@@ -7,7 +7,7 @@ empty, and every remote resource is gated.
 The initial root provides an isolated two-AZ VPC, environment KMS key, private
 RDS PostgreSQL, encrypted SQS/DLQ, protected metadata and quarantine buckets,
 bounded logs, an ECS cluster, and a tagged monthly budget. It deliberately does
-not deploy an API, worker task, internet route, NAT gateway, legal hold,
+not deploy a persistent API, worker task, internet route, NAT gateway, legal hold,
 multi-region failover, or product-hosted source execution.
 
 Initialize with the encrypted backend created by `../bootstrap` and a protected
@@ -27,3 +27,13 @@ runner can reach only PostgreSQL, the regional ECR/log/secret/SQS endpoints,
 and the S3 gateway used for ECR layers. The workflow always replans with the
 flag disabled, removes every runner resource, and requires a final zero-drift
 plan.
+
+`control_api_runner_enabled=true` temporarily occupies the protected private
+PostgreSQL runner slot with an immutable ECR repository, encrypted log group,
+execution identity, four private interface
+endpoints, and read-only Fargate task definition for the protected M9-T06 run.
+The application process receives no AWS task identity. Its security group has no
+ingress and only exact PostgreSQL, interface-endpoint TLS, and S3 ECR-layer
+egress. The task runs the real Node HTTP adapter against the private RDS store,
+then removes its synthetic tenant rows. The workflow disables and destroys all
+ephemeral resources and requires a final zero-drift plan even after failure.

@@ -51,16 +51,22 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/compute.tf",
   "tooling/infra/aws/metadata-cloud/migration.tf",
   "tooling/infra/aws/metadata-cloud/queue-runner.tf",
+  "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
   "tooling/infra/aws/metadata-cloud/budget.tf",
   ".github/workflows/aws-oidc-smoke.yml",
   ".github/workflows/aws-metadata-cloud.yml",
   ".github/workflows/aws-postgres-migration.yml",
   ".github/workflows/aws-sqs-conformance.yml",
+  ".github/workflows/aws-control-api-conformance.yml",
   "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
   "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",
+  "tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile",
   "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
   "tooling/infra/run-live-postgres-migration.mjs",
   "tooling/infra/run-live-sqs-conformance.mjs",
+  "tooling/infra/run-live-control-api-conformance.mjs",
+  "tooling/infra/control-api-node-http.mjs",
+  "tooling/infra/test-control-api-node-http.mjs",
   "tooling/infra/aws-sqs-publication-transport.mjs",
   "docs/architecture/ADR/0013-aws-metadata-cloud-foundation.md",
 ];
@@ -70,7 +76,7 @@ const bootstrap = ["versions.tf", "variables.tf", "main.tf", "identity.tf", "bud
   .map((file) => readFile(path.join(bootstrapRoot, file), "utf8"));
 const metadata = [
   "versions.tf", "variables.tf", "locals.tf", "network.tf", "security.tf",
-  "data.tf", "compute.tf", "migration.tf", "queue-runner.tf", "budget.tf", "outputs.tf",
+  "data.tf", "compute.tf", "migration.tf", "queue-runner.tf", "control-api-runner.tf", "budget.tf", "outputs.tf",
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
@@ -78,6 +84,7 @@ const dockerignore = await read(".dockerignore");
 const metadataData = await read("tooling/infra/aws/metadata-cloud/data.tf");
 const migrationProbe = await read("tooling/infra/run-live-postgres-migration.mjs");
 const queueProbe = await read("tooling/infra/run-live-sqs-conformance.mjs");
+const controlApiProbe = await read("tooling/infra/run-live-control-api-conformance.mjs");
 const queueTransport = await read("tooling/infra/aws-sqs-publication-transport.mjs");
 const rdsCaBundle = await read("tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem");
 const metadataText = (await Promise.all(metadata)).join("\n");
@@ -102,7 +109,7 @@ requireText(metadataText, 'condition     = var.environment != "production" || va
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
 requireText(metadataText, 'name              = "/aws/rds/instance/${local.name}-postgres/postgresql"', "managed RDS logs");
-assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 6, "all six log groups need 30-day retention");
+assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 7, "all seven log groups need 30-day retention");
 requireText(metadataText, "block_public_acls       = true", "S3 public access block");
 requireText(metadataText, "noncurrent_days = 35", "metadata backup expiry");
 requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
@@ -111,6 +118,7 @@ requireText(metadataText, 'resource "aws_budgets_budget" "monthly"', "cost budge
 requireText(metadataText, 'Tier = "private-isolated"', "isolated subnet");
 requireText(metadataText, 'CostControl = "ephemeral-migration"', "ephemeral migration cost control");
 requireText(metadataText, 'CostControl = "ephemeral-sqs-conformance"', "ephemeral SQS cost control");
+requireText(metadataText, 'CostControl = "ephemeral-control-api-conformance"', "ephemeral control API cost control");
 requireText(metadataText, '"ecr.api"', "private ECR API endpoint");
 requireText(metadataText, '"ecr.dkr"', "private ECR registry endpoint");
 requireText(metadataText, '"logs"', "private log endpoint");
@@ -125,6 +133,10 @@ requireText(migrationProbe, "rejectUnauthorized: true", "RDS certificate verific
 requireText(queueProbe, "rejectUnauthorized: true", "SQS runner RDS certificate verification");
 requireText(queueProbe, "assertCloudCanariesAbsent", "live bounded secondary-sink scan");
 requireText(queueProbe, "maximumReceiveCount: 5", "live bounded SQS retries");
+requireText(controlApiProbe, "rejectUnauthorized: true", "control API runner RDS certificate verification");
+requireText(controlApiProbe, "createControlApiNodeListener", "real control API HTTP boundary");
+requireText(controlApiProbe, "wrongAudience.status, expired.status, revoked.status", "identity expiry and revocation probe");
+requireText(controlApiProbe, "sensitiveCanary", "audit body canary probe");
 requireText(queueTransport, "MaxNumberOfMessages: 1", "single-message SQS receive");
 requireText(queueTransport, "MessageAttributeNames: []", "message attribute exclusion");
 requireText(dockerignore, "!tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem", "RDS CA build context");
@@ -202,6 +214,7 @@ requireText(migrationWorkflow, "migration_runner_enabled=true", "explicit migrat
 requireText(migrationWorkflow, "migration_runner_enabled=false", "mandatory migration cleanup");
 requireText(migrationWorkflow, "assignPublicIp=DISABLED", "private Fargate task");
 requireText(migrationWorkflow, "Verify zero drift after cleanup", "post-cleanup drift gate");
+requireText(migrationWorkflow, "group: aws-private-postgres-runner-development", "shared private PostgreSQL runner lock");
 assert.doesNotMatch(migrationWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
 const queueWorkflow = await read(".github/workflows/aws-sqs-conformance.yml");
@@ -214,7 +227,19 @@ requireText(queueWorkflow, "assignPublicIp=DISABLED", "private SQS Fargate task"
 requireText(queueWorkflow, "Verify zero drift after cleanup", "SQS post-cleanup drift gate");
 assert.doesNotMatch(queueWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
+const controlApiWorkflow = await read(".github/workflows/aws-control-api-conformance.yml");
+requireText(controlApiWorkflow, "id-token: write", "control API workflow token permission");
+requireText(controlApiWorkflow, "environment: development", "control API environment boundary");
+requireText(controlApiWorkflow, "github.ref == 'refs/heads/main'", "main-only control API boundary");
+requireText(controlApiWorkflow, "control_api_runner_enabled=true", "explicit control API runner enablement");
+requireText(controlApiWorkflow, "control_api_runner_enabled=false", "mandatory control API runner cleanup");
+requireText(controlApiWorkflow, "assignPublicIp=DISABLED", "private control API Fargate task");
+requireText(controlApiWorkflow, "Verify zero drift after cleanup", "control API post-cleanup drift gate");
+requireText(controlApiWorkflow, "group: aws-private-postgres-runner-development", "shared control API runner lock");
+assert.doesNotMatch(controlApiWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
+
 await checked("node", ["--test", "tooling/infra/test-aws-sqs-publication-transport.mjs"]);
+await checked("node", ["--test", "tooling/infra/test-control-api-node-http.mjs"]);
 
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");

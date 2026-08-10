@@ -56,6 +56,21 @@ override_resource {
   }
 }
 
+override_resource {
+  target = aws_iam_role.control_api_runner_execution
+  values = {
+    arn = "arn:aws:iam::123456789012:role/verification-development-control-api-conformance-execution"
+  }
+}
+
+override_resource {
+  target = aws_ecr_repository.control_api_runner
+  values = {
+    arn            = "arn:aws:ecr:us-west-2:123456789012:repository/verification-development-control-api-conformance"
+    repository_url = "123456789012.dkr.ecr.us-west-2.amazonaws.com/verification-development-control-api-conformance"
+  }
+}
+
 override_data {
   target = data.aws_iam_policy_document.environment_key
   values = {
@@ -112,6 +127,20 @@ override_data {
   }
 }
 
+override_data {
+  target = data.aws_iam_policy_document.control_api_runner_task_assume
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = data.aws_iam_policy_document.control_api_runner_execution
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
 run "creation_is_disabled_by_default" {
   command = plan
 
@@ -151,9 +180,77 @@ run "development_foundation_is_private_and_bounded" {
   }
 
   assert {
-    condition     = length(aws_ecr_repository.migration) == 0 && length(aws_vpc_endpoint.migration) == 0 && length(aws_ecs_task_definition.migration) == 0 && length(aws_ecr_repository.queue_runner) == 0 && length(aws_vpc_endpoint.queue_runner) == 0 && length(aws_ecs_task_definition.queue_runner) == 0
+    condition     = length(aws_ecr_repository.migration) == 0 && length(aws_vpc_endpoint.migration) == 0 && length(aws_ecs_task_definition.migration) == 0 && length(aws_ecr_repository.queue_runner) == 0 && length(aws_vpc_endpoint.queue_runner) == 0 && length(aws_ecs_task_definition.queue_runner) == 0 && length(aws_ecr_repository.control_api_runner) == 0 && length(aws_vpc_endpoint.control_api_runner) == 0 && length(aws_ecs_task_definition.control_api_runner) == 0
     error_message = "Ephemeral runner infrastructure must remain absent during an ordinary foundation deployment."
   }
+}
+
+run "ephemeral_control_api_runner_is_private_and_bounded" {
+  command = plan
+
+  variables {
+    deployment_enabled           = true
+    aws_account_id               = "123456789012"
+    budget_alert_email           = "alerts@example.com"
+    control_api_runner_enabled   = true
+    control_api_runner_image_tag = "cccccccccccccccccccccccccccccccccccccccc"
+  }
+
+  assert {
+    condition     = length(aws_vpc_endpoint.control_api_runner) == 4 && alltrue([for endpoint in aws_vpc_endpoint.control_api_runner : length(endpoint.subnet_ids) == 1 && endpoint.private_dns_enabled])
+    error_message = "The control API runner requires exactly four one-AZ private service endpoints."
+  }
+
+  assert {
+    condition     = length(aws_vpc_security_group_egress_rule.control_api_runner_to_s3) == 1 && aws_vpc_security_group_egress_rule.control_api_runner_to_s3[0].from_port == 443 && aws_vpc_security_group_egress_rule.control_api_runner_to_s3[0].to_port == 443
+    error_message = "The control API runner requires one bounded TLS path to the S3 gateway endpoint for ECR layers."
+  }
+
+  assert {
+    condition     = length(aws_vpc_security_group_egress_rule.control_api_runner_to_endpoints) == 1 && aws_vpc_security_group_egress_rule.control_api_runner_to_endpoints[0].referenced_security_group_id == aws_security_group.control_api_runner_endpoints[0].id && aws_vpc_security_group_egress_rule.control_api_runner_to_endpoints[0].from_port == 443 && aws_vpc_security_group_egress_rule.control_api_runner_to_endpoints[0].to_port == 443
+    error_message = "The control API runner requires one identity-bound TLS path to private interface endpoints."
+  }
+
+  assert {
+    condition     = length(aws_vpc_security_group_egress_rule.control_api_runner_to_database) == 1 && aws_vpc_security_group_egress_rule.control_api_runner_to_database[0].referenced_security_group_id == aws_security_group.database[0].id
+    error_message = "The control API runner requires one identity-bound PostgreSQL path."
+  }
+
+  assert {
+    condition     = aws_ecr_repository.control_api_runner[0].image_tag_mutability == "IMMUTABLE" && aws_ecr_repository.control_api_runner[0].force_delete
+    error_message = "The ephemeral control API repository must use immutable tags and support automatic cleanup."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.control_api_runner[0].network_mode == "awsvpc" && contains(aws_ecs_task_definition.control_api_runner[0].requires_compatibilities, "FARGATE")
+    error_message = "Control API conformance must run only as a private Fargate task."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.control_api_runner[0].container_definitions)[0].readonlyRootFilesystem && aws_cloudwatch_log_group.control_api_runner[0].retention_in_days == 30
+    error_message = "The control API runner must be read-only with bounded encrypted logs."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.control_api_runner[0].task_role_arn == null
+    error_message = "The control API conformance process must receive no AWS task credentials."
+  }
+}
+
+run "private_postgres_runner_namespace_is_exclusive" {
+  command = plan
+
+  variables {
+    deployment_enabled           = true
+    aws_account_id               = "123456789012"
+    budget_alert_email           = "alerts@example.com"
+    migration_runner_enabled     = true
+    migration_image_tag          = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    control_api_runner_enabled   = true
+    control_api_runner_image_tag = "cccccccccccccccccccccccccccccccccccccccc"
+  }
+
+  expect_failures = [var.control_api_runner_enabled]
 }
 
 run "ephemeral_sqs_runner_is_private_and_bounded" {

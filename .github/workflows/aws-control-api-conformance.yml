@@ -1,4 +1,4 @@
-name: AWS PostgreSQL migration
+name: AWS control API conformance
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  migrate:
-    name: Migrate and probe private development RDS
+  conformance:
+    name: Probe private development control API
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -32,7 +32,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
-          role-session-name: postgres-migration-${{ github.run_id }}
+          role-session-name: control-api-conformance-${{ github.run_id }}
           aws-region: ${{ vars.AWS_REGION }}
           allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
 
@@ -47,39 +47,39 @@ jobs:
             -backend-config="kms_key_id=${{ vars.AWS_STATE_KMS_KEY_ARN }}" \
             -backend-config="use_lockfile=true"
 
-      - name: Validate migration infrastructure
+      - name: Validate control API conformance infrastructure
         working-directory: tooling/infra/aws/metadata-cloud
         run: tofu validate -no-color
 
-      - name: Build immutable migration-runner plan
+      - name: Build immutable control API conformance plan
         working-directory: tooling/infra/aws/metadata-cloud
         run: |
-          tofu plan -input=false -lock-timeout=5m -out=migration.tfplan \
+          tofu plan -input=false -lock-timeout=5m -out=control-api-conformance.tfplan \
             -var='deployment_enabled=true' \
             -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
             -var='aws_region=${{ vars.AWS_REGION }}' \
             -var='environment=development' \
             -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
             -var='monthly_budget_usd=100' \
-            -var='migration_runner_enabled=true' \
-            -var='migration_image_tag=${{ github.sha }}'
+            -var='control_api_runner_enabled=true' \
+            -var='control_api_runner_image_tag=${{ github.sha }}'
 
-      - name: Apply immutable migration-runner plan
+      - name: Apply immutable control API conformance plan
         working-directory: tooling/infra/aws/metadata-cloud
-        run: tofu apply -input=false -auto-approve migration.tfplan
+        run: tofu apply -input=false -auto-approve control-api-conformance.tfplan
 
       - name: Read non-secret runner coordinates
         id: runner
         working-directory: tooling/infra/aws/metadata-cloud
         run: |
-          echo "repository=$(tofu output -raw migration_repository_url)" >> "$GITHUB_OUTPUT"
-          echo "task_definition=$(tofu output -raw migration_task_definition_arn)" >> "$GITHUB_OUTPUT"
-          echo "cluster=$(tofu output -raw migration_cluster_arn)" >> "$GITHUB_OUTPUT"
-          echo "subnet=$(tofu output -raw migration_subnet_id)" >> "$GITHUB_OUTPUT"
-          echo "security_group=$(tofu output -raw migration_security_group_id)" >> "$GITHUB_OUTPUT"
-          echo "log_group=$(tofu output -raw migration_log_group_name)" >> "$GITHUB_OUTPUT"
+          echo "repository=$(tofu output -raw control_api_runner_repository_url)" >> "$GITHUB_OUTPUT"
+          echo "task_definition=$(tofu output -raw control_api_runner_task_definition_arn)" >> "$GITHUB_OUTPUT"
+          echo "cluster=$(tofu output -raw control_api_runner_cluster_arn)" >> "$GITHUB_OUTPUT"
+          echo "subnet=$(tofu output -raw control_api_runner_subnet_id)" >> "$GITHUB_OUTPUT"
+          echo "security_group=$(tofu output -raw control_api_runner_security_group_id)" >> "$GITHUB_OUTPUT"
+          echo "log_group=$(tofu output -raw control_api_runner_log_group_name)" >> "$GITHUB_OUTPUT"
 
-      - name: Build and push immutable migration image
+      - name: Build and push immutable control API conformance image
         env:
           REPOSITORY: ${{ steps.runner.outputs.repository }}
         run: |
@@ -87,12 +87,11 @@ jobs:
           aws ecr get-login-password --region "${{ vars.AWS_REGION }}" \
             | docker login --username AWS --password-stdin "$registry"
           docker build \
-            --file tooling/infra/aws/metadata-cloud/migration.Dockerfile \
+            --file tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile \
             --tag "$REPOSITORY:${{ github.sha }}" .
           docker push "$REPOSITORY:${{ github.sha }}"
 
-      - name: Run migration and live conformance probe
-        id: migration
+      - name: Run live control API conformance
         env:
           CLUSTER: ${{ steps.runner.outputs.cluster }}
           LOG_GROUP: ${{ steps.runner.outputs.log_group }}
@@ -125,20 +124,18 @@ jobs:
           evidence=$(aws logs get-log-events \
             --log-group-name "$LOG_GROUP" \
             --log-stream-name "$log_stream" \
-            --limit 10 \
+            --limit 20 \
             --query 'events[-1].message' \
             --output text)
           echo "$evidence" | jq -e '
             .schemaVersion == 1
-            and .kind == "awsPostgresMigrationEvidence"
+            and .kind == "awsControlApiEvidence"
             and .outcome == "passed"
-            and .migrationId == "0001_publication_store"
-            and (.serverVersion | startswith("17.6"))
             and ([.checks[]] | all(. == "passed"))'
           test "$exit_code" = "0"
           echo "$evidence"
 
-      - name: Remove ephemeral migration resources
+      - name: Remove ephemeral control API conformance resources
         if: always()
         working-directory: tooling/infra/aws/metadata-cloud
         run: |
@@ -149,7 +146,7 @@ jobs:
             -var='environment=development' \
             -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
             -var='monthly_budget_usd=100' \
-            -var='migration_runner_enabled=false'
+            -var='control_api_runner_enabled=false'
           tofu apply -input=false -auto-approve cleanup.tfplan
 
       - name: Verify zero drift after cleanup
@@ -163,4 +160,4 @@ jobs:
             -var='environment=development' \
             -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
             -var='monthly_budget_usd=100' \
-            -var='migration_runner_enabled=false'
+            -var='control_api_runner_enabled=false'
