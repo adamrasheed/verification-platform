@@ -66,7 +66,7 @@
     },
     {
       "path": ".github/workflows/aws-control-api-conformance.yml",
-      "digest": "sha256:d2cb0d55cc30a5d813ae843861757b77fa9e94337b31379bf9ba8aaa23ecae78"
+      "digest": "sha256:c49b54f0f96e719ec4a448ef72b623a42c84b653cc03e09b276642f8128aa46f"
     },
     {
       "path": "docs/operations/AWS_CONTROL_API_CONFORMANCE.md",

@@ -124,6 +124,7 @@ jobs:
             --tasks "$task_arn" \
             --query 'tasks[0].containers[0].reason' \
             --output text)
+          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
           log_stream=$(aws logs describe-log-streams \
             --log-group-name "$LOG_GROUP" \
             --order-by LastEventTime \
@@ -131,6 +132,10 @@ jobs:
             --max-items 1 \
             --query 'logStreams[0].logStreamName' \
             --output text)
+          if [[ -z "$log_stream" || "$log_stream" == "None" ]]; then
+            echo "No CloudWatch log stream was created before the ECS task stopped."
+            exit 1
+          fi
           log_messages=$(aws logs get-log-events \
             --log-group-name "$LOG_GROUP" \
             --log-stream-name "$log_stream" \
@@ -138,7 +143,6 @@ jobs:
             --query 'events[].message' \
             --output json)
           evidence=$(jq -r '.[-1]' <<< "$log_messages")
-          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
           jq -r '.[]' <<< "$log_messages"
           echo "$evidence" | jq -e '
             .schemaVersion == 1
