@@ -192,7 +192,7 @@ jobs:
           security delete-keychain "$RUNNER_TEMP/verify-signing.keychain-db" || true
 
       - name: Retain the signed macOS release
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: VerifyPluginHost-macos-${{ inputs.version }}
           path: |
@@ -308,7 +308,7 @@ jobs:
         run: Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $env:RUNNER_TEMP 'verify-code-signing.pfx')
 
       - name: Retain the signed Windows release
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: VerifyPluginHost-windows-${{ inputs.version }}
           path: |
