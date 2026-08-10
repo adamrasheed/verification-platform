@@ -174,12 +174,12 @@ resource "aws_vpc_security_group_ingress_rule" "control_api_runner_endpoints" {
 resource "aws_vpc_security_group_egress_rule" "control_api_runner_to_endpoints" {
   count = var.deployment_enabled ? (var.control_api_runner_enabled ? 1 : 0) : 0
 
-  security_group_id            = aws_security_group.control_api_runner[0].id
-  referenced_security_group_id = aws_security_group.control_api_runner_endpoints[0].id
-  from_port                    = 443
-  to_port                      = 443
-  ip_protocol                  = "tcp"
-  description                  = "TLS only to the control API endpoint identity"
+  security_group_id = aws_security_group.control_api_runner[0].id
+  cidr_ipv4         = var.vpc_cidr
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  description       = "TLS only inside the VPC for private AWS service endpoints"
 }
 
 resource "aws_vpc_security_group_egress_rule" "control_api_runner_to_s3" {

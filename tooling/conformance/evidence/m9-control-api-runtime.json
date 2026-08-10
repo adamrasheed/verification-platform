@@ -58,7 +58,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
-      "digest": "sha256:bdefe0d2f64aac6f395d46dff4699703129d2ce91100c60a8fc296d9a3a520fa"
+      "digest": "sha256:67804b6fe1e9e2929418787ec0604d216be9ce63ed102ddc51c446ec28b3a51f"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile",

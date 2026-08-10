@@ -84,7 +84,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:5ea303992259056e40a4b75ab820b090262f8745b06962a722e70e12f040c30d"
+      "digest": "sha256:16554705011eb7896c2ca92c9d5ff470de8db4e840445aa0469783a8236bab0f"
     },
     {
       "path": ".github/workflows/ci.yml",
