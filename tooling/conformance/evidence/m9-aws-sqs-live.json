@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-sqs-live",
+  "taskId": "M9-T05",
+  "owner": "cloud-platform",
+  "governingClauses": ["Freeze §§11.3-11.4,18", "EDD §§19-21,26-28,31", "ADR-0005", "ADR-0013", "SP-CLOUD-002", "ORB-QUEUE-002"],
+  "testIds": [
+    "aws-sqs-live:fenced-outbox-relay",
+    "aws-sqs-live:idempotent-duplicate-side-effect",
+    "aws-sqs-live:bounded-visibility-retry",
+    "aws-sqs-live:source-bound-dead-letter-redrive",
+    "aws-sqs-live:digest-free-dead-letter-and-deletion",
+    "aws-sqs-live:closed-secondary-sink-canary-scan",
+    "aws-sqs-live:synthetic-cleanup",
+    "aws-sqs-live:ephemeral-teardown-zero-drift"
+  ],
+  "command": "gh run watch 31255571094 --exit-status && npm run check:aws-sqs-evidence",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_SQS_WORKER.json",
+      "digest": "sha256:54c9e3409582df7968e68756d286ff48b0b50f0bf88cd049b3bcc615405e6dd1"
+    },
+    {
+      "path": "tooling/infra/check-aws-sqs-evidence.mjs",
+      "digest": "sha256:38cbb97d6705b369fe05b9f2f7cc510ebc6a5f26c3462ee53e07b8da1e2655ee"
+    },
+    {
+      "path": ".github/workflows/aws-sqs-conformance.yml",
+      "digest": "sha256:359415b97ade7e1bbd837af4137ba0cdd222d4aed5a0c8ce1fc42ea15ec431fb"
+    },
+    {
+      "path": "tooling/infra/run-live-sqs-conformance.mjs",
+      "digest": "sha256:61b289755ed8339d7dae4b382a33f9edc2909a1c05826ee0811ca98ae9475535"
+    }
+  ]
+}

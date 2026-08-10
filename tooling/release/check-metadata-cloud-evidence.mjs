@@ -38,7 +38,7 @@ for (const field of ["serviceSlo", "disasterRecovery", "providerDeployment"]) {
   if (report.verification?.[field] !== "blocked") errors.push(`verification: ${field} must remain blocked`);
 }
 const expectedBlockers = [
-  ["providerDeployment", "M9-T05-T07"],
+  ["providerDeployment", "M9-T06-T07"],
   ["serviceSlo", "M9-T08"],
   ["disasterRecovery", "M9-T08"],
 ];
@@ -80,6 +80,7 @@ const expectedArtifacts = [
   "docs/compliance/release/SECURITY_REPORT.json",
   "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json",
   "docs/compliance/release/AWS_POSTGRES_MIGRATION.json",
+  "docs/compliance/release/AWS_SQS_WORKER.json",
   "package-lock.json",
   "tooling/release/package-policy.json",
 ];
