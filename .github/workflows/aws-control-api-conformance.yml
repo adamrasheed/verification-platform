@@ -161,3 +161,7 @@ jobs:
             -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
             -var='monthly_budget_usd=100' \
             -var='control_api_runner_enabled=false'
+
+      - name: Audit the cleaned development foundation
+        if: always()
+        run: node tooling/infra/audit-aws-development.mjs

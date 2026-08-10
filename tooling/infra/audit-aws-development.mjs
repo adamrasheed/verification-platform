@@ -7,6 +7,7 @@ const execute = promisify(execFile);
 const accountId = "661590454564";
 const region = "us-west-2";
 const environment = "development";
+const reviewedPostgresVersion = "17.9";
 const name = `verification-${environment}`;
 const keyAlias = `alias/${name}-metadata`;
 
@@ -42,7 +43,10 @@ requireCheck(rds.DBInstanceStatus === "available", "RDS is not available");
 requireCheck(rds.StorageEncrypted && rds.KmsKeyId === key.Arn, "RDS storage is not encrypted with the environment key");
 requireCheck(!rds.PubliclyAccessible, "RDS is publicly accessible");
 requireCheck(rds.BackupRetentionPeriod === 35, "RDS backup retention is not 35 days");
-requireCheck(rds.Engine === "postgres" && rds.EngineVersion === "17.6", "RDS engine is not the reviewed PostgreSQL version");
+requireCheck(
+  rds.Engine === "postgres" && rds.EngineVersion === reviewedPostgresVersion,
+  "RDS engine is not the reviewed PostgreSQL version",
+);
 requireCheck(rds.MasterUserSecret?.SecretStatus === "active", "RDS-managed credential is not active");
 requireCheck(rds.MasterUserSecret?.KmsKeyId === key.Arn, "RDS-managed credential is not encrypted with the environment key");
 requireCheck(

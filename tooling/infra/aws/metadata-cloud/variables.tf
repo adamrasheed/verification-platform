@@ -96,7 +96,12 @@ variable "database_instance_class" {
 variable "postgres_engine_version" {
   description = "Reviewed PostgreSQL engine line."
   type        = string
-  default     = "17.6"
+  default     = "17.9"
+
+  validation {
+    condition     = var.postgres_engine_version == "17.9"
+    error_message = "The reviewed development PostgreSQL engine is exactly 17.9."
+  }
 }
 
 variable "database_multi_az" {
