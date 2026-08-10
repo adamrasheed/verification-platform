@@ -6,6 +6,7 @@ export type {
   ControlApiAuditEvent,
   ControlApiAuditSink,
   ControlApiAuthenticator,
+  ControlApiDispatchStore,
   ControlApiGrantResolver,
   ControlApiHandler,
   ControlApiOptions,

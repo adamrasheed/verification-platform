@@ -34,7 +34,7 @@
     },
     {
       "path": "apps/control-api/src/public/index.ts",
-      "digest": "sha256:8aad19d46beba9454d4d186d0a859573a3c2f2b5f4511232118b417d37604d84"
+      "digest": "sha256:9aef9d0d8b73e42bae7e21aab62fe10b7fd3c5bc648469332a63f7a3d24fe7ce"
     },
     {
       "path": "apps/control-api/test/postgres-control-store.test.mjs",

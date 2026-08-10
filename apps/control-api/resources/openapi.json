@@ -11,6 +11,91 @@
     { "bearerIdentity": [] }
   ],
   "paths": {
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches": {
+      "post": {
+        "operationId": "createDispatch",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "https://verification.internal/schemas/protocol/command-request/v1" }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Tenant-bound customer workload dispatch accepted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "https://verification.internal/schemas/protocol/command-result/v1" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "413": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches/{dispatchId}": {
+      "get": {
+        "operationId": "getDispatch",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          { "$ref": "#/components/parameters/DispatchId" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized dispatch lifecycle without local result or source",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/DispatchRecord" } }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/tenants/{tenantId}/projects/{projectId}/dispatches/{dispatchId}/cancellations": {
+      "post": {
+        "operationId": "cancelDispatch",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          { "$ref": "#/components/parameters/DispatchId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DispatchCancellationRequest" } }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Gateway cancellation acknowledgement retained",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/DispatchRecord" } }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
     "/v1/tenants/{tenantId}/projects/{projectId}/publication-intents": {
       "post": {
         "operationId": "issuePublicationIntent",
@@ -160,6 +245,12 @@
         "required": true,
         "schema": { "$ref": "#/components/schemas/OpaqueId" }
       },
+      "DispatchId": {
+        "name": "dispatchId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
       "IdempotencyKey": {
         "name": "Idempotency-Key",
         "in": "header",
@@ -208,6 +299,57 @@
           },
           "nonce": { "$ref": "#/components/schemas/OpaqueId" },
           "expiresAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "DispatchCancellationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["schemaVersion"],
+        "properties": {
+          "schemaVersion": { "const": 1 }
+        }
+      },
+      "DispatchRecord": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion", "dispatchId", "tenantId", "projectId", "workloadBinding",
+          "state", "admittedAt", "updatedAt", "reasonCodes"
+        ],
+        "properties": {
+          "schemaVersion": { "const": 1 },
+          "dispatchId": { "$ref": "#/components/schemas/OpaqueId" },
+          "tenantId": { "$ref": "#/components/schemas/OpaqueId" },
+          "projectId": { "$ref": "#/components/schemas/OpaqueId" },
+          "workloadBinding": { "$ref": "#/components/schemas/OpaqueId" },
+          "state": {
+            "enum": [
+              "queued", "offered", "running", "cancellation_requested",
+              "completed", "cancelled", "expired", "failed"
+            ]
+          },
+          "admittedAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "verifyInvocationId": { "$ref": "#/components/schemas/OpaqueId" },
+          "publishedRunId": { "$ref": "#/components/schemas/OpaqueId" },
+          "cancellation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cancellationId", "requestedAt", "gatewayAcknowledgement", "workloadAcknowledgement"
+            ],
+            "properties": {
+              "cancellationId": { "$ref": "#/components/schemas/OpaqueId" },
+              "requestedAt": { "type": "string", "format": "date-time" },
+              "gatewayAcknowledgement": { "enum": ["accepted", "forwarded"] },
+              "workloadAcknowledgement": { "enum": ["pending", "accepted", "terminal"] }
+            }
+          },
+          "reasonCodes": {
+            "type": "array",
+            "maxItems": 64,
+            "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+          }
         }
       },
       "PublicationRequest": {
