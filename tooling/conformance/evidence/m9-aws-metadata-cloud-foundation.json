@@ -24,7 +24,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:1e00e3012b20b78a4ed79ad9ffb33e79ba4ac91ecb35e94bf9200163edde020d"
+      "digest": "sha256:d0fdc087b1de0b37b5305fb2dae4165772387d57870e31a9d635b788dc92f688"
     },
     {
       "path": "tooling/infra/aws/bootstrap/.terraform.lock.hcl",
@@ -60,7 +60,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/variables.tf",
-      "digest": "sha256:d77d073bbcee25b929f9d3e2fe47bb2ce83b10ebd2b1dfbb7aba20d22be7cc35"
+      "digest": "sha256:4e71b15989341fed7727e3b42d1698fb83f6b176cf0f94345ce1e6ad468534c9"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
@@ -84,7 +84,7 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:043ddc68639b4699c03845eb2069cebac875a5eb9d7b2dec0c2668291f1aa8f0"
+      "digest": "sha256:5ea303992259056e40a4b75ab820b090262f8745b06962a722e70e12f040c30d"
     },
     {
       "path": ".github/workflows/ci.yml",

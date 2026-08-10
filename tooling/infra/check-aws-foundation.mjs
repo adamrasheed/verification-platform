@@ -236,6 +236,7 @@ requireText(controlApiWorkflow, "control_api_runner_enabled=false", "mandatory c
 requireText(controlApiWorkflow, "assignPublicIp=DISABLED", "private control API Fargate task");
 requireText(controlApiWorkflow, "Verify zero drift after cleanup", "control API post-cleanup drift gate");
 requireText(controlApiWorkflow, "group: aws-private-postgres-runner-development", "shared control API runner lock");
+requireText(controlApiWorkflow, "node tooling/infra/audit-aws-development.mjs", "post-cleanup foundation audit");
 assert.doesNotMatch(controlApiWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
 await checked("node", ["--test", "tooling/infra/test-aws-sqs-publication-transport.mjs"]);

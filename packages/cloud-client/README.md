@@ -70,7 +70,7 @@ reject source and secret markers everywhere and tenant markers in any sink not
 authorized for that tenant.
 
 The PostgreSQL integration case runs when `VERIFY_POSTGRES_URL` is set; CI binds
-it to a digest-pinned PostgreSQL 17.6 service matching development RDS. Schemas
+it to a digest-pinned PostgreSQL 17 service matching development RDS. Schemas
 and compatibility are owned by Founding Engineering. M8 foundation acceptance
 is covered by `cloud-client:test`. The digest-bound metadata-cloud
 foundation report retains contract, security, and supply-chain verification,

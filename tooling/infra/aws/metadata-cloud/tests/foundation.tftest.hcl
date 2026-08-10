@@ -170,6 +170,11 @@ run "development_foundation_is_private_and_bounded" {
   }
 
   assert {
+    condition     = aws_db_instance.metadata[0].engine_version == "17.9"
+    error_message = "Development RDS must use the reviewed PostgreSQL 17.9 engine."
+  }
+
+  assert {
     condition     = aws_sqs_queue.metadata[0].redrive_policy != null && aws_kms_key.environment[0].enable_key_rotation
     error_message = "Queue redrive and environment key rotation are mandatory."
   }
