@@ -29,7 +29,7 @@
     },
     {
       "path": "packages/cloud-client/src/public/index.ts",
-      "digest": "sha256:e4106e0b355616d214bd023499fae99c84f1d05755c0775f810b6b557b87c8c6"
+      "digest": "sha256:d7bb9fef16c4dd9c7ccd1067a830d5825b39a5319cc521ce88b052758ac7cf53"
     },
     {
       "path": "packages/cloud-client/package.json",

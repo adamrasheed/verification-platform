@@ -1,4 +1,6 @@
 import type {
+  DispatchVerificationRequest,
+  DispatchVerificationResult,
   PublishedVerificationResult,
 } from "@verify-internal/protocol";
 
@@ -6,6 +8,123 @@ export const METADATA_PUBLICATION_SCHEMA_MAJOR = 1 as const;
 export const DISCLOSURE_MANIFEST_SCHEMA_MAJOR = 1 as const;
 export const POLICY_DISTRIBUTION_SCHEMA_MAJOR = 1 as const;
 export const PUBLICATION_INTENT_SCHEMA_MAJOR = 1 as const;
+export const WORKLOAD_DISPATCH_SCHEMA_MAJOR = 1 as const;
+
+export interface DispatchAuthorizationContext {
+  readonly tenantId: string;
+  readonly projectId: string;
+}
+
+export type WorkloadDispatchLifecycleState =
+  | "queued"
+  | "offered"
+  | "running"
+  | "cancellation_requested"
+  | "completed"
+  | "cancelled"
+  | "expired"
+  | "failed";
+
+export interface DispatchCancellationState {
+  readonly cancellationId: string;
+  readonly requestedAt: string;
+  readonly gatewayAcknowledgement: "accepted" | "forwarded";
+  readonly workloadAcknowledgement: "pending" | "accepted" | "terminal";
+}
+
+export interface CustomerWorkloadDispatchRecord {
+  readonly schemaVersion: typeof WORKLOAD_DISPATCH_SCHEMA_MAJOR;
+  readonly dispatchId: string;
+  readonly tenantId: string;
+  readonly projectId: string;
+  readonly workloadBinding: string;
+  readonly state: WorkloadDispatchLifecycleState;
+  readonly admittedAt: string;
+  readonly updatedAt: string;
+  readonly verifyInvocationId?: string;
+  readonly publishedRunId?: string;
+  readonly cancellation?: DispatchCancellationState;
+  readonly reasonCodes: readonly string[];
+}
+
+export interface CustomerWorkloadDispatchAdmission {
+  readonly authorization: DispatchAuthorizationContext;
+  readonly request: DispatchVerificationRequest;
+  readonly requestDigest: `sha256:${string}`;
+  readonly admittedAt: string;
+}
+
+export interface CustomerWorkloadDispatchReceipt {
+  readonly schemaVersion: typeof WORKLOAD_DISPATCH_SCHEMA_MAJOR;
+  readonly result: DispatchVerificationResult;
+  readonly admittedAt: string;
+}
+
+export interface CustomerWorkloadOfferClaim {
+  readonly schemaVersion: typeof WORKLOAD_DISPATCH_SCHEMA_MAJOR;
+  readonly dispatchId: string;
+  readonly tenantId: string;
+  readonly projectId: string;
+  readonly workloadBinding: string;
+  readonly workerId: string;
+  readonly fence: number;
+  readonly attempt: number;
+  readonly leaseExpiresAt: string;
+  readonly request: DispatchVerificationRequest;
+}
+
+export interface CustomerWorkloadCompletion {
+  readonly schemaVersion: typeof WORKLOAD_DISPATCH_SCHEMA_MAJOR;
+  readonly idempotencyKey: string;
+  readonly verifyInvocationId: string;
+  readonly publishedRunId: string;
+  readonly completedAt: string;
+}
+
+export interface CustomerWorkloadDispatchStore {
+  admit(
+    admission: CustomerWorkloadDispatchAdmission,
+  ): PublicationStoreResult<CustomerWorkloadDispatchReceipt>;
+  resolve(
+    authorization: DispatchAuthorizationContext,
+    dispatchId: string,
+  ): PublicationStoreResult<CustomerWorkloadDispatchRecord | undefined>;
+  claimOffer(
+    workloadBinding: string,
+    workerId: string,
+    now: Date,
+    leaseMs: number,
+  ): PublicationStoreResult<CustomerWorkloadOfferClaim | undefined>;
+  acceptOffer(
+    claim: CustomerWorkloadOfferClaim,
+    now: Date,
+  ): PublicationStoreResult<void>;
+  heartbeat(
+    claim: CustomerWorkloadOfferClaim,
+    now: Date,
+    leaseMs: number,
+  ): PublicationStoreResult<CustomerWorkloadOfferClaim>;
+  requestCancellation(
+    authorization: DispatchAuthorizationContext,
+    dispatchId: string,
+    cancellationId: string,
+    now: Date,
+  ): PublicationStoreResult<CustomerWorkloadDispatchRecord | undefined>;
+  observeCancellation(
+    claim: CustomerWorkloadOfferClaim,
+    now: Date,
+  ): PublicationStoreResult<DispatchCancellationState | undefined>;
+  acknowledgeCancellation(
+    claim: CustomerWorkloadOfferClaim,
+    acknowledgement: "accepted" | "terminal",
+    now: Date,
+  ): PublicationStoreResult<void>;
+  finalize(
+    claim: CustomerWorkloadOfferClaim,
+    completion: CustomerWorkloadCompletion,
+    now: Date,
+  ): PublicationStoreResult<CustomerWorkloadDispatchRecord>;
+}
 
 export type MetadataPublicationPayload = PublishedVerificationResult & {
   readonly schemaVersion: typeof METADATA_PUBLICATION_SCHEMA_MAJOR;

@@ -32,11 +32,11 @@
     },
     {
       "path": "packages/cloud-client/src/public/types.ts",
-      "digest": "sha256:5b576c79ac6dd86d4f20f63ecb46eb13808fe984f8008834fdf821eccfcfeafd"
+      "digest": "sha256:ef0257f9599b776199fe94b2708732248d9fd6d583203b1ff20cf4df525c32e6"
     },
     {
       "path": "packages/cloud-client/src/public/index.ts",
-      "digest": "sha256:e4106e0b355616d214bd023499fae99c84f1d05755c0775f810b6b557b87c8c6"
+      "digest": "sha256:d7bb9fef16c4dd9c7ccd1067a830d5825b39a5319cc521ce88b052758ac7cf53"
     },
     {
       "path": "packages/cloud-client/test/cloud-client.test.mjs",
