@@ -37,7 +37,7 @@
     },
     {
       "path": "package-lock.json",
-      "digest": "sha256:f6992814c76ecfb5e174d78457e74edac0606e3fdd6b36645e91389f11bfab9a"
+      "digest": "sha256:a5f00e7e458c6e47bb6450f2497c359b9a7f4b59ec2ec52cb4b24511b4db7d5e"
     },
     {
       "path": "docs/operations/M9_SQS_WORKER.md",

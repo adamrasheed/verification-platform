@@ -42,15 +42,15 @@
     },
     {
       "path": "packages/auth/src/public/cloud-authorization.ts",
-      "digest": "sha256:dd865c801e5c9fca04217d82991abb8ffe80f5e604beaaaef7dfa594f69a9217"
+      "digest": "sha256:e325748c3997a5f46e1580073bbaeb21c717bc262a95391d50210df73711d189"
     },
     {
       "path": "packages/auth/schemas/cloud-authorization.schema.json",
-      "digest": "sha256:bf669832967d3439529707a111897a72085a273aeec857b2af080dbea069cd3c"
+      "digest": "sha256:c10426b64f5fe09a28f3ec6d340c85baa7b08feabe0e4f1808dcaa241ec27c79"
     },
     {
       "path": "packages/auth/test/cloud-authorization.test.mjs",
-      "digest": "sha256:34d25ee175b08d5937b63451da7bff1079b3806a90fb49f84c9b1a78fef9c4b8"
+      "digest": "sha256:2079b041f99cab493aa44377a5ce9da92bce53275d4e5a67677c20bc7a4ca71c"
     },
     {
       "path": "docs/architecture/SHARED_CONTRACTS.md",

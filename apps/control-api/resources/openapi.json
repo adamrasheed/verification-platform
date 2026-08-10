@@ -1,0 +1,238 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Verification Metadata Control API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "/" }
+  ],
+  "security": [
+    { "bearerIdentity": [] }
+  ],
+  "paths": {
+    "/v1/tenants/{tenantId}/projects/{projectId}/publication-intents": {
+      "post": {
+        "operationId": "issuePublicationIntent",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PublicationIntentRequest" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exact signed publication intent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "https://verification.internal/schemas/cloud-client/publication-intent/v1" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "413": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/tenants/{tenantId}/projects/{projectId}/publications": {
+      "post": {
+        "operationId": "publishRun",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PublicationRequest" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Immutable publication acceptance",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "https://verification.internal/schemas/cloud-client/publication-ingestion-receipt/v1" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "413": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/tenants/{tenantId}/projects/{projectId}/runs": {
+      "get": {
+        "operationId": "listPublishedRuns",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "minLength": 1, "maxLength": 512 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stable tenant/project-scoped page",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "https://verification.internal/schemas/cloud-client/published-run-list-page/v1" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/v1/tenants/{tenantId}/projects/{projectId}/runs/{publishedRunId}": {
+      "get": {
+        "operationId": "getPublishedRun",
+        "parameters": [
+          { "$ref": "#/components/parameters/TenantId" },
+          { "$ref": "#/components/parameters/ProjectId" },
+          {
+            "name": "publishedRunId",
+            "in": "path",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/OpaqueId" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One authorized immutable run projection or tombstone",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PublishedRunResolution" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerIdentity": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "EdDSA compact JWT"
+      }
+    },
+    "parameters": {
+      "TenantId": {
+        "name": "tenantId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
+      "ProjectId": {
+        "name": "projectId",
+        "in": "path",
+        "required": true,
+        "schema": { "$ref": "#/components/schemas/OpaqueId" }
+      },
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": { "type": "string", "minLength": 1, "maxLength": 512 }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Bounded structured error",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/ErrorEnvelope" } }
+        }
+      }
+    },
+    "schemas": {
+      "OpaqueId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[^/\\\\\\u0000-\\u001f\\u007f]+$"
+      },
+      "PublicationIntentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schemaVersion", "manifest", "manifestDigest", "retentionClass", "limits", "nonce", "expiresAt"
+        ],
+        "properties": {
+          "schemaVersion": { "const": 1 },
+          "manifest": { "$ref": "https://verification.internal/schemas/cloud-client/disclosure-manifest/v1" },
+          "manifestDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "retentionClass": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "limits": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "maxEncodedPayloadBytes", "maxPromiseCount", "maxProofCount", "maxEvidenceCount"
+            ],
+            "properties": {
+              "maxEncodedPayloadBytes": { "type": "integer", "minimum": 0, "maximum": 1048576 },
+              "maxPromiseCount": { "type": "integer", "minimum": 0, "maximum": 10000 },
+              "maxProofCount": { "type": "integer", "minimum": 0, "maximum": 50000 },
+              "maxEvidenceCount": { "type": "integer", "minimum": 0, "maximum": 50000 }
+            }
+          },
+          "nonce": { "$ref": "#/components/schemas/OpaqueId" },
+          "expiresAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PublicationRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["schemaVersion", "signedIntent", "manifest", "manifestDigest", "payload"],
+        "properties": {
+          "schemaVersion": { "const": 1 },
+          "signedIntent": { "$ref": "https://verification.internal/schemas/cloud-client/publication-intent/v1" },
+          "manifest": { "$ref": "https://verification.internal/schemas/cloud-client/disclosure-manifest/v1" },
+          "manifestDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "payload": { "$ref": "https://verification.internal/schemas/cloud-client/metadata-publication/v1" }
+        }
+      },
+      "PublishedRunResolution": {
+        "$ref": "https://verification.internal/schemas/cloud-client/published-run-list-page/v1#/$defs/resolution"
+      },
+      "ErrorEnvelope": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["error"],
+        "properties": {
+          "error": { "$ref": "https://verification.internal/schemas/protocol/structured-error/v1" }
+        }
+      }
+    }
+  }
+}

@@ -64,7 +64,7 @@
     },
     {
       "path": "apps/github-action/dist/index.js",
-      "digest": "sha256:e682ffda34746b039ffb6ffec9cf7ccdc660c49158d3025782f291a330a943cb"
+      "digest": "sha256:510d8707a29388ad9a17cb89019aeca8208a50cf805b14e7f85c35d1023523b8"
     },
     {
       "path": "docs/architecture/ADAPTER_COMPATIBILITY.md",

@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "dist/control-api.tsbuildinfo",
+    "types": ["node"],
+    "paths": {
+      "@verify-internal/auth": ["../../packages/auth/src/public/index.ts"],
+      "@verify-internal/cloud-client": ["../../packages/cloud-client/src/public/index.ts"],
+      "@verify-internal/protocol": ["../../packages/protocol/src/public/index.ts"]
+    }
+  },
+  "references": [
+    { "path": "../../packages/auth" },
+    { "path": "../../packages/cloud-client" },
+    { "path": "../../packages/protocol" }
+  ],
+  "include": ["src/**/*.ts"]
+}

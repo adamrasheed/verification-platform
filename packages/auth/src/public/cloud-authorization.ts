@@ -16,7 +16,7 @@ export type CloudResourceType =
   (typeof CLOUD_ACTION_CATALOG)[number]["resourceType"];
 
 export interface CloudPrincipal {
-  readonly kind: "user" | "workload" | "operator";
+  readonly kind: "user" | "workload" | "integration" | "operator";
   readonly id: string;
   readonly authenticated: boolean;
   readonly audience: string;
