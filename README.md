@@ -1,8 +1,9 @@
-# Verification Platform
+# Verify
 
-**Verification infrastructure for AI-generated software.**
+**Know when an AI-generated JavaScript or TypeScript change is actually done.**
 
-Run one command to check whether a JavaScript or TypeScript workspace is coherently configured, inspect the evidence, and give humans or coding agents structured guidance for repairs.
+Verify checks a workspace with a deterministic, local-first engine and returns
+an evidence-backed verdict that developers, coding agents, and CI can all read.
 
 [![CI](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml)
@@ -13,150 +14,166 @@ Run one command to check whether a JavaScript or TypeScript workspace is coheren
 npx @adamrasheed/verify@latest verify .
 ```
 
-Generated code can look complete, compile, and still leave the application incorrectly configured. Verification Platform provides an independent source of evidence: applications make Promises, the Engine evaluates Proofs, retained Evidence supports the result, and Repairs point to the next change.
+No account or configuration is required. The Engine run is offline and
+read-only: it does not execute repository code, contact external services, read
+credentials, or change source files.
 
-## From agent claim to evidence
+## What it catches today
 
-The workflow available today is deliberately narrow and concrete:
+Verify currently checks npm, pnpm, and Yarn workspaces for dependency and
+workspace declaration problems:
 
-1. Claude, Codex, Cursor, or another coding agent says a workspace change is finished.
-2. You run `verify .`.
-3. The Engine passively discovers the workspace's dependency-integrity Capability and its applicable Promises.
-4. Four built-in Proofs evaluate package manifests, workspace membership, local dependency references, and lockfile ownership.
-5. The CLI returns an operational status, a verification outcome, exact Evidence references, reason codes, and any supported Repair suggestions.
-6. A human or agent uses the machine-readable result to make the change and verifies again.
+| Problem | Example |
+|---|---|
+| Invalid manifests | malformed or ambiguous `package.json` data |
+| Workspace identity conflicts | duplicate or missing package names |
+| Broken local dependencies | ranges or paths that do not select the intended workspace package |
+| Lockfile ownership drift | missing, conflicting, or incorrectly rooted package-manager signals |
 
-The verifier—not the coding agent—determines the result. Authentication, payments, deployments, webhooks, and other runtime journeys are not verified by the current CLI; they illustrate where the same model is intended to extend later.
+These problems can survive code generation and look plausible in review while
+still breaking installation, builds, or later automation.
 
-## See it work
+## What a result tells you
 
-For a valid workspace, current human output has this shape (opaque IDs are abbreviated):
+A run separates two questions that ordinary pass/fail output often mixes:
+
+- **Operational status:** did verification itself complete correctly?
+- **Verification outcome:** were the workspace promises satisfied, violated, or
+  indeterminate?
+
+A violation identifies the failed Proof, cites retained Evidence, returns stable
+reason codes such as `DUPLICATE_WORKSPACE_NAME`, and includes a Repair suggestion
+when the Engine can derive one safely.
 
 ```text
 operational status: completed
-verification outcome: satisfied
-application model: model:<workspace-id>@sha256:<revision>
+verification outcome: violated
 required promises:
-  - sid:promise:<id> — proof:manifest-structural-v1: passed
-  - sid:promise:<id> — proof:workspace-unique-v1: passed
-  - sid:promise:<id> — proof:local-dependency-v1: passed
-  - sid:promise:<id> — proof:lockfile-ownership-v1: passed
+  - promise:<id> — proof:workspace-unique-v1: failed
+      reason: DUPLICATE_WORKSPACE_NAME
 evidence references:
   - evidence:<id>@sha256:<revision>
-  - evidence:<id>@sha256:<revision>
-  - evidence:<id>@sha256:<revision>
-  - evidence:<id>@sha256:<revision>
 next actions:
-  (none)
-cache: miss
-invocation: invocation:<id>
+  - repair:<id>: <targeted manifest edit>
 ```
 
-A violation changes the relevant Proof to `failed`, adds a stable reason such as `DUPLICATE_WORKSPACE_NAME`, and can include a targeted Repair such as a JSON patch for a `package.json` file.
+The verifier—not the coding agent—determines the result.
 
-Use JSON when a coding agent or script needs one final protocol document:
+## Use it from a terminal or an agent
+
+Human-readable output:
+
+```sh
+npx @adamrasheed/verify@latest verify .
+```
+
+One canonical JSON document for an agent or script:
 
 ```sh
 npx @adamrasheed/verify@latest verify . --json
 ```
 
-The current result uses fields such as these:
-
-```json
-{
-  "operationalStatus": "completed",
-  "result": {
-    "kind": "verify",
-    "outcome": "satisfied",
-    "summary": {
-      "requiredPromiseCount": 4,
-      "advisoryPromiseCount": 0,
-      "satisfiedCount": 4,
-      "violatedCount": 0,
-      "indeterminateCount": 0
-    },
-    "reasonCodes": []
-  }
-}
-```
-
-The full document also carries model, Promise, Proof, attempt, Evidence, Repair, cache, and diagnostic data. JSONL mode emits ordered lifecycle `event` records followed by exactly one terminal `result` record:
+Ordered lifecycle events followed by one terminal result:
 
 ```sh
 npx @adamrasheed/verify@latest verify . --jsonl
 ```
 
-## What it verifies today
+Inspect retained results and Evidence:
 
-The published CLI passively verifies dependency and workspace declaration integrity for npm, pnpm, and Yarn repositories. It checks that:
+```sh
+npx @adamrasheed/verify@latest inspect run <invocation-id> --json
+npx @adamrasheed/verify@latest inspect evidence <evidence-id> --json
+```
 
-- package manifests are valid, unambiguous structured data;
-- in-boundary workspace packages have unique names;
-- local dependency ranges and path references select the intended workspace package;
-- the workspace has one unambiguous, root-owned lockfile and package manager.
+Preview a supported Repair without writing:
 
-In practical terms, it finds malformed manifests, duplicate or missing workspace names, unresolved or ambiguous local package references, missing or conflicting lockfiles, and multiple package-manager signals before they become harder-to-diagnose build or runtime failures.
+```sh
+npx @adamrasheed/verify@latest repair preview <invocation-id> <repair-id> --json
+```
 
-“Passive” describes the `verify` operation: it reads bounded ordinary files, but does not execute repository code, contact external services, read credentials, or modify source files. `npx` may contact npm to obtain the package when it is not already cached; the Engine run itself is offline. Separate Repair commands require an exact retained suggestion and an explicit write grant before applying an atomic JSON edit.
+Repair application is deliberately separate. It requires the exact retained
+suggestion, a current matching file revision, and the explicit
+`--grant-workspace-write` flag. The edit is atomic and followed by a new
+verification.
 
-## How it complements existing tools
+Node.js 22.5 or newer is required. `npx` may contact npm to download the
+package; the verification Engine itself remains offline.
 
-Unit and end-to-end tests check behavior selected by their authors. Type checkers and linters enforce language and style rules. CI providers run jobs, observability platforms report on deployed systems, and AI review tools reason about code changes.
-
-Verification Platform builds on those categories rather than replacing them. Its role is to model application Promises, determine the Proofs and Evidence needed to evaluate them, normalize the result, retain its provenance, and expose compatible output to humans, agents, and automation.
-
-## Platform model
+## How it works
 
 ```text
-Application
-  → Capabilities
-  → Promises
-  → Proofs
-  → Evidence
-  → Repairs
+Application → Capability → Promise → Proof → Evidence → Repair
 ```
 
-The current workspace verifier exercises the complete model:
+1. **Discover:** read a bounded set of ordinary workspace files without running
+   repository code.
+2. **Model:** identify the supported capability and the promises that apply.
+3. **Prove:** evaluate exact, versioned Proofs against normalized observations.
+4. **Report:** return one canonical result with Evidence and provenance links.
+5. **Repair:** optionally derive a targeted advisory edit that must be applied
+   with separate authority and verified again.
 
-- **Application:** a discovered JavaScript or TypeScript workspace
-- **Capability:** `workspace.dependencyIntegrity`
-- **Promise:** every in-boundary workspace package has a unique name
-- **Proof:** statically compare package names from bounded manifest observations
-- **Evidence:** validated, revision-addressed observations supporting the verdict
-- **Repair:** a targeted manifest edit with the motivating Proof, Evidence, and a later verification plan
+This model is designed to grow beyond workspace integrity to provider-neutral
+capabilities such as authentication, billing, storage, notifications, and
+permissions. Those broader checks are product direction, not current CLI
+functionality.
 
-This is also the platform's extensibility model. The long-term direction is to represent provider-neutral capabilities such as Authentication, Billing, Storage, Notifications, and Permissions, then evaluate their configuration or runtime Promises through appropriately isolated Proofs. Those broader Proofs are not part of the current CLI.
+## One engine, three interfaces
 
-## One Engine, multiple interfaces
+Every interface delegates verdict semantics to the same Engine.
 
-Each interface delegates semantics to the same canonical local dispatcher. A developer, coding agent, and CI workflow can therefore receive compatible outcomes and reason codes instead of separate interpretations of the repository.
-
-| Interface | Current status | Use |
+| Interface | Status | Best for |
 |---|---|---|
-| [CLI](apps/cli/README.md) | Published on npm as `@adamrasheed/verify` | Human, JSON, and JSONL verification; retained inspection; cache and Repair commands |
-| [Local MCP server](apps/mcp-server/README.md) | Implemented and tested; built from this repository | Workspace-bound verification plus retained run, event, Evidence, and provenance reads over stdio |
-| [GitHub Action](apps/github-action/README.md) | Implemented and bundled; a public version tag has not yet been released | Offline verification in a workflow checkout with an optional metadata-only GitHub check |
+| [CLI](apps/cli/README.md) | Published as `@adamrasheed/verify` | local use, scripts, and agent subprocesses |
+| [Local MCP server](apps/mcp-server/README.md) | Implemented and tested from source | workspace-bound agent verification and retained reads |
+| [GitHub Action](apps/github-action/README.md) | Implemented and bundled; public version tag pending | offline verification in pull-request workflows |
 
-The MCP server cannot apply Repairs or accept arbitrary client paths. The Action does not recalculate verdicts, emit source annotations, or upload Evidence bodies.
+The MCP server is read-only and bound to one host-configured workspace. The
+Action publishes only an allowlisted metadata projection and does not upload
+Evidence bodies or source annotations.
 
-## Quick start
+## Trust and privacy boundary
 
-Node.js 22.5 or newer is required. No account or configuration is needed.
+- Source and secrets stay local by default.
+- Verification reads bounded ordinary files and performs no ambient network or
+  process execution.
+- Evidence is revision-addressed and results retain exact provenance.
+- A product violation is never reported as an internal error, and an internal
+  error is never converted into a product violation.
+- Hosted development work uses customer-controlled execution and allows only
+  metadata publication; the hosted product remains pre-release.
 
-```sh
-# Human-readable result
-npx @adamrasheed/verify@latest verify .
+## Current scope
 
-# One canonical JSON document
-npx @adamrasheed/verify@latest verify . --json
+**Available now**
 
-# Lifecycle events followed by one terminal result
-npx @adamrasheed/verify@latest verify . --jsonl
-```
+- deterministic dependency-integrity verification for npm, pnpm, and Yarn
+  workspaces;
+- human, JSON, and JSONL output;
+- retained local runs, Evidence, provenance, and bounded cache entries;
+- advisory Repair preview and explicitly authorized atomic application;
+- local MCP and bundled GitHub Action adapters from this repository.
 
-Exit codes preserve the distinction between a product verdict and an operational problem: satisfied `0`, violated `1`, indeterminate or not evaluated `2`, invalid `3`, blocked `4`, cancelled `5`, and internal or incompatible `6`. See the [CLI guide](apps/cli/README.md) for the complete command surface.
+**Not claimed yet**
 
-To work on the repository itself:
+- verification of runtime journeys such as authentication, payments,
+  deployment, or webhooks;
+- a generally available hosted service or production availability SLO;
+- an independently released MCP package or public GitHub Marketplace Action;
+- signed Windows production sandbox support, which is intentionally on hold.
+
+## Project status
+
+This is an early-stage working product. CLI version `0.2.0` is published on npm.
+The local Engine, Evidence store, cache, Repair loop, MCP adapter, GitHub Action,
+and AWS metadata-cloud development path are implemented and tested. Broader
+providers and public hosted delivery remain gated by their release Evidence.
+
+See the [Roadmap](docs/product/ROADMAP.md) for exact completion status and the
+[GTM plan](docs/product/GTM_PLAN.md) for the launch sequence.
+
+## Develop the repository
 
 ```sh
 npm ci --ignore-scripts
@@ -165,46 +182,21 @@ node apps/cli/dist/verify.js verify . --json
 npm test
 ```
 
-## Use cases
-
-**Available now**
-
-- Catch npm, pnpm, and Yarn workspace-integrity problems without running repository code.
-- Produce concise terminal results for developers and protocol output for coding agents.
-- Retain local run and Evidence history, inspect exact provenance, and reuse bounded cache entries.
-- Generate deterministic advisory Repairs for supported workspace violations; preview or explicitly apply and re-verify eligible JSON patches.
-- Invoke the same dispatcher through a local MCP server built from source.
-- Run the same Engine through the bundled GitHub Action implementation from this repository.
-
-**Direction**
-
-- Release the implemented read-only repository-policy provider after its remaining production security gates.
-- Extend beyond static workspace metadata to configuration and runtime Promises for capabilities such as Authentication and Billing.
-- Coordinate verification in customer-controlled workloads while keeping source and secrets outside the product cloud.
-- Publish allowlisted result projections and retain hosted proof history without recalculating local verdicts.
-- Produce broader evidence-backed repair plans while keeping write authority separate from verification.
-
-See the [Product Vision](docs/product/VISION.md) and [Roadmap](docs/product/ROADMAP.md) for product intent and implementation sequence.
-
-## Architecture and documentation
+The repository is architecture-enforced. Start with:
 
 - [Engineering Design Document](docs/architecture/EDD.md)
 - [Architecture Freeze](docs/architecture/ARCHITECTURE_FREEZE.md)
 - [Shared Contracts](docs/architecture/SHARED_CONTRACTS.md)
 - [Product Vision](docs/product/VISION.md)
-- [Roadmap](docs/product/ROADMAP.md)
+- [Positioning](docs/product/POSITIONING.md)
 - [ADR index](docs/architecture/ADR/README.md)
 
-The compact [architecture authority map](docs/architecture/README.md) explains how these documents relate.
+The [architecture authority map](docs/architecture/README.md) explains how the
+documents relate.
 
-## Project status
+## Contributing and security
 
-Early-stage, working CLI MVP. Version `0.2.0` is published on npm; the local Engine, retained Evidence and cache, Repair preview/apply/re-verify flow, local MCP adapter, and bundled GitHub Action are implemented. The MCP and Action are currently source interfaces rather than independently released packages. Broader provider, runtime, deployment, and hosted verification remain under development.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing code. Report
+vulnerabilities through [SECURITY.md](SECURITY.md).
 
-## Contributing
-
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and architecture requirements, and report vulnerabilities through the process in [SECURITY.md](SECURITY.md).
-
-## License
-
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0 licensed. See [LICENSE](LICENSE).

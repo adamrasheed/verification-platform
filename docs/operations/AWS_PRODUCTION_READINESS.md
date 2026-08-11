@@ -33,6 +33,26 @@ restore database, removes synthetic primary rows, deletes the backup scratch
 file, destroys all ephemeral AWS resources, requires a zero-drift plan, and
 reruns the development-foundation audit.
 
+## Retained live result
+
+Protected workflow run
+[`31460493329`](https://github.com/adamrasheed/verification-platform/actions/runs/31460493329)
+tested commit `50942841e9f8b487cacbb5ca4856635fbfa79305` on 2026-08-11.
+The first Fargate launch encountered a transient private ECR image-pull timeout;
+the workflow's bounded retry launched the exact same immutable task, which
+completed successfully on attempt two.
+
+The successful task measured 500 successful responses from 500 requests,
+100% sampled availability, 490.488 ms p95, 5.775 s PostgreSQL/publication RPO,
+449 ms PostgreSQL/publication RTO, and 39.554 ms connection recovery. All twelve
+derived load, durability, recovery, tombstone, abuse, security, and supply-chain
+checks passed. The workflow then destroyed all 13 ephemeral resources, restored
+the one temporarily changed persistent resource, observed no remaining drift,
+and passed the cleaned-foundation audit.
+
+The machine-checkable retained result is
+[`AWS_PRODUCTION_READINESS.json`](../compliance/release/AWS_PRODUCTION_READINESS.json).
+
 This is measured development Evidence, not a claim of 99.9% monthly production
 availability or a production Multi-AZ failover. Those claims remain blocked
 until the separately protected production topology and observation window pass.

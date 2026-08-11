@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "metadataCloudReleaseEvidence",
-  "evidenceDate": "2026-08-08",
+  "evidenceDate": "2026-08-11",
   "releaseClass": "contractFoundation",
   "releaseStatus": "not_releasable",
   "verification": {
@@ -9,19 +9,19 @@
     "security": "passed",
     "supplyChain": "passed",
     "serviceSlo": "blocked",
-    "disasterRecovery": "blocked",
+    "disasterRecovery": "passed",
     "providerDeployment": "blocked"
   },
   "releaseBlockers": [
-    { "claim": "providerDeployment", "gate": "M9-T08", "reason": "The AWS data plane and M9-T04 through M9-T07 adapters passed protected live probes with cleanup and zero drift. This contract-foundation record defers the production deployment claim until M9-T08 assembles complete release Evidence." },
-    { "claim": "serviceSlo", "gate": "M9-T08", "reason": "No deployed load or availability measurements exist." },
-    { "claim": "disasterRecovery", "gate": "M9-T08", "reason": "No deployed backup, restore, failover, or tombstone-replay drill exists." }
+    { "claim": "providerDeployment", "gate": "M9-T08", "reason": "The AWS development data plane, adapters, and protected readiness drill passed with cleanup and zero drift. The production topology has not been deployed, so production provider deployment remains unclaimed." },
+    { "claim": "serviceSlo", "gate": "M9-T08", "reason": "Protected development run 31460493329 passed 500/500 samples and the p95 threshold, but a single development drill is not a monthly production availability observation." }
   ],
   "commands": [
     { "command": "npm test", "outcome": "passed" },
     { "command": "npm run check:conformance", "outcome": "passed" },
     { "command": "npm run check:schemas", "outcome": "passed" },
-    { "command": "npm run check:package-content", "outcome": "passed" }
+    { "command": "npm run check:package-content", "outcome": "passed" },
+    { "command": "npm run check:aws-production-readiness-evidence", "outcome": "passed" }
   ],
   "artifacts": [
     { "path": "tooling/conformance/evidence/m8-cloud-foundation.json", "digest": "sha256:d3b5495355faa14c3116f762430f510b2d85d6824a28ed00bf1a19ca531ffdeb" },
@@ -36,6 +36,7 @@
     { "path": "docs/compliance/release/AWS_SQS_WORKER.json", "digest": "sha256:54c9e3409582df7968e68756d286ff48b0b50f0bf88cd049b3bcc615405e6dd1" },
     { "path": "docs/compliance/release/AWS_CONTROL_API.json", "digest": "sha256:10faf7a6bbfd250cd355dab0d107e2bc3e3b6e1a6eeca9c9237ffcb2d8997e06" },
     { "path": "docs/compliance/release/AWS_CUSTOMER_WORKLOAD.json", "digest": "sha256:3c36c695ab8d72102119cb15738eeda958c0b8cc1f930556c22642ced7364f10" },
+    { "path": "docs/compliance/release/AWS_PRODUCTION_READINESS.json", "digest": "sha256:a01ed3e3772ed13c3267e5faa3d6737b6bb77e67b0e0e24bd151744715fb6661" },
     { "path": "package-lock.json", "digest": "sha256:6266628ebf238a27ff667734c4c77856959fe6a33658602790e8380ecb1e1396" },
     { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
   ]

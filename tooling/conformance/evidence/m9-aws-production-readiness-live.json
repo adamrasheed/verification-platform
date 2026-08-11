@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-production-readiness-live",
+  "taskId": "M9-T08",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§14,16,18",
+    "EDD §§27-31,33-34",
+    "ADR-0005",
+    "ADR-0013",
+    "SP-CLOUD-002",
+    "ORB-COST-001"
+  ],
+  "testIds": [
+    "aws-production-readiness-live:sampled-availability-and-p95",
+    "aws-production-readiness-live:accepted-dispatch-durability",
+    "aws-production-readiness-live:postgres-and-publication-recovery",
+    "aws-production-readiness-live:logical-backup-restore",
+    "aws-production-readiness-live:tombstone-replay-before-service",
+    "aws-production-readiness-live:bounded-connection-recovery",
+    "aws-production-readiness-live:cost-abuse-no-mutation",
+    "aws-production-readiness-live:cross-tenant-and-canary-scan",
+    "aws-production-readiness-live:security-sbom-provenance-prerequisites",
+    "aws-production-readiness-live:ephemeral-teardown-zero-drift"
+  ],
+  "command": "gh run watch 31460493329 --exit-status && npm run check:aws-production-readiness-evidence",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_PRODUCTION_READINESS.json",
+      "digest": "sha256:a01ed3e3772ed13c3267e5faa3d6737b6bb77e67b0e0e24bd151744715fb6661"
+    },
+    {
+      "path": "tooling/infra/check-aws-production-readiness-evidence.mjs",
+      "digest": "sha256:473082f0a0d7fd3e6f1fdf5b2727c6649932ff325ee5b64e80d9f7293265b943"
+    },
+    {
+      "path": ".github/workflows/aws-production-readiness.yml",
+      "digest": "sha256:0937e0850c617f30a4a94e78a182110f1f19e5bd0db439e0b8fb88177675c1b5"
+    },
+    {
+      "path": "tooling/infra/run-live-production-readiness.mjs",
+      "digest": "sha256:6f24aa55fa178547455f995015b139e3621eef6f9e4add1d009fd8d473cbd429"
+    }
+  ]
+}
