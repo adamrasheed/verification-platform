@@ -314,6 +314,28 @@ test("dispatch boundaries reject idempotency drift, online work, and missing res
     { "idempotency-key": "idempotency:dispatch-one" },
   ));
   assert.equal(rejected.status, 400);
+  for (const additive of [
+    { ...dispatchRequest(), sourceCanary: "SOURCE_CANARY" },
+    (() => {
+      const request = dispatchRequest();
+      request.arguments.secretCanary = "SECRET_CANARY";
+      return request;
+    })(),
+    (() => {
+      const request = dispatchRequest();
+      request.arguments.verifyRequest.environment.sourceCanary = "SOURCE_CANARY";
+      return request;
+    })(),
+  ]) {
+    const response = await handler(jsonRequest(
+      "/v1/tenants/tenant:one/projects/project:one/dispatches",
+      "POST",
+      additive,
+      { "idempotency-key": "idempotency:dispatch-one" },
+    ));
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error.retryability, "never");
+  }
   const malformedCancellation = await handler(jsonRequest(
     "/v1/tenants/tenant:one/projects/project:one/dispatches/dispatch:one/cancellations",
     "POST",
@@ -323,6 +345,7 @@ test("dispatch boundaries reject idempotency drift, online work, and missing res
   assert.equal(malformedCancellation.status, 400);
   assert.equal(calls.dispatchAdmissions.length, 0);
   assert.equal(JSON.stringify(calls.audit).includes("SOURCE_CANARY"), false);
+  assert.equal(JSON.stringify(calls.audit).includes("SECRET_CANARY"), false);
 
   const missing = fixtures({
     dispatches: {

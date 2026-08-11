@@ -76,6 +76,16 @@ function exactKeys(value: RecordValue, keys: readonly string[]): boolean {
     && keys.every((key) => Object.hasOwn(value, key));
 }
 
+function exactKeysWithOptional(
+  value: RecordValue,
+  required: readonly string[],
+  optional: readonly string[],
+): boolean {
+  const allowed = new Set([...required, ...optional]);
+  return required.every((key) => Object.hasOwn(value, key))
+    && Object.keys(value).every((key) => allowed.has(key));
+}
+
 function bounded(value: unknown, maximum = 256): value is string {
   return typeof value === "string"
     && value.length > 0
@@ -341,6 +351,29 @@ function publicationBody(value: unknown): PublicationBody {
 }
 
 function dispatchBody(value: unknown) {
+  const requestKeys = [
+    "schemaVersion", "command", "invocationId", "arguments",
+    "configurationReferences", "policyReferences", "consentGrantReferences",
+    "offline", "outputMode", "environment",
+  ];
+  if (!record(value)
+    || !exactKeysWithOptional(value, requestKeys, ["deadlineMs"])
+    || !record(value.arguments)
+    || !exactKeys(value.arguments, ["workloadBinding", "verifyRequest", "idempotencyKey"])
+    || !record(value.environment)
+    || !exactKeys(value.environment, ["platform", "allowlistedBindings"])
+    || !record(value.arguments.verifyRequest)
+    || !exactKeysWithOptional(
+      value.arguments.verifyRequest,
+      [...requestKeys, "workspace"],
+      ["deadlineMs"],
+    )
+    || !record(value.arguments.verifyRequest.environment)
+    || !exactKeys(value.arguments.verifyRequest.environment, ["platform", "allowlistedBindings"])
+    || !record(value.arguments.verifyRequest.workspace)
+    || !exactKeysWithOptional(value.arguments.verifyRequest.workspace, ["rootBinding"], ["expectedRevision"])) {
+    throw new TypeError("VFY_CONTROL_API_REQUEST_INVALID");
+  }
   const decoded = decodeCommandRequest(value);
   if (decoded.kind !== "ok" || decoded.value.command !== "dispatchVerification") {
     throw new TypeError("VFY_CONTROL_API_REQUEST_INVALID");
