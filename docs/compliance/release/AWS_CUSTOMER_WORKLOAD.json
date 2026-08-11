@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsCustomerWorkloadEvidence",
+  "evidenceDate": "2026-08-10",
+  "taskId": "M9-T07",
+  "outcome": "passed",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "248b0b4f0dbe4c96878a5861e786bf3d9e94bee4",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0",
+    "nodeVersion": "22.19.0",
+    "postgresVersion": "17.9"
+  },
+  "workflow": {
+    "name": "AWS customer workload conformance",
+    "runId": 31454245521,
+    "jobId": 93664681242,
+    "event": "workflow_dispatch",
+    "protectedEnvironment": "development",
+    "createdAt": "2026-08-11T03:03:30Z",
+    "startedAt": "2026-08-11T03:03:36Z",
+    "completedAt": "2026-08-11T03:12:38Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "imageBuildAndPush": "passed",
+    "liveCustomerWorkloadProbe": "passed",
+    "cleanup": "passed",
+    "postCleanupZeroDrift": "passed",
+    "postCleanupFoundationAudit": "passed",
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/31454245521",
+    "jobUrl": "https://github.com/adamrasheed/verification-platform/actions/runs/31454245521/job/93664681242"
+  },
+  "topology": {
+    "runtime": "private AWS Fargate task",
+    "publicIp": false,
+    "internetGateway": false,
+    "natGateway": false,
+    "ephemeralInterfaceEndpoints": 4,
+    "endpointAvailabilityZones": 1,
+    "databaseTransport": "PostgreSQL verify-full TLS with the pinned official us-west-2 RDS CA bundle",
+    "taskRole": false,
+    "rootFilesystemReadOnly": true,
+    "writableScratchPath": "/work"
+  },
+  "customerWorkloadProbe": {
+    "schemaVersion": 1,
+    "kind": "awsCustomerWorkloadEvidence",
+    "runId": "248b0b4f0dbe4c96878a5861e786bf3d9e94bee4",
+    "outcome": "passed",
+    "checks": {
+      "privatePostgresTls": "passed",
+      "exactRepositoryBinding": "passed",
+      "canonicalOfflineEngine": "passed",
+      "durableFencedHeartbeat": "passed",
+      "allowlistedPublication": "passed",
+      "publicationReferenceOnlyCompletion": "passed",
+      "forwardedTerminalCancellation": "passed",
+      "tenantIsolation": "passed",
+      "sourceEgressCanaryAbsent": "passed"
+    }
+  },
+  "postCleanupAudit": {
+    "ephemeralResourcesCreated": 16,
+    "ephemeralResourcesDestroyed": 16,
+    "persistentResourcesRestored": 1,
+    "ephemeralResourcesRemaining": 0,
+    "zeroDrift": true,
+    "foundationOutcome": "passed"
+  },
+  "dataHandling": {
+    "customerDataUsed": false,
+    "syntheticDataRemoved": true,
+    "sourceCanaryRetained": false,
+    "sourceCanaryLogged": false,
+    "identityTokensRetained": false,
+    "secretValuesRetained": false
+  },
+  "sourceArtifacts": [
+    {
+      "path": ".github/workflows/aws-customer-workload-conformance.yml",
+      "digest": "sha256:d378144e8923f8d702e21f80871b977038e21bc06d83897f7b13e023995a1844"
+    },
+    {
+      "path": "tooling/infra/run-live-customer-workload-conformance.mjs",
+      "digest": "sha256:188a7c69ed164ed5074d93d4b2ae536353700cc3254bed52bb0a745a369b3f97"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/customer-workload-runner.tf",
+      "digest": "sha256:954d2634143fed2f48b37034c2d40b6ef50ddb480eb8e334abafc128a7317a4f"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/customer-workload-runner.Dockerfile",
+      "digest": "sha256:a7d90b95b1b17ed1f5086f85d1d25678d504d273bcad43ed97382955495a6c16"
+    },
+    {
+      "path": "apps/github-action/src/public/customer-workload.ts",
+      "digest": "sha256:478bb134bbdeb98ab1f903801e5d03ff13104b97f9a124b5d58533f00fb72ef7"
+    },
+    {
+      "path": "packages/cloud-client/src/public/postgres-workload-dispatch-store.ts",
+      "digest": "sha256:9193295338e91f1053d7f8346c1c4162068bd2948dad6270d51537a821b27088"
+    },
+    {
+      "path": "packages/cloud-client/migrations/0002_customer_workload_dispatch.sql",
+      "digest": "sha256:e050715d3624241819af63f9462d7abc8c9947b8e23590e6ddd32280c494c23a"
+    },
+    {
+      "path": "apps/control-api/src/public/handler.ts",
+      "digest": "sha256:3b8d3b5b704881f8b1b9c1df2514072c112f18adbd6864788bed7f5f6c47663e"
+    },
+    {
+      "path": "docs/operations/AWS_CUSTOMER_WORKLOAD_CONFORMANCE.md",
+      "digest": "sha256:1e0f931bcdf16090fc5b8948c362971dd6d3103ca7ca003ed9c2e49841141d6d"
+    }
+  ]
+}
