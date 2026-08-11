@@ -6,6 +6,7 @@
   "files": ["action.yml", "dist", "README.md"],
   "dependencies": {
     "@verify-internal/adapter-core": "0.0.0",
+    "@verify-internal/cloud-client": "0.0.0",
     "@verify-internal/github-check-projector": "0.0.0",
     "@verify-internal/protocol": "0.0.0"
   },

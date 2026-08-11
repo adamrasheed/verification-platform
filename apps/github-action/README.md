@@ -13,3 +13,15 @@ steps:
   - uses: actions/checkout@v4
   - uses: adamrasheed/verification-platform/apps/github-action@v1
 ```
+
+## Customer-workload offers
+
+`runCustomerWorkloadOffer` is the customer-owned execution boundary used by a
+transport adapter after it claims a tenant-bound offer. It rejects offers that
+are not bound to `workload:github:$GITHUB_REPOSITORY`, runs the nested canonical
+request offline against the checked-out workspace, heartbeats the fenced lease,
+and forwards cancellation to the Engine. Only an immutable, source-free
+dispatch context and a validated `MetadataPublicationPayload` cross the
+injected publication transport; local source, evidence bytes, the lease token,
+and the full canonical envelope never do. Completion stores only the
+verification invocation ID and the published-run reference.
