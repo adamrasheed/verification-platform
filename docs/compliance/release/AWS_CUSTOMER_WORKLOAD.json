@@ -113,7 +113,7 @@
     },
     {
       "path": "apps/control-api/src/public/handler.ts",
-      "digest": "sha256:3b8d3b5b704881f8b1b9c1df2514072c112f18adbd6864788bed7f5f6c47663e"
+      "digest": "sha256:c5e8c6240f90eb0b0c1eb00f1c780e1152ec2c2caf60ab3a7f5b7984597c6e7c"
     },
     {
       "path": "docs/operations/AWS_CUSTOMER_WORKLOAD_CONFORMANCE.md",

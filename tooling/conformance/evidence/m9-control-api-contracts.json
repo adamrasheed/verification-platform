@@ -35,7 +35,7 @@
     },
     {
       "path": "apps/control-api/src/public/handler.ts",
-      "digest": "sha256:3b8d3b5b704881f8b1b9c1df2514072c112f18adbd6864788bed7f5f6c47663e"
+      "digest": "sha256:c5e8c6240f90eb0b0c1eb00f1c780e1152ec2c2caf60ab3a7f5b7984597c6e7c"
     },
     {
       "path": "apps/control-api/src/public/identity.ts",
@@ -51,7 +51,7 @@
     },
     {
       "path": "apps/control-api/test/control-api.test.mjs",
-      "digest": "sha256:92d887dc31e5831bce184b0d31c7da9484a652973317df687a30000e790cf773"
+      "digest": "sha256:95a253c9e7d560d253e83a6307b42258bfe84f75f08454f65c14627105d711ea"
     },
     {
       "path": "tooling/architecture/workspaces.json",
