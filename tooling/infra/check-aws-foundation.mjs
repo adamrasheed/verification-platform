@@ -292,6 +292,8 @@ requireText(readinessWorkflow, "Verify zero drift after cleanup", "readiness pos
 requireText(readinessWorkflow, "group: aws-private-postgres-runner-development", "shared readiness runner lock");
 requireText(readinessWorkflow, "run-security-gates.mjs", "readiness security Evidence");
 requireText(readinessWorkflow, "prepare-candidate.mjs", "readiness SBOM and provenance Evidence");
+requireText(readinessWorkflow, "for launch_attempt in {1..3}", "bounded readiness task launch retry");
+requireText(readinessWorkflow, "CannotPullContainerError", "private ECR warm-up retry boundary");
 requireText(readinessWorkflow, "SOURCE_CANARY_M9_READINESS_", "readiness source canary exclusion");
 requireText(readinessWorkflow, "node tooling/infra/audit-aws-development.mjs", "readiness post-cleanup foundation audit");
 assert.doesNotMatch(readinessWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);

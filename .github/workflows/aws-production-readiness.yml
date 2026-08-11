@@ -143,32 +143,37 @@ jobs:
           SUBNET: ${{ steps.runner.outputs.subnet }}
           TASK_DEFINITION: ${{ steps.runner.outputs.task_definition }}
         run: |
-          task_arn=$(aws ecs run-task \
-            --cluster "$CLUSTER" \
-            --task-definition "$TASK_DEFINITION" \
-            --launch-type FARGATE \
-            --platform-version 1.4.0 \
-            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
-            --query 'tasks[0].taskArn' \
-            --output text)
-          test "$task_arn" != "None"
-          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task_arn"
-          exit_code=$(aws ecs describe-tasks \
-            --cluster "$CLUSTER" \
-            --tasks "$task_arn" \
-            --query 'tasks[0].containers[0].exitCode' \
-            --output text)
-          stopped_reason=$(aws ecs describe-tasks \
-            --cluster "$CLUSTER" \
-            --tasks "$task_arn" \
-            --query 'tasks[0].stoppedReason' \
-            --output text)
-          container_reason=$(aws ecs describe-tasks \
-            --cluster "$CLUSTER" \
-            --tasks "$task_arn" \
-            --query 'tasks[0].containers[0].reason' \
-            --output text)
-          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
+          task_arn=''
+          exit_code='None'
+          stopped_reason=''
+          container_reason=''
+          for launch_attempt in {1..3}; do
+            task_arn=$(aws ecs run-task \
+              --cluster "$CLUSTER" \
+              --task-definition "$TASK_DEFINITION" \
+              --launch-type FARGATE \
+              --platform-version 1.4.0 \
+              --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
+              --query 'tasks[0].taskArn' \
+              --output text)
+            test "$task_arn" != "None"
+            aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task_arn"
+            task_description=$(aws ecs describe-tasks \
+              --cluster "$CLUSTER" \
+              --tasks "$task_arn" \
+              --output json)
+            exit_code=$(jq -r '.tasks[0].containers[0].exitCode // "None"' <<< "$task_description")
+            stopped_reason=$(jq -r '.tasks[0].stoppedReason // "None"' <<< "$task_description")
+            container_reason=$(jq -r '.tasks[0].containers[0].reason // "None"' <<< "$task_description")
+            echo "task attempt=$launch_attempt exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
+            if [[ "$stopped_reason" != CannotPullContainerError:* ]]; then
+              break
+            fi
+            if test "$launch_attempt" -lt 3; then
+              echo "Private ECR pull was not ready; retrying the exact immutable task."
+              sleep 15
+            fi
+          done
           task_id="${task_arn##*/}"
           log_stream="postgres/production-readiness/$task_id"
           log_messages='[]'
