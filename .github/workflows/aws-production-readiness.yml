@@ -158,24 +158,39 @@ jobs:
             --tasks "$task_arn" \
             --query 'tasks[0].containers[0].exitCode' \
             --output text)
-          echo "task exit=$exit_code"
-          log_stream=$(aws logs describe-log-streams \
-            --log-group-name "$LOG_GROUP" \
-            --order-by LastEventTime \
-            --descending \
-            --max-items 1 \
-            --query 'logStreams[0].logStreamName' \
+          stopped_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].stoppedReason' \
             --output text)
-          test -n "$log_stream"
-          test "$log_stream" != "None"
-          log_messages=$(aws logs get-log-events \
-            --log-group-name "$LOG_GROUP" \
-            --log-stream-name "$log_stream" \
-            --limit 100 \
-            --query 'events[].message' \
-            --output json)
-          evidence=$(jq -r '.[-1]' <<< "$log_messages")
+          container_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].containers[0].reason' \
+            --output text)
+          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
+          task_id="${task_arn##*/}"
+          log_stream="postgres/production-readiness/$task_id"
+          log_messages='[]'
+          for attempt in {1..30}; do
+            if candidate=$(aws logs get-log-events \
+              --log-group-name "$LOG_GROUP" \
+              --log-stream-name "$log_stream" \
+              --limit 100 \
+              --query 'events[].message' \
+              --output json 2>/dev/null); then
+              log_messages="$candidate"
+              if test "$(jq length <<< "$log_messages")" -gt 0; then
+                break
+              fi
+            fi
+            sleep 2
+          done
           jq -r '.[]' <<< "$log_messages"
+          evidence=$(jq -r \
+            '[.[] | fromjson? | select(.kind == "awsProductionReadinessEvidence")] | last // empty | tojson' \
+            <<< "$log_messages")
+          test -n "$evidence"
           echo "$evidence" | jq -e '
             .schemaVersion == 1
             and .kind == "awsProductionReadinessEvidence"
