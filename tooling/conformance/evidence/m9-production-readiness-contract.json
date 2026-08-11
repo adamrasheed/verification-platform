@@ -36,7 +36,7 @@
     },
     {
       "path": "tooling/infra/run-live-production-readiness.mjs",
-      "digest": "sha256:cbfa086b95100f11260921a9041c34f2d06410c40363482d6133448dd6c6effa"
+      "digest": "sha256:6f24aa55fa178547455f995015b139e3621eef6f9e4add1d009fd8d473cbd429"
     },
     {
       "path": ".github/workflows/aws-production-readiness.yml",
