@@ -1,9 +1,12 @@
 # Verify
 
-**Know when an AI-generated JavaScript or TypeScript change is actually done.**
+**Catch broken workspace changes before CI does.**
 
-Verify checks a workspace with a deterministic, local-first engine and returns
-an evidence-backed verdict that developers, coding agents, and CI can all read.
+Verify is a deterministic, offline checker for npm, pnpm, and Yarn monorepos.
+It reads workspace declarations, evaluates a fixed set of promises, and returns
+one evidence-backed verdict: satisfied or violated. Dependency and workspace
+declaration mistakes, whether introduced by a human or an AI coding agent, get
+caught here instead of in CI.
 
 [![CI](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml)
@@ -16,9 +19,10 @@ npx @adamrasheed/verify@latest verify .
 
 No account or configuration is required. The Engine run is offline and
 read-only: it does not execute repository code, contact external services, read
-credentials, or change source files.
+credentials, or change source files. A `violated` verdict exits 1, which fails
+a shell step or a CI job on its own.
 
-## What it catches today
+## What it catches
 
 Verify currently checks npm, pnpm, and Yarn workspaces for dependency and
 workspace declaration problems:
@@ -33,69 +37,167 @@ workspace declaration problems:
 These problems can survive code generation and look plausible in review while
 still breaking installation, builds, or later automation.
 
-## What a result tells you
+## See it fail
 
-A run separates two questions that ordinary pass/fail output often mixes:
+The smallest realistic failure: two workspace packages with the same name.
 
-- **Operational status:** did verification itself complete correctly?
-- **Verification outcome:** were the workspace promises satisfied, violated, or
-  indeterminate?
+```jsonc
+// package.json
+{ "name": "npm-duplicate", "private": true, "workspaces": ["packages/*"] }
 
-A violation identifies the failed Proof, cites retained Evidence, returns stable
-reason codes such as `DUPLICATE_WORKSPACE_NAME`, and includes a Repair suggestion
-when the Engine can derive one safely.
+// packages/a/package.json
+{ "name": "@fixture/duplicate", "version": "1.0.0" }
 
-```text
-operational status: completed
-verification outcome: violated
-required promises:
-  - promise:<id> — proof:workspace-unique-v1: failed
-      reason: DUPLICATE_WORKSPACE_NAME
-evidence references:
-  - evidence:<id>@sha256:<revision>
-next actions:
-  - repair:<id>: <targeted manifest edit>
+// packages/b/package.json
+{ "name": "@fixture/duplicate", "version": "1.0.0" }
 ```
 
-The verifier—not the coding agent—determines the result.
-
-## Use it from a terminal or an agent
-
-Human-readable output:
+Run Verify from the workspace root:
 
 ```sh
 npx @adamrasheed/verify@latest verify .
 ```
 
-One canonical JSON document for an agent or script:
+```text
+operational status: completed
+verification outcome: violated
+required promises:
+  - promise:<id> — proof:manifest-structural-v1: passed
+  - promise:<id> — proof:workspace-unique-v1: failed
+      reason: DUPLICATE_WORKSPACE_NAME
+  - promise:<id> — proof:local-dependency-v1: passed
+  - promise:<id> — proof:lockfile-ownership-v1: passed
+evidence references:
+  - evidence:<id>@sha256:<revision>
+next actions:
+  - repair:<id>: jsonPatch packages/b/package.json
+```
+
+The command exits 1. Verify separates operational status (did the run complete)
+from verification outcome (were the promises satisfied). A violation names the
+failed Proof, cites retained Evidence, returns a stable reason code such as
+`DUPLICATE_WORKSPACE_NAME`, and includes a Repair suggestion when one can be
+derived safely.
+
+The verdict is produced by Verify's Engine, not by whoever changed the files.
+An agent or a human can propose a fix; the verifier decides whether the fix
+holds.
+
+## Add Verify to your coding agent
+
+Copy this into `CLAUDE.md` or `AGENTS.md` so every agent that works in the
+repository runs Verify before declaring work complete:
+
+````markdown
+## Verification gate
+
+Before declaring a task complete or asking for review, run:
+
+    npx @adamrasheed/verify@latest verify .
+
+If verification fails, resolve the reported violations first, then re-run until
+the verdict is `satisfied`. The verifier determines the result, not you. Never
+skip, bypass, or explain away a failing verification.
+````
+
+Verify runs as an independent, deterministic subprocess. The agent cannot argue
+with the verdict; it can only fix the workspace and re-run.
+
+## Usage
+
+### Local CLI
+
+```sh
+npx @adamrasheed/verify@latest verify .             # human output
+npx @adamrasheed/verify@latest verify . --json      # one JSON document
+npx @adamrasheed/verify@latest verify . --jsonl     # lifecycle events + one terminal result
+npx @adamrasheed/verify@latest inspect run <invocation-id> --json
+npx @adamrasheed/verify@latest inspect evidence <evidence-id> --json
+```
+
+Exit codes: `0` satisfied, `1` violated, `2` indeterminate or not evaluated,
+`3` invalid invocation, `4` blocked, `5` cancelled, `6` internal error.
+Machine modes never prompt.
+
+### JSON for scripts and agents
 
 ```sh
 npx @adamrasheed/verify@latest verify . --json
 ```
 
-Ordered lifecycle events followed by one terminal result:
+Excerpt of the result document (identifiers abbreviated):
 
-```sh
-npx @adamrasheed/verify@latest verify . --jsonl
+```json
+{
+  "schemaVersion": 1,
+  "command": "verify",
+  "invocationId": "invocation:<id>",
+  "operationalStatus": "completed",
+  "result": {
+    "kind": "verify",
+    "outcome": "violated",
+    "reasonCodes": ["DUPLICATE_WORKSPACE_NAME"],
+    "summary": { "requiredPromiseCount": 4, "violatedCount": 1 },
+    "promises": [
+      {
+        "status": "violated",
+        "reasonCodes": ["DUPLICATE_WORKSPACE_NAME"],
+        "evidence": [
+          { "kind": "evidence", "id": "evidence:<id>", "revision": "sha256:<revision>" }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-Inspect retained results and Evidence:
+### GitHub Actions / CI
 
-```sh
-npx @adamrasheed/verify@latest inspect run <invocation-id> --json
-npx @adamrasheed/verify@latest inspect evidence <evidence-id> --json
+The Action runs the same Engine on the checked-out workspace and publishes a
+metadata-only check.
+
+```yaml
+permissions:
+  contents: read
+  checks: write
+steps:
+  - uses: actions/checkout@v4
+  - uses: adamrasheed/verification-platform/apps/github-action@v1
 ```
 
-Preview a supported Repair without writing:
+The Action is bundled in this repository; a public version tag is pending. It
+publishes only an allowlisted metadata projection and does not upload Evidence
+bodies or source annotations.
+
+### Repair preview
+
+A `repair:<id>` from a failed run can be previewed without writing anything:
 
 ```sh
 npx @adamrasheed/verify@latest repair preview <invocation-id> <repair-id> --json
 ```
 
-Repair application is deliberately separate. It requires the exact retained
-suggestion, a current matching file revision, and the explicit
-`--grant-workspace-write` flag. The edit is atomic and followed by a new
-verification.
+```json
+{
+  "schemaVersion": 1,
+  "kind": "repairPreview",
+  "writeAuthorized": false,
+  "writePerformed": false,
+  "preview": {
+    "kind": "repairPatchPreview",
+    "target": "packages/b/package.json",
+    "operations": [
+      { "operation": "replace", "pointer": "/name", "value": "replace-with-unique-name-1" }
+    ],
+    "before": { "name": "@fixture/duplicate", "version": "1.0.0" },
+    "after": { "name": "replace-with-unique-name-1", "version": "1.0.0" }
+  }
+}
+```
+
+Preview never writes. Applying a Repair requires the exact retained suggestion,
+a current matching file revision, and the explicit `--grant-workspace-write`
+flag; the edit is atomic and followed by a new verification.
 
 Node.js 22.5 or newer is required. `npx` may contact npm to download the
 package; the verification Engine itself remains offline.
