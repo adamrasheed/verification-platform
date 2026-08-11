@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-customer-workload-runner",
+  "taskId": "M9-T07",
+  "owner": "integrations",
+  "governingClauses": ["EDD §§15,19-21,23-24,27,33", "ADR-0005", "ADR-0008"],
+  "testIds": [
+    "customer-workload-runner:exact-github-repository-binding",
+    "customer-workload-runner:canonical-offline-engine",
+    "customer-workload-runner:fenced-heartbeat",
+    "customer-workload-runner:forwarded-terminal-cancellation",
+    "customer-workload-runner:closed-metadata-publication",
+    "customer-workload-runner:source-egress-absent",
+    "customer-workload-runner:publication-reference-only-completion"
+  ],
+  "command": "npm test --workspace @verify-internal/github-action",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "apps/github-action/src/public/customer-workload.ts",
+      "digest": "sha256:478bb134bbdeb98ab1f903801e5d03ff13104b97f9a124b5d58533f00fb72ef7"
+    },
+    {
+      "path": "apps/github-action/src/public/index.ts",
+      "digest": "sha256:05fed953af1f7b178dee682cbf9dc9c7a533d6f5f7febdbef4c204cc2c1ac4f0"
+    },
+    {
+      "path": "apps/github-action/test/customer-workload.test.mjs",
+      "digest": "sha256:5e5bc2a44957faf856aa0b9ba754e9d3bff15d34d8f510f82adda4ac96bd7f40"
+    },
+    {
+      "path": "apps/github-action/README.md",
+      "digest": "sha256:414600b7f370197ff202e143b5aedf3f9a3b7abfd1a8d45a791ae199d6ecd07e"
+    },
+    {
+      "path": "apps/github-action/package.json",
+      "digest": "sha256:6e9f0921d66beaf01fa721bba214698dc04be0d01e130d23a7a8399903205004"
+    },
+    {
+      "path": "apps/github-action/tsconfig.json",
+      "digest": "sha256:48eaa781a4c27768c14c72158c01fb49ec936130d0c924f6e53dd0787b9c743d"
+    },
+    {
+      "path": "package-lock.json",
+      "digest": "sha256:6266628ebf238a27ff667734c4c77856959fe6a33658602790e8380ecb1e1396"
+    },
+    {
+      "path": "tooling/architecture/workspaces.json",
+      "digest": "sha256:fe4e876444be84d8d58a49460b8cdebcc92554615252ceef439be168694ddf09"
+    }
+  ]
+}
