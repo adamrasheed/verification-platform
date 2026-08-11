@@ -35,27 +35,27 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/variables.tf",
-      "digest": "sha256:04dcf037fc62f8bd53807fb4abb4ac192fa4c3a05122462c6d25a53b3c2732a7"
+      "digest": "sha256:b65c1970499de6226528fa085f79653978339b901dc3abede51a4cd0cb5ba8b0"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:33ff67441cdfb43ad84133db8d2d280fed3cffb504afca403a88bb0889751f87"
+      "digest": "sha256:70ed0bf671057aaba92d1a4f926f9718b7a594655ab2f04b481a024e99821c00"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/outputs.tf",
-      "digest": "sha256:e5e590f1b6c4163f755e24ed603d618684b8e867e7f1e1e12af9929fa70f353e"
+      "digest": "sha256:a31e8933642de86b8477d87236863a4954c125689a3d4274939a7e503a83f79b"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:82f7ae7c6cc4600d1db3da4787fb39dc7ae8158c7d3ed135270d3e916bbbce66"
+      "digest": "sha256:6b354b3cdc352af53b69cf79b2756651cfe3196a3da9428639da5c0b65ecae42"
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:26a7ca30a95100f5ce8c2a5ac67b87a947338c591119b25e77a0deaa8b14f8ef"
+      "digest": "sha256:5bac04fd85074dd2976aa2641c91dfad4d4ca38af6f2cf8deb2b3d21ae467ff7"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/README.md",
-      "digest": "sha256:a8360402fcab59029c8a47fce7207f9e5a65685bd4af3ba3838741e71095fa5b"
+      "digest": "sha256:8253d3b4e0c76f046aff106d8d5468984e3112b37b241f431ac5d0fdc7086b08"
     }
   ]
 }

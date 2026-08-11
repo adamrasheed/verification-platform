@@ -46,3 +46,15 @@ runs the customer-owned GitHub boundary against the private PostgreSQL dispatch
 store, publishes only an allowlisted projection through the authenticated HTTP
 boundary, proves durable cancellation and source-canary absence, deletes its
 synthetic rows, destroys the slot, and requires zero drift.
+
+`readiness_runner_enabled=true` reuses the migration namespace for the bounded
+M9-T08 development drill. The digest-pinned image adds matching PostgreSQL 17
+logical backup tools while retaining a read-only root, one `/work` scratch
+volume, no task role, and the exact private database/ECR/log/secret paths. The
+task measures 500 authenticated control-API reads, durable dispatch recovery,
+logical backup and restore, post-backup tombstone replay, connection recovery,
+cross-tenant denial, canary absence, and 100 rejected abuse attempts. The
+protected workflow also regenerates security, performance, SBOM, provenance,
+and immutable-image Evidence before execution, then destroys the runner and
+requires zero drift. A passing development drill does not by itself prove a
+monthly production availability window or Multi-AZ production recovery.

@@ -143,6 +143,38 @@ variable "migration_image_tag" {
   }
 }
 
+variable "readiness_runner_enabled" {
+  description = "Creates the ephemeral private production-readiness runner; disabled outside an explicit protected drill."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.readiness_runner_enabled || var.deployment_enabled
+    error_message = "The readiness runner requires the guarded metadata-cloud deployment."
+  }
+
+  validation {
+    condition = !var.readiness_runner_enabled || (
+      !var.migration_runner_enabled &&
+      !var.queue_runner_enabled &&
+      !var.control_api_runner_enabled &&
+      !var.customer_workload_runner_enabled
+    )
+    error_message = "The readiness runner requires exclusive use of the ephemeral private-runner namespace."
+  }
+}
+
+variable "readiness_runner_image_tag" {
+  description = "Immutable Git commit tag for the ephemeral production-readiness image."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.readiness_runner_enabled || can(regex("^[a-f0-9]{40}$", var.readiness_runner_image_tag))
+    error_message = "An exact 40-character Git commit tag is required for a production-readiness run."
+  }
+}
+
 variable "queue_runner_enabled" {
   description = "Creates the ephemeral private Fargate SQS conformance runner; disabled outside an explicit protected run."
   type        = bool

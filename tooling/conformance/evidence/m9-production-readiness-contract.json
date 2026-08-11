@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-production-readiness-contract",
+  "taskId": "M9-T08",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§14,16,18",
+    "EDD §§27-31,33-34",
+    "ADR-0005",
+    "ADR-0013",
+    "SP-CLOUD-002",
+    "ORB-COST-001"
+  ],
+  "testIds": [
+    "production-readiness:closed-threshold-contract",
+    "production-readiness:sampled-availability-and-p95",
+    "production-readiness:accepted-dispatch-durability",
+    "production-readiness:logical-backup-restore",
+    "production-readiness:tombstone-replay-before-service",
+    "production-readiness:bounded-connection-recovery",
+    "production-readiness:cross-tenant-and-canary-scan",
+    "production-readiness:cost-abuse-no-mutation",
+    "production-readiness:security-sbom-provenance-prerequisites",
+    "production-readiness:always-cleanup-zero-drift"
+  ],
+  "command": "node --test tooling/infra/test-production-readiness-contract.mjs && npm run check:cloud-infra",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "tooling/infra/production-readiness-contract.mjs",
+      "digest": "sha256:6e35e407ccad2f100fdd3dbfcfb34cb480bf47735160d2d8878ac87e67e6c489"
+    },
+    {
+      "path": "tooling/infra/test-production-readiness-contract.mjs",
+      "digest": "sha256:f39d527024ae9cdcb986190ca28eeabbdb46a54afa3a70fce770f7e5604b30d5"
+    },
+    {
+      "path": "tooling/infra/run-live-production-readiness.mjs",
+      "digest": "sha256:cbfa086b95100f11260921a9041c34f2d06410c40363482d6133448dd6c6effa"
+    },
+    {
+      "path": ".github/workflows/aws-production-readiness.yml",
+      "digest": "sha256:72f0f338c00ea355f223fd5f117766af3104fba700feadc34572d709faf4336c"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/readiness-runner.Dockerfile",
+      "digest": "sha256:d5e993db23939318ad778dd20f988d33d40a528494a6a5833a00ced64503d102"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/readiness.tf",
+      "digest": "sha256:9f4294d797a7040cdc78f4ddea730fb702ee14e29f43f2e6365b82316584047a"
+    },
+    {
+      "path": "docs/operations/AWS_PRODUCTION_READINESS.md",
+      "digest": "sha256:ce2d2255506ee54f8e41466bb0ce167c39198e9003d8c8cdc73caf48075e3e72"
+    }
+  ]
+}

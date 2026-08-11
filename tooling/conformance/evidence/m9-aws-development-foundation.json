@@ -40,15 +40,15 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
-      "digest": "sha256:ffb96fe65851a88cfde07a90b511b716ab2bb4d1572ff36fbba8e02b23d651cc"
+      "digest": "sha256:3828f48efc548f6cccbe88a95ea0c3e4496a84104a68e501919f4611ccfde1e5"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:31559a198cf532734a66b5e4c1a842f3d82ee0885a21470f6c154aa744308d8f"
+      "digest": "sha256:13e103d388a8fd48bd0960a4e4448b02b8f12bbe56b320c1b2e48ad27d339cec"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:33ff67441cdfb43ad84133db8d2d280fed3cffb504afca403a88bb0889751f87"
+      "digest": "sha256:70ed0bf671057aaba92d1a4f926f9718b7a594655ab2f04b481a024e99821c00"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/compute.tf",
@@ -60,11 +60,11 @@
     },
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:f847fa7a0fa7d1eecd0937aff43e001b5b15f9e956656ce14925803d28552beb"
+      "digest": "sha256:6d8ceec3690db7c444430d779e2821d2ac0a55efc5372912aadb47d97e6880d8"
     },
     {
       "path": "docs/product/ROADMAP.md",
-      "digest": "sha256:34aa8b6ee227e5a5f1cb70d2ff0784ee790d0fd99e4694b9249939794604f5a4"
+      "digest": "sha256:ed7633b9a34d71cf4f6efe94cfad70500544f694a0e7feb006836a19d0765355"
     },
     {
       "path": "package.json",

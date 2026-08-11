@@ -35,6 +35,21 @@ override_resource {
 }
 
 override_resource {
+  target = aws_iam_role.readiness_execution
+  values = {
+    arn = "arn:aws:iam::123456789012:role/verification-development-migration-execution"
+  }
+}
+
+override_resource {
+  target = aws_ecr_repository.readiness
+  values = {
+    arn            = "arn:aws:ecr:us-west-2:123456789012:repository/verification-development-postgres-migration"
+    repository_url = "123456789012.dkr.ecr.us-west-2.amazonaws.com/verification-development-postgres-migration"
+  }
+}
+
+override_resource {
   target = aws_iam_role.queue_runner_execution
   values = {
     arn = "arn:aws:iam::123456789012:role/verification-development-sqs-conformance-execution"
@@ -116,6 +131,20 @@ override_data {
 
 override_data {
   target = data.aws_iam_policy_document.migration_execution
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = data.aws_iam_policy_document.readiness_task_assume
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = data.aws_iam_policy_document.readiness_execution
   values = {
     json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
   }
@@ -437,6 +466,59 @@ run "ephemeral_migration_runner_is_private_and_bounded" {
     condition     = jsondecode(aws_ecs_task_definition.migration[0].container_definitions)[0].readonlyRootFilesystem && aws_cloudwatch_log_group.migration[0].retention_in_days == 30
     error_message = "The migration container must be read-only and retain encrypted logs for 30 days while active."
   }
+}
+
+run "ephemeral_readiness_runner_is_private_bounded_and_exclusive" {
+  command = plan
+
+  variables {
+    deployment_enabled         = true
+    aws_account_id             = "123456789012"
+    budget_alert_email         = "alerts@example.com"
+    readiness_runner_enabled   = true
+    readiness_runner_image_tag = "dddddddddddddddddddddddddddddddddddddddd"
+  }
+
+  assert {
+    condition     = length(aws_vpc_endpoint.migration) == 4 && alltrue([for endpoint in aws_vpc_endpoint.migration : length(endpoint.subnet_ids) == 1 && endpoint.private_dns_enabled])
+    error_message = "The readiness runner requires exactly four one-AZ private service endpoints."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.readiness[0].cpu == "1024" && aws_ecs_task_definition.readiness[0].memory == "2048"
+    error_message = "The bounded readiness load drill requires its exact Fargate resource envelope."
+  }
+
+  assert {
+    condition     = jsondecode(aws_ecs_task_definition.readiness[0].container_definitions)[0].readonlyRootFilesystem && jsondecode(aws_ecs_task_definition.readiness[0].container_definitions)[0].mountPoints[0].containerPath == "/work"
+    error_message = "The readiness runner requires a read-only root and one bounded scratch mount."
+  }
+
+  assert {
+    condition     = aws_ecs_task_definition.readiness[0].task_role_arn == null
+    error_message = "The readiness process must receive no AWS task credentials."
+  }
+
+  assert {
+    condition     = output.readiness_runner_subnet_id == aws_subnet.private[var.availability_zones[0]].id && output.readiness_runner_security_group_id == aws_security_group.workload[0].id
+    error_message = "Readiness outputs must expose only its private launch coordinates."
+  }
+}
+
+run "readiness_runner_rejects_namespace_collision" {
+  command = plan
+
+  variables {
+    deployment_enabled                 = true
+    aws_account_id                     = "123456789012"
+    budget_alert_email                 = "alerts@example.com"
+    readiness_runner_enabled           = true
+    readiness_runner_image_tag         = "dddddddddddddddddddddddddddddddddddddddd"
+    customer_workload_runner_enabled   = true
+    customer_workload_runner_image_tag = "cccccccccccccccccccccccccccccccccccccccc"
+  }
+
+  expect_failures = [var.readiness_runner_enabled]
 }
 
 run "production_rejects_single_az" {

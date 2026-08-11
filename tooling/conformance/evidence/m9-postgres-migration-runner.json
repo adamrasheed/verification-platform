@@ -25,23 +25,23 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/network.tf",
-      "digest": "sha256:ffb96fe65851a88cfde07a90b511b716ab2bb4d1572ff36fbba8e02b23d651cc"
+      "digest": "sha256:3828f48efc548f6cccbe88a95ea0c3e4496a84104a68e501919f4611ccfde1e5"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/security.tf",
-      "digest": "sha256:31559a198cf532734a66b5e4c1a842f3d82ee0885a21470f6c154aa744308d8f"
+      "digest": "sha256:13e103d388a8fd48bd0960a4e4448b02b8f12bbe56b320c1b2e48ad27d339cec"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/data.tf",
-      "digest": "sha256:33ff67441cdfb43ad84133db8d2d280fed3cffb504afca403a88bb0889751f87"
+      "digest": "sha256:70ed0bf671057aaba92d1a4f926f9718b7a594655ab2f04b481a024e99821c00"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/variables.tf",
-      "digest": "sha256:04dcf037fc62f8bd53807fb4abb4ac192fa4c3a05122462c6d25a53b3c2732a7"
+      "digest": "sha256:b65c1970499de6226528fa085f79653978339b901dc3abede51a4cd0cb5ba8b0"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/tests/foundation.tftest.hcl",
-      "digest": "sha256:82f7ae7c6cc4600d1db3da4787fb39dc7ae8158c7d3ed135270d3e916bbbce66"
+      "digest": "sha256:6b354b3cdc352af53b69cf79b2756651cfe3196a3da9428639da5c0b65ecae42"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
@@ -53,7 +53,7 @@
     },
     {
       "path": ".dockerignore",
-      "digest": "sha256:7b3d3aaa8eb26d95e879cd7bf7328b376c9d6b711f1eca8d07faf57af4e2258d"
+      "digest": "sha256:7b873cbb4169de264867cf074f1c98f8a7b7ccaacb034d153c48261b1f9e3d80"
     },
     {
       "path": "tooling/infra/run-live-postgres-migration.mjs",
@@ -69,7 +69,7 @@
     },
     {
       "path": "tooling/infra/check-aws-foundation.mjs",
-      "digest": "sha256:26a7ca30a95100f5ce8c2a5ac67b87a947338c591119b25e77a0deaa8b14f8ef"
+      "digest": "sha256:5bac04fd85074dd2976aa2641c91dfad4d4ca38af6f2cf8deb2b3d21ae467ff7"
     },
     {
       "path": "docs/operations/M9_POSTGRES_MIGRATION.md",

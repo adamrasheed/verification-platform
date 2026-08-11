@@ -42,11 +42,11 @@
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/outputs.tf",
-      "digest": "sha256:e5e590f1b6c4163f755e24ed603d618684b8e867e7f1e1e12af9929fa70f353e"
+      "digest": "sha256:a31e8933642de86b8477d87236863a4954c125689a3d4274939a7e503a83f79b"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/README.md",
-      "digest": "sha256:a8360402fcab59029c8a47fce7207f9e5a65685bd4af3ba3838741e71095fa5b"
+      "digest": "sha256:8253d3b4e0c76f046aff106d8d5468984e3112b37b241f431ac5d0fdc7086b08"
     }
   ]
 }

@@ -70,7 +70,7 @@ resource "aws_security_group" "workload" {
 }
 
 resource "aws_security_group" "migration_endpoints" {
-  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+  count = var.deployment_enabled ? (local.private_operation_runner_enabled ? 1 : 0) : 0
 
   name        = "${local.name}-migration-endpoints"
   description = "Ephemeral TLS endpoints for the bounded database migration"
@@ -102,7 +102,7 @@ resource "aws_vpc_security_group_egress_rule" "workload_to_database" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "migration_endpoints_from_workload" {
-  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+  count = var.deployment_enabled ? (local.private_operation_runner_enabled ? 1 : 0) : 0
 
   security_group_id            = aws_security_group.migration_endpoints[0].id
   referenced_security_group_id = aws_security_group.workload[0].id
@@ -113,7 +113,7 @@ resource "aws_vpc_security_group_ingress_rule" "migration_endpoints_from_workloa
 }
 
 resource "aws_vpc_security_group_egress_rule" "migration_to_endpoints" {
-  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+  count = var.deployment_enabled ? (local.private_operation_runner_enabled ? 1 : 0) : 0
 
   security_group_id = aws_security_group.workload[0].id
   cidr_ipv4         = var.vpc_cidr
@@ -124,7 +124,7 @@ resource "aws_vpc_security_group_egress_rule" "migration_to_endpoints" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "migration_to_s3" {
-  count = var.deployment_enabled ? (var.migration_runner_enabled ? 1 : 0) : 0
+  count = var.deployment_enabled ? (local.private_operation_runner_enabled ? 1 : 0) : 0
 
   security_group_id = aws_security_group.workload[0].id
   prefix_list_id    = aws_vpc_endpoint.s3[0].prefix_list_id

@@ -1,4 +1,5 @@
 .git
+.release
 .DS_Store
 .env
 .env.*
