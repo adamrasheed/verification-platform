@@ -41,7 +41,7 @@ output "migration_cluster_arn" {
 }
 
 output "migration_subnet_id" {
-  value = var.deployment_enabled && var.migration_runner_enabled ? aws_subnet.private[var.availability_zones[0]].id : null
+  value = var.deployment_enabled && local.private_operation_runner_enabled ? aws_subnet.private[var.availability_zones[0]].id : null
 }
 
 output "migration_security_group_id" {
@@ -50,6 +50,30 @@ output "migration_security_group_id" {
 
 output "migration_log_group_name" {
   value = try(aws_cloudwatch_log_group.migration[0].name, null)
+}
+
+output "readiness_runner_repository_url" {
+  value = try(aws_ecr_repository.readiness[0].repository_url, null)
+}
+
+output "readiness_runner_task_definition_arn" {
+  value = try(aws_ecs_task_definition.readiness[0].arn, null)
+}
+
+output "readiness_runner_cluster_arn" {
+  value = try(aws_ecs_cluster.metadata[0].arn, null)
+}
+
+output "readiness_runner_subnet_id" {
+  value = var.deployment_enabled && var.readiness_runner_enabled ? aws_subnet.private[var.availability_zones[0]].id : null
+}
+
+output "readiness_runner_security_group_id" {
+  value = try(aws_security_group.workload[0].id, null)
+}
+
+output "readiness_runner_log_group_name" {
+  value = try(aws_cloudwatch_log_group.readiness[0].name, null)
 }
 
 output "queue_runner_repository_url" {

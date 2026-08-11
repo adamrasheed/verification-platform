@@ -50,6 +50,7 @@ const requiredFiles = [
   "tooling/infra/aws/metadata-cloud/data.tf",
   "tooling/infra/aws/metadata-cloud/compute.tf",
   "tooling/infra/aws/metadata-cloud/migration.tf",
+  "tooling/infra/aws/metadata-cloud/readiness.tf",
   "tooling/infra/aws/metadata-cloud/queue-runner.tf",
   "tooling/infra/aws/metadata-cloud/control-api-runner.tf",
   "tooling/infra/aws/metadata-cloud/customer-workload-runner.tf",
@@ -60,15 +61,20 @@ const requiredFiles = [
   ".github/workflows/aws-sqs-conformance.yml",
   ".github/workflows/aws-control-api-conformance.yml",
   ".github/workflows/aws-customer-workload-conformance.yml",
+  ".github/workflows/aws-production-readiness.yml",
   "tooling/infra/aws/metadata-cloud/migration.Dockerfile",
   "tooling/infra/aws/metadata-cloud/queue-runner.Dockerfile",
   "tooling/infra/aws/metadata-cloud/control-api-runner.Dockerfile",
   "tooling/infra/aws/metadata-cloud/customer-workload-runner.Dockerfile",
+  "tooling/infra/aws/metadata-cloud/readiness-runner.Dockerfile",
   "tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem",
   "tooling/infra/run-live-postgres-migration.mjs",
   "tooling/infra/run-live-sqs-conformance.mjs",
   "tooling/infra/run-live-control-api-conformance.mjs",
   "tooling/infra/run-live-customer-workload-conformance.mjs",
+  "tooling/infra/run-live-production-readiness.mjs",
+  "tooling/infra/production-readiness-contract.mjs",
+  "tooling/infra/test-production-readiness-contract.mjs",
   "tooling/infra/control-api-node-http.mjs",
   "tooling/infra/test-control-api-node-http.mjs",
   "tooling/infra/aws-sqs-publication-transport.mjs",
@@ -80,7 +86,7 @@ const bootstrap = ["versions.tf", "variables.tf", "main.tf", "identity.tf", "bud
   .map((file) => readFile(path.join(bootstrapRoot, file), "utf8"));
 const metadata = [
   "versions.tf", "variables.tf", "locals.tf", "network.tf", "security.tf",
-  "data.tf", "compute.tf", "migration.tf", "queue-runner.tf", "control-api-runner.tf", "customer-workload-runner.tf", "budget.tf", "outputs.tf",
+  "data.tf", "compute.tf", "migration.tf", "readiness.tf", "queue-runner.tf", "control-api-runner.tf", "customer-workload-runner.tf", "budget.tf", "outputs.tf",
 ].map((file) => readFile(path.join(metadataRoot, file), "utf8"));
 const bootstrapText = (await Promise.all(bootstrap)).join("\n");
 const bootstrapIdentity = await read("tooling/infra/aws/bootstrap/identity.tf");
@@ -90,6 +96,9 @@ const migrationProbe = await read("tooling/infra/run-live-postgres-migration.mjs
 const queueProbe = await read("tooling/infra/run-live-sqs-conformance.mjs");
 const controlApiProbe = await read("tooling/infra/run-live-control-api-conformance.mjs");
 const customerWorkloadProbe = await read("tooling/infra/run-live-customer-workload-conformance.mjs");
+const readinessProbe = await read("tooling/infra/run-live-production-readiness.mjs");
+const readinessContract = await read("tooling/infra/production-readiness-contract.mjs");
+const readinessDockerfile = await read("tooling/infra/aws/metadata-cloud/readiness-runner.Dockerfile");
 const queueTransport = await read("tooling/infra/aws-sqs-publication-transport.mjs");
 const rdsCaBundle = await read("tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem");
 const metadataText = (await Promise.all(metadata)).join("\n");
@@ -114,7 +123,7 @@ requireText(metadataText, 'condition     = var.environment != "production" || va
 requireText(metadataText, 'deletion_protection       = var.environment == "production"', "production deletion protection");
 requireText(metadataText, "enable_key_rotation     = true", "KMS rotation");
 requireText(metadataText, 'name              = "/aws/rds/instance/${local.name}-postgres/postgresql"', "managed RDS logs");
-assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 8, "all eight log groups need 30-day retention");
+assert.equal((metadataText.match(/retention_in_days = 30/g) ?? []).length, 9, "all nine log groups need 30-day retention");
 requireText(metadataText, "block_public_acls       = true", "S3 public access block");
 requireText(metadataText, "noncurrent_days = 35", "metadata backup expiry");
 requireText(metadataText, "expiration { days = 1 }", "quarantine expiry");
@@ -125,6 +134,7 @@ requireText(metadataText, 'CostControl = "ephemeral-migration"', "ephemeral migr
 requireText(metadataText, 'CostControl = "ephemeral-sqs-conformance"', "ephemeral SQS cost control");
 requireText(metadataText, 'CostControl = "ephemeral-control-api-conformance"', "ephemeral control API cost control");
 requireText(metadataText, 'CostControl = "ephemeral-customer-workload-conformance"', "ephemeral customer workload cost control");
+requireText(metadataText, '"ephemeral-production-readiness"', "ephemeral production readiness cost control");
 requireText(metadataText, '"ecr.api"', "private ECR API endpoint");
 requireText(metadataText, '"ecr.dkr"', "private ECR registry endpoint");
 requireText(metadataText, '"logs"', "private log endpoint");
@@ -147,6 +157,15 @@ requireText(customerWorkloadProbe, "rejectUnauthorized: true", "customer workloa
 requireText(customerWorkloadProbe, "runCustomerWorkloadOffer", "canonical customer-owned runner boundary");
 requireText(customerWorkloadProbe, "sourceCanary", "customer source-egress canary probe");
 requireText(customerWorkloadProbe, "PostgresCustomerWorkloadDispatchStore", "durable workload dispatch adapter");
+requireText(readinessProbe, "evaluateProductionReadiness", "closed production-readiness evaluation");
+requireText(readinessProbe, 'spawn(command, args', "argv-only logical backup and restore tools");
+requireText(readinessProbe, "pg_terminate_backend", "connection recovery drill");
+requireText(readinessProbe, "deletedRecordResurrections", "tombstone replay drill");
+requireText(readinessContract, "minimumAvailability: 0.999", "sampled availability threshold");
+requireText(readinessContract, "maximumControlApiP95Ms: 500", "control API p95 threshold");
+requireText(readinessContract, "maximumPostgresRtoMs: 4 * 60 * 60 * 1_000", "PostgreSQL RTO threshold");
+requireText(readinessDockerfile, "postgres:17.9-bookworm@sha256:", "digest-pinned PostgreSQL recovery tooling");
+requireText(readinessDockerfile, "ENTRYPOINT []", "readiness entrypoint reset");
 requireText(queueTransport, "MaxNumberOfMessages: 1", "single-message SQS receive");
 requireText(queueTransport, "MessageAttributeNames: []", "message attribute exclusion");
 requireText(dockerignore, "!tooling/infra/aws/metadata-cloud/us-west-2-bundle.pem", "RDS CA build context");
@@ -262,8 +281,24 @@ requireText(customerWorkloadWorkflow, "SOURCE_CANARY_M9_WORKLOAD_", "CloudWatch 
 requireText(customerWorkloadWorkflow, "node tooling/infra/audit-aws-development.mjs", "customer workload post-cleanup foundation audit");
 assert.doesNotMatch(customerWorkloadWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
 
+const readinessWorkflow = await read(".github/workflows/aws-production-readiness.yml");
+requireText(readinessWorkflow, "id-token: write", "readiness workflow token permission");
+requireText(readinessWorkflow, "environment: development", "readiness environment boundary");
+requireText(readinessWorkflow, "github.ref == 'refs/heads/main'", "main-only readiness boundary");
+requireText(readinessWorkflow, "readiness_runner_enabled=true", "explicit readiness enablement");
+requireText(readinessWorkflow, "readiness_runner_enabled=false", "mandatory readiness cleanup");
+requireText(readinessWorkflow, "assignPublicIp=DISABLED", "private readiness Fargate task");
+requireText(readinessWorkflow, "Verify zero drift after cleanup", "readiness post-cleanup drift gate");
+requireText(readinessWorkflow, "group: aws-private-postgres-runner-development", "shared readiness runner lock");
+requireText(readinessWorkflow, "run-security-gates.mjs", "readiness security Evidence");
+requireText(readinessWorkflow, "prepare-candidate.mjs", "readiness SBOM and provenance Evidence");
+requireText(readinessWorkflow, "SOURCE_CANARY_M9_READINESS_", "readiness source canary exclusion");
+requireText(readinessWorkflow, "node tooling/infra/audit-aws-development.mjs", "readiness post-cleanup foundation audit");
+assert.doesNotMatch(readinessWorkflow, /AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY|pull_request|workflow_run/);
+
 await checked("node", ["--test", "tooling/infra/test-aws-sqs-publication-transport.mjs"]);
 await checked("node", ["--test", "tooling/infra/test-control-api-node-http.mjs"]);
+await checked("node", ["--test", "tooling/infra/test-production-readiness-contract.mjs"]);
 
 for (const lockRoot of [bootstrapRoot, metadataRoot]) {
   const lock = await readFile(path.join(lockRoot, ".terraform.lock.hcl"), "utf8");

@@ -56,7 +56,10 @@ locals {
     "secretsmanager",
   ])
 
-  migration_endpoint_policies = var.migration_runner_enabled ? {
+  private_operation_repository_arn = try(aws_ecr_repository.readiness[0].arn, aws_ecr_repository.migration[0].arn, null)
+  private_operation_log_group_arn  = try(aws_cloudwatch_log_group.readiness[0].arn, aws_cloudwatch_log_group.migration[0].arn, null)
+
+  migration_endpoint_policies = local.private_operation_runner_enabled ? {
     "ecr.api" = jsonencode({
       Version = "2012-10-17"
       Statement = [
@@ -73,7 +76,7 @@ locals {
           Effect    = "Allow"
           Principal = "*"
           Action    = ["ecr:BatchCheckLayerAvailability", "ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"]
-          Resource  = aws_ecr_repository.migration[0].arn
+          Resource  = local.private_operation_repository_arn
           Condition = { StringEquals = { "aws:PrincipalAccount" = var.aws_account_id } }
         },
       ]
@@ -94,7 +97,7 @@ locals {
           Effect    = "Allow"
           Principal = "*"
           Action    = ["ecr:BatchCheckLayerAvailability", "ecr:BatchGetImage", "ecr:GetDownloadUrlForLayer"]
-          Resource  = aws_ecr_repository.migration[0].arn
+          Resource  = local.private_operation_repository_arn
           Condition = { StringEquals = { "aws:PrincipalAccount" = var.aws_account_id } }
         },
       ]
@@ -106,7 +109,7 @@ locals {
         Effect    = "Allow"
         Principal = "*"
         Action    = ["logs:CreateLogStream", "logs:PutLogEvents"]
-        Resource  = "${aws_cloudwatch_log_group.migration[0].arn}:*"
+        Resource  = "${local.private_operation_log_group_arn}:*"
         Condition = { StringEquals = { "aws:PrincipalAccount" = var.aws_account_id } }
       }]
     })
@@ -125,7 +128,7 @@ locals {
 }
 
 resource "aws_vpc_endpoint" "migration" {
-  for_each = var.deployment_enabled ? (var.migration_runner_enabled ? local.migration_endpoint_services : toset([])) : toset([])
+  for_each = var.deployment_enabled ? (local.private_operation_runner_enabled ? local.migration_endpoint_services : toset([])) : toset([])
 
   vpc_id              = aws_vpc.metadata[0].id
   service_name        = "com.amazonaws.${var.aws_region}.${each.key}"

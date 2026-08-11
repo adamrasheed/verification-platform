@@ -26,7 +26,7 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/AWS_CONTROL_API.json",
-      "digest": "sha256:8766ad16064d3456431d93b65cdec0c5cf000f7de83f9b331f6141e595996ab7"
+      "digest": "sha256:10faf7a6bbfd250cd355dab0d107e2bc3e3b6e1a6eeca9c9237ffcb2d8997e06"
     },
     {
       "path": "tooling/infra/check-aws-control-api-evidence.mjs",

@@ -38,8 +38,9 @@ included in the warm-discovery measurement.
 supply-chain artifacts that can be verified before a cloud provider exists. It
 is intentionally classified as `contractFoundation` and `not_releasable`.
 M9-T03 now supplies exact Evidence for the deployed AWS development foundation.
-The protected M9-T04 through M9-T07 reports record private PostgreSQL 17.9,
-SQS, tenant-authorized control API, and customer-controlled workload probes;
+The protected M9-T04 through M9-T07 reports record strict-TLS private
+PostgreSQL, SQS, tenant-authorized control API, and customer-controlled workload
+probes;
 their synthetic-data cleanup, ephemeral teardown, final zero-drift checks, and
 cleaned-foundation audits passed. The provider deployment is therefore live-
 conformant, but this M8 contract-foundation record deliberately keeps the
