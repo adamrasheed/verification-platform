@@ -171,7 +171,7 @@ data "aws_iam_policy_document" "s3_endpoint" {
   }
 
   dynamic "statement" {
-    for_each = var.migration_runner_enabled || var.queue_runner_enabled || var.control_api_runner_enabled ? [1] : []
+    for_each = var.migration_runner_enabled || var.queue_runner_enabled || var.control_api_runner_enabled || var.customer_workload_runner_enabled ? [1] : []
 
     content {
       sid       = "EphemeralEcrLayerPull"

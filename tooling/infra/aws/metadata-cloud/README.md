@@ -37,3 +37,12 @@ ingress and only exact PostgreSQL, interface-endpoint TLS, and S3 ECR-layer
 egress. The task runs the real Node HTTP adapter against the private RDS store,
 then removes its synthetic tenant rows. The workflow disables and destroys all
 ephemeral resources and requires a final zero-drift plan even after failure.
+
+The protected M9-T07 customer-workload workflow reuses this mutually exclusive
+ephemeral slot with a different immutable image. Its root filesystem remains
+read-only and it receives one bounded writable scratch mount for the synthetic
+customer checkout and local Engine state. The task has no AWS task identity. It
+runs the customer-owned GitHub boundary against the private PostgreSQL dispatch
+store, publishes only an allowlisted projection through the authenticated HTTP
+boundary, proves durable cancellation and source-canary absence, deletes its
+synthetic rows, destroys the slot, and requires zero drift.

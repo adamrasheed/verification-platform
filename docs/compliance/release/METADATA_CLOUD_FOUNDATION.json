@@ -34,7 +34,7 @@
     { "path": "docs/compliance/release/AWS_DEVELOPMENT_FOUNDATION.json", "digest": "sha256:a788de050061b1e480a27454b06804c345e4be83b3dfcbf21783cb2aad6b0cbc" },
     { "path": "docs/compliance/release/AWS_POSTGRES_MIGRATION.json", "digest": "sha256:ed2e497fd3c9e35842ec9d1ad708ed4bac3c8c43c2918b7ac3882ab92912c1e5" },
     { "path": "docs/compliance/release/AWS_SQS_WORKER.json", "digest": "sha256:54c9e3409582df7968e68756d286ff48b0b50f0bf88cd049b3bcc615405e6dd1" },
-    { "path": "docs/compliance/release/AWS_CONTROL_API.json", "digest": "sha256:ab099c3e4ab8d25bbbd169c92e735bc50399afd4f4fd688ff10e7d9d2acd9b80" },
+    { "path": "docs/compliance/release/AWS_CONTROL_API.json", "digest": "sha256:8766ad16064d3456431d93b65cdec0c5cf000f7de83f9b331f6141e595996ab7" },
     { "path": "package-lock.json", "digest": "sha256:6266628ebf238a27ff667734c4c77856959fe6a33658602790e8380ecb1e1396" },
     { "path": "tooling/release/package-policy.json", "digest": "sha256:20c49de9845ca36a94a55c41a212cc005ddc6a0efe56cbebfdb36f3a8f260772" }
   ]
