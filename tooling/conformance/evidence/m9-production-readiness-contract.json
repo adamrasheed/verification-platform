@@ -40,7 +40,7 @@
     },
     {
       "path": ".github/workflows/aws-production-readiness.yml",
-      "digest": "sha256:72f0f338c00ea355f223fd5f117766af3104fba700feadc34572d709faf4336c"
+      "digest": "sha256:964dec4bca703fa9d84b0ab90661a65d1a54ba7e2bd63c94822af8541df4902b"
     },
     {
       "path": "tooling/infra/aws/metadata-cloud/readiness-runner.Dockerfile",
