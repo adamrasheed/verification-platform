@@ -145,6 +145,7 @@ const ingestion = new PublicationIngestionService(
 );
 let correlation = 0;
 let phase = "bootstrap";
+let evaluation;
 const handler = createControlApiHandler({
   expectedAudience: audience,
   authenticator: controlStore,
@@ -506,7 +507,7 @@ try {
     && secretCanaryAbsent;
 
   phase = "evaluate";
-  const evaluation = evaluateProductionReadiness({
+  evaluation = evaluateProductionReadiness({
     schemaVersion: 1,
     load: { requestCount: durationMs.length, successCount, durationMs },
     durability: {
@@ -546,7 +547,11 @@ try {
       provenance: true,
     },
   });
-  assert.equal(evaluation.outcome, "passed");
+  if (evaluation.outcome !== "passed") {
+    const error = new TypeError("VFY_READINESS_THRESHOLDS_FAILED");
+    error.code = "VFY_READINESS_THRESHOLDS_FAILED";
+    throw error;
+  }
   console.log(JSON.stringify({
     schemaVersion: 1,
     kind: "awsProductionReadinessEvidence",
@@ -568,6 +573,10 @@ try {
       name: error instanceof Error ? error.name : "UnknownError",
       code: typeof error?.code === "string" ? error.code : "VFY_READINESS_UNCLASSIFIED",
     },
+    ...(evaluation === undefined ? {} : {
+      measurements: evaluation.measurements,
+      checks: evaluation.checks,
+    }),
   }));
   process.exitCode = 1;
 } finally {
