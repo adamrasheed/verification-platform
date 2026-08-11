@@ -7,7 +7,7 @@
   "testIds": [
     "metadata-cloud:foundation-report-exact-artifacts",
     "metadata-cloud:non-releasable-deployed-evidence-gate",
-    "metadata-cloud:slo-dr-unclaimed",
+    "metadata-cloud:production-slo-and-deployment-unclaimed",
     "metadata-cloud:security-supply-chain-evidence",
     "metadata-cloud:artifact-tamper-rejection"
   ],
@@ -16,11 +16,11 @@
   "artifacts": [
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:5cc9959702862b16ba3ea45ed433f03f8b6ffbe90f5996c86bec0ba661c5694a"
+      "digest": "sha256:3ac5a3cabc9081b3c065b321401038d9950fbac024312c0e4ce16e5c2afe188f"
     },
     {
       "path": "tooling/release/check-metadata-cloud-evidence.mjs",
-      "digest": "sha256:270018da2bb939a45a2fc5e5b6952450e37992bcb3036392b0b818a7ccc4d632"
+      "digest": "sha256:550ea9cc31f258e963d456d6c0b4f4b2f1f955512378d47dde4304579e3d1101"
     },
     {
       "path": "tooling/release/test/release.test.mjs",

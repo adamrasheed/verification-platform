@@ -34,13 +34,15 @@ exactKeys(report.verification ?? {}, [
 for (const field of ["contractConformance", "security", "supplyChain"]) {
   if (report.verification?.[field] !== "passed") errors.push(`verification: ${field} must pass`);
 }
-for (const field of ["serviceSlo", "disasterRecovery", "providerDeployment"]) {
+for (const field of ["serviceSlo", "providerDeployment"]) {
   if (report.verification?.[field] !== "blocked") errors.push(`verification: ${field} must remain blocked`);
+}
+if (report.verification?.disasterRecovery !== "passed") {
+  errors.push("verification: disasterRecovery must pass the protected development restore and replay drill");
 }
 const expectedBlockers = [
   ["providerDeployment", "M9-T08"],
   ["serviceSlo", "M9-T08"],
-  ["disasterRecovery", "M9-T08"],
 ];
 if (!Array.isArray(report.releaseBlockers)
   || report.releaseBlockers.length !== expectedBlockers.length
@@ -60,6 +62,7 @@ const expectedCommands = [
   "npm run check:conformance",
   "npm run check:schemas",
   "npm run check:package-content",
+  "npm run check:aws-production-readiness-evidence",
 ];
 if (!Array.isArray(report.commands)
   || report.commands.length !== expectedCommands.length
@@ -83,6 +86,7 @@ const expectedArtifacts = [
   "docs/compliance/release/AWS_SQS_WORKER.json",
   "docs/compliance/release/AWS_CONTROL_API.json",
   "docs/compliance/release/AWS_CUSTOMER_WORKLOAD.json",
+  "docs/compliance/release/AWS_PRODUCTION_READINESS.json",
   "package-lock.json",
   "tooling/release/package-policy.json",
 ];

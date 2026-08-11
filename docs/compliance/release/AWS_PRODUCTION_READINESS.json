@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "kind": "awsProductionReadinessReleaseEvidence",
+  "evidenceDate": "2026-08-11",
+  "taskId": "M9-T08",
+  "outcome": "passed",
+  "claimScope": "protected development production-readiness drill",
+  "accountBinding": {
+    "accountId": "661590454564",
+    "region": "us-west-2",
+    "environment": "development"
+  },
+  "source": {
+    "repository": "adamrasheed/verification-platform",
+    "headSha": "50942841e9f8b487cacbb5ca4856635fbfa79305",
+    "openTofuVersion": "1.12.5",
+    "awsProviderVersion": "6.56.0",
+    "nodeVersion": "22.19.0",
+    "postgresVersion": "17.9"
+  },
+  "workflow": {
+    "name": "AWS production readiness",
+    "runId": 31460493329,
+    "jobId": 93682875376,
+    "event": "workflow_dispatch",
+    "protectedEnvironment": "development",
+    "createdAt": "2026-08-11T05:04:54Z",
+    "startedAt": "2026-08-11T05:05:00Z",
+    "completedAt": "2026-08-11T05:14:55Z",
+    "conclusion": "success",
+    "immutablePlan": "passed",
+    "apply": "passed",
+    "imageBuildAndPush": "passed",
+    "liveReadinessProbe": "passed",
+    "cleanup": "passed",
+    "postCleanupZeroDrift": "passed",
+    "postCleanupFoundationAudit": "passed",
+    "launchAttempts": 2,
+    "transientImagePullFailures": 1,
+    "url": "https://github.com/adamrasheed/verification-platform/actions/runs/31460493329",
+    "jobUrl": "https://github.com/adamrasheed/verification-platform/actions/runs/31460493329/job/93682875376"
+  },
+  "topology": {
+    "runtime": "private AWS Fargate task",
+    "publicIp": false,
+    "internetGateway": false,
+    "natGateway": false,
+    "ephemeralInterfaceEndpoints": 4,
+    "endpointAvailabilityZones": 1,
+    "databaseTransport": "PostgreSQL verify-full TLS with the pinned official us-west-2 RDS CA bundle",
+    "taskRole": false,
+    "rootFilesystemReadOnly": true,
+    "writableScratchPath": "/work"
+  },
+  "thresholds": {
+    "minimumRequestSamples": 500,
+    "minimumAvailability": 0.999,
+    "maximumControlApiP95Ms": 500,
+    "maximumPostgresRpoMs": 300000,
+    "maximumPostgresRtoMs": 14400000,
+    "maximumPublicationObjectRpoMs": 900000,
+    "maximumPublicationObjectRtoMs": 28800000,
+    "maximumConnectionRecoveryMs": 30000,
+    "minimumAbuseAttempts": 100
+  },
+  "readinessProbe": {
+    "schemaVersion": 1,
+    "kind": "awsProductionReadinessEvidence",
+    "runId": "50942841e9f8b487cacbb5ca4856635fbfa79305",
+    "outcome": "passed",
+    "measurements": {
+      "requestCount": 500,
+      "successCount": 500,
+      "availability": 1,
+      "p95Ms": 490.488,
+      "postgresRpoMs": 5775,
+      "postgresRtoMs": 449,
+      "publicationObjectRpoMs": 5775,
+      "publicationObjectRtoMs": 449,
+      "connectionRecoveryMs": 39.554
+    },
+    "checks": {
+      "loadSample": "passed",
+      "sampledAvailability": "passed",
+      "controlApiP95": "passed",
+      "acceptedDispatchDurability": "passed",
+      "postgresRecovery": "passed",
+      "publicationObjectRecovery": "passed",
+      "connectionRecovery": "passed",
+      "logicalBackupRestore": "passed",
+      "tombstoneReplay": "passed",
+      "costAbuse": "passed",
+      "security": "passed",
+      "supplyChain": "passed"
+    }
+  },
+  "postCleanupAudit": {
+    "ephemeralResourcesCreated": 13,
+    "ephemeralResourcesDestroyed": 13,
+    "persistentResourcesRestored": 1,
+    "ephemeralResourcesRemaining": 0,
+    "zeroDrift": true,
+    "foundationOutcome": "passed"
+  },
+  "dataHandling": {
+    "customerDataUsed": false,
+    "syntheticDataRemoved": true,
+    "logicalBackupRemoved": true,
+    "sourceCanaryRetained": false,
+    "sourceCanaryLogged": false,
+    "secretCanaryRetained": false,
+    "secretCanaryLogged": false,
+    "identityTokensRetained": false,
+    "idempotencyKeysLogged": false
+  },
+  "releaseClaims": {
+    "developmentDrill": "passed",
+    "productionDeployment": "not_claimed",
+    "monthlyProductionAvailability": "not_claimed",
+    "productionMultiAzFailover": "not_claimed"
+  },
+  "sourceArtifacts": [
+    {
+      "path": ".github/workflows/aws-production-readiness.yml",
+      "digest": "sha256:0937e0850c617f30a4a94e78a182110f1f19e5bd0db439e0b8fb88177675c1b5"
+    },
+    {
+      "path": "tooling/infra/run-live-production-readiness.mjs",
+      "digest": "sha256:6f24aa55fa178547455f995015b139e3621eef6f9e4add1d009fd8d473cbd429"
+    },
+    {
+      "path": "tooling/infra/production-readiness-contract.mjs",
+      "digest": "sha256:6e35e407ccad2f100fdd3dbfcfb34cb480bf47735160d2d8878ac87e67e6c489"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/readiness.tf",
+      "digest": "sha256:9f4294d797a7040cdc78f4ddea730fb702ee14e29f43f2e6365b82316584047a"
+    },
+    {
+      "path": "tooling/infra/aws/metadata-cloud/readiness-runner.Dockerfile",
+      "digest": "sha256:d5e993db23939318ad778dd20f988d33d40a528494a6a5833a00ced64503d102"
+    },
+    {
+      "path": "apps/control-api/src/public/handler.ts",
+      "digest": "sha256:c5e8c6240f90eb0b0c1eb00f1c780e1152ec2c2caf60ab3a7f5b7984597c6e7c"
+    },
+    {
+      "path": "packages/cloud-client/src/public/postgres-publication-store.ts",
+      "digest": "sha256:7954b29f1a7fed562ef839e8a1ac2d7a66e23de28187aa28dba8f8e1b137de72"
+    },
+    {
+      "path": "packages/cloud-client/src/public/postgres-workload-dispatch-store.ts",
+      "digest": "sha256:9193295338e91f1053d7f8346c1c4162068bd2948dad6270d51537a821b27088"
+    },
+    {
+      "path": "docs/operations/AWS_PRODUCTION_READINESS.md",
+      "digest": "sha256:2d9cc73d5834d2b5e124f79a1eea3aeb6d8c4c5b65be326d4856d760bac7f27c"
+    }
+  ]
+}
