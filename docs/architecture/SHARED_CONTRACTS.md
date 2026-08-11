@@ -296,11 +296,13 @@ zero-secondary-leakage claim is made.
 ## Metadata-cloud release Evidence
 
 The provider-neutral foundation report is a closed, digest-bound inventory of
-M8 conformance records, the security report, the npm lockfile, and the package
-policy. Contract conformance, security, and supply-chain verification may pass
-at this stage, but the report must remain `not_releasable` with service SLO,
-disaster recovery, and provider deployment explicitly `blocked` by their M9
-Evidence gates.
+M8 conformance records, the security report, the npm lockfile, the package
+policy, and any completed M9 provider probes. Contract conformance, security,
+and supply-chain verification may pass at this stage, but the report remains
+`not_releasable`. Even after the individual M9-T04 through M9-T07 deployment
+probes pass, service SLO, disaster recovery, and the assembled production
+deployment claim remain explicitly `blocked` until the M9-T08 release-Evidence
+gate passes.
 
 ADR-0013 resolves D-002 without promoting the report. Production release
 Evidence additionally requires measurements from AWS `us-west-2` and

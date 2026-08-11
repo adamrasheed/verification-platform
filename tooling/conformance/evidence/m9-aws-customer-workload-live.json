@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence:m9-aws-customer-workload-live",
+  "taskId": "M9-T07",
+  "owner": "cloud-platform",
+  "governingClauses": [
+    "Freeze §§10-12,16,18",
+    "EDD §§19-24,27,33",
+    "ADR-0005",
+    "ADR-0008",
+    "ADR-0013",
+    "SP-CLOUD-002"
+  ],
+  "testIds": [
+    "aws-customer-workload-live:private-postgres-tls",
+    "aws-customer-workload-live:exact-repository-binding",
+    "aws-customer-workload-live:canonical-offline-engine",
+    "aws-customer-workload-live:durable-fenced-heartbeat",
+    "aws-customer-workload-live:allowlisted-publication",
+    "aws-customer-workload-live:publication-reference-only-completion",
+    "aws-customer-workload-live:forwarded-terminal-cancellation",
+    "aws-customer-workload-live:tenant-isolation",
+    "aws-customer-workload-live:source-egress-canary-absent",
+    "aws-customer-workload-live:ephemeral-teardown-zero-drift"
+  ],
+  "command": "gh run watch 31454245521 --exit-status && npm run check:aws-customer-workload-evidence",
+  "outcome": "passed",
+  "artifacts": [
+    {
+      "path": "docs/compliance/release/AWS_CUSTOMER_WORKLOAD.json",
+      "digest": "sha256:e3997cc8ffa5406e0e96f105578fb1e4ae2658381694483a885e54cac1ec80c5"
+    },
+    {
+      "path": "tooling/infra/check-aws-customer-workload-evidence.mjs",
+      "digest": "sha256:adcdcbe031235ecbdcc4454958d6837f2f74b44cea45f7d7a382c62414bcc7f7"
+    },
+    {
+      "path": ".github/workflows/aws-customer-workload-conformance.yml",
+      "digest": "sha256:d378144e8923f8d702e21f80871b977038e21bc06d83897f7b13e023995a1844"
+    },
+    {
+      "path": "tooling/infra/run-live-customer-workload-conformance.mjs",
+      "digest": "sha256:188a7c69ed164ed5074d93d4b2ae536353700cc3254bed52bb0a745a369b3f97"
+    }
+  ]
+}

@@ -60,15 +60,15 @@
     },
     {
       "path": "docs/compliance/release/METADATA_CLOUD_FOUNDATION.json",
-      "digest": "sha256:60386d935b7b007376621013b468656082cfe3d1a966fd6cb5ae09624c832c35"
+      "digest": "sha256:f847fa7a0fa7d1eecd0937aff43e001b5b15f9e956656ce14925803d28552beb"
     },
     {
       "path": "docs/product/ROADMAP.md",
-      "digest": "sha256:b724346e89af75f0be462ddc72319dbc08aeffee4a3f476eec1c171d8ee661f9"
+      "digest": "sha256:34aa8b6ee227e5a5f1cb70d2ff0784ee790d0fd99e4694b9249939794604f5a4"
     },
     {
       "path": "package.json",
-      "digest": "sha256:9941cdd14ed995ee68694f54addd7d03759694afaa41a134e9a0870e6cedbd48"
+      "digest": "sha256:8dc6d4b10073804ece9a0e7fa09f75cd82689e276621af08c5827846b1e035ce"
     }
   ]
 }
