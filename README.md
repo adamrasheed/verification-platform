@@ -4,9 +4,9 @@
 
 Verify is a deterministic, offline checker for npm, pnpm, and Yarn monorepos.
 It reads workspace declarations, evaluates a fixed set of promises, and returns
-one evidence-backed verdict: satisfied or violated. Dependency and workspace
-declaration mistakes, whether introduced by a human or an AI coding agent, get
-caught here instead of in CI.
+one evidence-backed verdict. Dependency and workspace declaration mistakes,
+whether introduced by a human or an AI coding agent, get caught here instead of
+in CI.
 
 [![CI](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml/badge.svg)](https://github.com/adamrasheed/verification-platform/actions/workflows/codeql.yml)
@@ -61,6 +61,7 @@ npx @adamrasheed/verify@latest verify .
 ```text
 operational status: completed
 verification outcome: violated
+application model: model:<id>@sha256:<revision>
 required promises:
   - promise:<id> — proof:manifest-structural-v1: passed
   - promise:<id> — proof:workspace-unique-v1: failed
@@ -71,7 +72,11 @@ evidence references:
   - evidence:<id>@sha256:<revision>
 next actions:
   - repair:<id>: jsonPatch packages/b/package.json
+cache: miss
+invocation: invocation:<id>
 ```
+
+(Output abbreviated; identifiers shortened.)
 
 The command exits 1. Verify separates operational status (did the run complete)
 from verification outcome (were the promises satisfied). A violation names the
@@ -140,11 +145,34 @@ Excerpt of the result document (identifiers abbreviated):
     "summary": { "requiredPromiseCount": 4, "violatedCount": 1 },
     "promises": [
       {
+        "promise": {
+          "kind": "promise",
+          "id": "sid:promise:<id>",
+          "revision": "sha256:<revision>",
+          "schemaVersion": 1
+        },
         "status": "violated",
-        "reasonCodes": ["DUPLICATE_WORKSPACE_NAME"],
+        "proofAttempts": [
+          {
+            "attemptId": "attempt:<id>",
+            "proof": {
+              "kind": "proof",
+              "id": "proof:workspace-unique-v1",
+              "revision": "sha256:<revision>",
+              "schemaVersion": 1
+            },
+            "invocationId": "invocation:<id>"
+          }
+        ],
         "evidence": [
-          { "kind": "evidence", "id": "evidence:<id>", "revision": "sha256:<revision>" }
-        ]
+          {
+            "kind": "evidence",
+            "id": "evidence:<id>",
+            "revision": "sha256:<revision>",
+            "schemaVersion": 1
+          }
+        ],
+        "reasonCodes": ["DUPLICATE_WORKSPACE_NAME"]
       }
     ]
   }
@@ -165,9 +193,11 @@ steps:
   - uses: adamrasheed/verification-platform/apps/github-action@v1
 ```
 
-The Action is bundled in this repository; a public version tag is pending. It
-publishes only an allowlisted metadata projection and does not upload Evidence
-bodies or source annotations.
+The Action is implemented and bundled in this repository, but no released tag
+contains it yet; the `@v1` reference follows the Action's own README and
+resolves once the public release is cut. It publishes only an allowlisted
+metadata projection and does not upload Evidence bodies or source
+annotations.
 
 ### Repair preview
 
@@ -181,11 +211,22 @@ npx @adamrasheed/verify@latest repair preview <invocation-id> <repair-id> --json
 {
   "schemaVersion": 1,
   "kind": "repairPreview",
+  "sourceInvocationId": "invocation:<id>",
   "writeAuthorized": false,
   "writePerformed": false,
   "preview": {
+    "schemaVersion": 1,
     "kind": "repairPatchPreview",
+    "repair": {
+      "kind": "repair",
+      "id": "repair:<id>",
+      "revision": "sha256:<revision>",
+      "schemaVersion": 1
+    },
     "target": "packages/b/package.json",
+    "expectedContentDigest": "sha256:<digest>",
+    "currentContentDigest": "sha256:<digest>",
+    "patchedContentDigest": "sha256:<digest>",
     "operations": [
       { "operation": "replace", "pointer": "/name", "value": "replace-with-unique-name-1" }
     ],
@@ -194,6 +235,8 @@ npx @adamrasheed/verify@latest repair preview <invocation-id> <repair-id> --json
   }
 }
 ```
+
+(Digests and identifiers abbreviated.)
 
 Preview never writes. Applying a Repair requires the exact retained suggestion,
 a current matching file revision, and the explicit `--grant-workspace-write`
