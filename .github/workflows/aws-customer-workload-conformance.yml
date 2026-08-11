@@ -1,0 +1,186 @@
+name: AWS customer workload conformance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-private-postgres-runner-development
+  cancel-in-progress: false
+
+jobs:
+  conformance:
+    name: Probe customer-owned workload dispatch
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: development
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4
+        with:
+          tofu_version: 1.12.5
+          tofu_wrapper: false
+
+      - name: Exchange GitHub OIDC for bounded AWS credentials
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: customer-workload-${{ github.run_id }}
+          aws-region: ${{ vars.AWS_REGION }}
+          allowed-account-ids: ${{ vars.AWS_ACCOUNT_ID }}
+
+      - name: Initialize encrypted remote state
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu init -input=false \
+            -backend-config="bucket=${{ vars.AWS_STATE_BUCKET }}" \
+            -backend-config="key=metadata-cloud/development.tfstate" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -backend-config="encrypt=true" \
+            -backend-config="kms_key_id=${{ vars.AWS_STATE_KMS_KEY_ARN }}" \
+            -backend-config="use_lockfile=true"
+
+      - name: Validate customer workload conformance infrastructure
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu validate -no-color
+
+      - name: Build immutable customer workload conformance plan
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -out=customer-workload.tfplan \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='customer_workload_runner_enabled=true' \
+            -var='customer_workload_runner_image_tag=${{ github.sha }}'
+
+      - name: Apply immutable customer workload conformance plan
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: tofu apply -input=false -auto-approve customer-workload.tfplan
+
+      - name: Read non-secret runner coordinates
+        id: runner
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          echo "repository=$(tofu output -raw customer_workload_runner_repository_url)" >> "$GITHUB_OUTPUT"
+          echo "task_definition=$(tofu output -raw customer_workload_runner_task_definition_arn)" >> "$GITHUB_OUTPUT"
+          echo "cluster=$(tofu output -raw customer_workload_runner_cluster_arn)" >> "$GITHUB_OUTPUT"
+          echo "subnet=$(tofu output -raw customer_workload_runner_subnet_id)" >> "$GITHUB_OUTPUT"
+          echo "security_group=$(tofu output -raw customer_workload_runner_security_group_id)" >> "$GITHUB_OUTPUT"
+          echo "log_group=$(tofu output -raw customer_workload_runner_log_group_name)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push immutable customer workload image
+        env:
+          REPOSITORY: ${{ steps.runner.outputs.repository }}
+        run: |
+          registry="${REPOSITORY%%/*}"
+          aws ecr get-login-password --region "${{ vars.AWS_REGION }}" \
+            | docker login --username AWS --password-stdin "$registry"
+          docker build \
+            --file tooling/infra/aws/metadata-cloud/customer-workload-runner.Dockerfile \
+            --tag "$REPOSITORY:${{ github.sha }}" .
+          docker push "$REPOSITORY:${{ github.sha }}"
+
+      - name: Run live customer workload conformance
+        env:
+          CLUSTER: ${{ steps.runner.outputs.cluster }}
+          LOG_GROUP: ${{ steps.runner.outputs.log_group }}
+          SECURITY_GROUP: ${{ steps.runner.outputs.security_group }}
+          SUBNET: ${{ steps.runner.outputs.subnet }}
+          TASK_DEFINITION: ${{ steps.runner.outputs.task_definition }}
+        run: |
+          task_arn=$(aws ecs run-task \
+            --cluster "$CLUSTER" \
+            --task-definition "$TASK_DEFINITION" \
+            --launch-type FARGATE \
+            --platform-version 1.4.0 \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SECURITY_GROUP],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          test "$task_arn" != "None"
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$task_arn"
+          exit_code=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].containers[0].exitCode' \
+            --output text)
+          stopped_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].stoppedReason' \
+            --output text)
+          container_reason=$(aws ecs describe-tasks \
+            --cluster "$CLUSTER" \
+            --tasks "$task_arn" \
+            --query 'tasks[0].containers[0].reason' \
+            --output text)
+          echo "task exit=$exit_code stopped_reason=$stopped_reason container_reason=$container_reason"
+          log_stream=$(aws logs describe-log-streams \
+            --log-group-name "$LOG_GROUP" \
+            --order-by LastEventTime \
+            --descending \
+            --max-items 1 \
+            --query 'logStreams[0].logStreamName' \
+            --output text)
+          test -n "$log_stream"
+          test "$log_stream" != "None"
+          log_messages=$(aws logs get-log-events \
+            --log-group-name "$LOG_GROUP" \
+            --log-stream-name "$log_stream" \
+            --limit 100 \
+            --query 'events[].message' \
+            --output json)
+          evidence=$(jq -r '.[-1]' <<< "$log_messages")
+          jq -r '.[]' <<< "$log_messages"
+          echo "$evidence" | jq -e '
+            .schemaVersion == 1
+            and .kind == "awsCustomerWorkloadEvidence"
+            and .outcome == "passed"
+            and ([.checks[]] | all(. == "passed"))'
+          if jq -e --arg canary "SOURCE_CANARY_M9_WORKLOAD_${GITHUB_SHA:0:12}" \
+            '[.[] | contains($canary)] | any' <<< "$log_messages" >/dev/null; then
+            echo "Customer source canary reached CloudWatch logs."
+            exit 1
+          fi
+          test "$exit_code" = "0"
+
+      - name: Remove ephemeral customer workload resources
+        if: always()
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -out=cleanup.tfplan \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='customer_workload_runner_enabled=false'
+          tofu apply -input=false -auto-approve cleanup.tfplan
+
+      - name: Verify zero drift after cleanup
+        if: always()
+        working-directory: tooling/infra/aws/metadata-cloud
+        run: |
+          tofu plan -input=false -lock-timeout=5m -detailed-exitcode \
+            -var='deployment_enabled=true' \
+            -var='aws_account_id=${{ vars.AWS_ACCOUNT_ID }}' \
+            -var='aws_region=${{ vars.AWS_REGION }}' \
+            -var='environment=development' \
+            -var='budget_alert_email=${{ vars.AWS_BUDGET_ALERT_EMAIL }}' \
+            -var='monthly_budget_usd=100' \
+            -var='customer_workload_runner_enabled=false'
+
+      - name: Audit the cleaned development foundation
+        if: always()
+        run: node tooling/infra/audit-aws-development.mjs

@@ -99,3 +99,27 @@ output "control_api_runner_security_group_id" {
 output "control_api_runner_log_group_name" {
   value = try(aws_cloudwatch_log_group.control_api_runner[0].name, null)
 }
+
+output "customer_workload_runner_repository_url" {
+  value = try(aws_ecr_repository.customer_workload_runner[0].repository_url, null)
+}
+
+output "customer_workload_runner_task_definition_arn" {
+  value = try(aws_ecs_task_definition.customer_workload_runner[0].arn, null)
+}
+
+output "customer_workload_runner_cluster_arn" {
+  value = try(aws_ecs_cluster.metadata[0].arn, null)
+}
+
+output "customer_workload_runner_subnet_id" {
+  value = var.deployment_enabled && var.customer_workload_runner_enabled ? aws_subnet.private[var.availability_zones[0]].id : null
+}
+
+output "customer_workload_runner_security_group_id" {
+  value = try(aws_security_group.customer_workload_runner[0].id, null)
+}
+
+output "customer_workload_runner_log_group_name" {
+  value = try(aws_cloudwatch_log_group.customer_workload_runner[0].name, null)
+}
