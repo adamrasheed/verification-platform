@@ -10,9 +10,16 @@ permissions:
   contents: read
   checks: write
 steps:
-  - uses: actions/checkout@v4
-  - uses: adamrasheed/verification-platform/apps/github-action@v1
+  - uses: actions/checkout@v7
+  - uses: adamrasheed/verify-action@v1
 ```
+
+The dedicated public distribution is
+[`adamrasheed/verify-action`](https://github.com/adamrasheed/verify-action).
+Use `@v1` for compatible v1 updates or `@v1.0.0` for the immutable first
+release. This directory remains the canonical implementation and conformance
+source; the distribution repository records the exact source revision and
+bundle digest for every release.
 
 ## Customer-workload offers
 

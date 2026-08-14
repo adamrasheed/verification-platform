@@ -1,6 +1,6 @@
 # Go-to-Market Plan
 
-**Status:** Launch plan
+**Status:** Launch plan — dedicated Action `v1.0.0` distribution complete
 **Owner:** Founding Team
 **Planning horizon:** First 90 days after launch readiness
 **Product boundary:** Market only capabilities supported by committed release
@@ -116,15 +116,16 @@ Use the channels closest to the product:
 
 1. npm search and package README;
 2. GitHub repository, release pages, and examples;
-3. a separately packaged public GitHub Action listing;
+3. the separately packaged public GitHub Action release and Marketplace listing;
 4. technical posts showing real broken-workspace fixtures;
 5. founder-led outreach to AI-native TypeScript teams; and
 6. launch communities only after the activation path is polished.
 
-GitHub requires a Marketplace Action repository to contain a root action
-metadata file and recommends a repository dedicated to the Action. Follow the
-[official Marketplace publishing requirements](https://docs.github.com/en/actions/how-tos/create-and-publish-actions/publish-in-github-marketplace?learn=create_actions)
-instead of trying to list the current monorepo layout directly.
+The dedicated [`adamrasheed/verify-action`](https://github.com/adamrasheed/verify-action)
+repository now contains the root metadata, independently tested bundle,
+immutable `v1.0.0` release, and movable `v1` compatibility tag required for
+distribution. The remaining Marketplace step must follow the
+[official publishing requirements](https://docs.github.com/en/actions/how-tos/create-and-publish-actions/publish-in-github-marketplace?learn=create_actions).
 
 ### Activation
 
@@ -171,7 +172,8 @@ Ship the public launch only when all items below are true:
 - README scope and examples match the published package;
 - one-command install is tested from a clean supported workspace;
 - npm release uses trusted publishing and provenance;
-- public Action distribution has an immutable release and major-version tag;
+- public Action distribution has an immutable release and major-version tag
+  (**complete:** `adamrasheed/verify-action@v1.0.0` and `@v1`);
 - Action installation instructions work in a clean public repository;
 - issue templates capture false positive, false negative, unsupported workspace,
   and integration friction separately;
@@ -193,7 +195,8 @@ eligible public packages. Preserve that trust signal in every release.
   workspace name and a supported Repair.
 - Record a 60–90 second terminal demo: agent claim → violated verdict → Repair
   preview → explicit apply → satisfied re-verification.
-- Prepare the dedicated Action distribution repository and Marketplace listing.
+- Publish the existing dedicated Action release to the Marketplace and verify
+  its installation copy against a clean public repository.
 - Recruit ten design-partner candidates from direct founder relationships,
   TypeScript open-source maintainers, and AI-native product teams.
 - Run five observed onboarding sessions; log time-to-result and every point of
@@ -219,7 +222,7 @@ installations.
 
 ### Days 31–60: public launch
 
-- Publish the GitHub Action and an npm release together.
+- Coordinate the Marketplace launch with the next provenance-backed npm release.
 - Launch with one concrete story and demo on Hacker News, relevant TypeScript and
   monorepo communities, LinkedIn/X, and developer newsletters.
 - Ask every design partner for one of: a public repository example, a short quote,
