@@ -30,7 +30,7 @@
     },
     {
       "path": "apps/github-action/README.md",
-      "digest": "sha256:414600b7f370197ff202e143b5aedf3f9a3b7abfd1a8d45a791ae199d6ecd07e"
+      "digest": "sha256:247410dd089098c6ef123464cc78cace3e32e4f0f54b6781eafbf4e503c30e14"
     },
     {
       "path": "apps/github-action/package.json",

@@ -287,10 +287,21 @@ A `violated` result already exits non-zero, so the CLI can be used directly in a
 ```
 
 
-A dedicated GitHub Action using the same Engine is also implemented in this repository.
+A dedicated, versioned GitHub Action runs the same Engine:
 
 
-The public versioned Action release is not available yet, so the CLI command above is the recommended CI integration today.
+```yaml
+permissions:
+  contents: read
+  checks: write
+
+steps:
+  - uses: actions/checkout@v7
+  - uses: adamrasheed/verify-action@v1
+```
+
+
+Use `adamrasheed/verify-action@v1.0.0` to pin the immutable first release.
 
 
 ## How Verify works
@@ -349,11 +360,11 @@ Those are product direction, not functionality claimed by the current CLI.
 Every interface delegates verdict semantics to the same Engine.
 
 
-| Interface                                     | Status                                                    | Best for                                              |
-| --------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------- |
-| [CLI](apps/cli/README.md)                     | Published as `@adamrasheed/verify`                        | local use, scripts, agents, and CI                    |
-| [Local MCP server](apps/mcp-server/README.md) | Implemented and tested from source                        | workspace-bound agent verification and retained reads |
-| [GitHub Action](apps/github-action/README.md) | Implemented and bundled; public versioned release pending | pull-request verification                             |
+| Interface                                     | Status                                                                              | Best for                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [CLI](apps/cli/README.md)                     | Published as `@adamrasheed/verify`                                                  | local use, scripts, agents, and CI                    |
+| [Local MCP server](apps/mcp-server/README.md) | Implemented and tested from source                                                  | workspace-bound agent verification and retained reads |
+| [GitHub Action](apps/github-action/README.md) | [`v1.0.0`](https://github.com/adamrasheed/verify-action/releases/tag/v1.0.0) released | pull-request verification                             |
 
 
 ## Trust boundary
