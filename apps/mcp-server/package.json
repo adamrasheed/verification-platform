@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "@verify-internal/adapter-core": "0.0.0",
     "@verify-internal/protocol": "0.0.0"
   },
